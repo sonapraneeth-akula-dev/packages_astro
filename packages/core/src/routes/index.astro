@@ -1,18 +1,25 @@
 ---
+/**
+ * Injected home route (`/`).
+ *
+ * This page lives in the engine and is registered for every site by the route
+ * integration in `defineDocsAstroConfig`. Per-site values (config, the MDX
+ * component map and an optional curated sidebar) are supplied through the
+ * `virtual:notes-core/*` modules the integration defines — so individual sites
+ * carry no `src/pages/` of their own.
+ */
 import { getCollection, render } from 'astro:content';
-import BaseLayout from '@grihasetu/notes-core/layouts/BaseLayout.astro';
-import { buildHomeData } from '@grihasetu/notes-core';
-import type { SidebarConfig } from '@grihasetu/notes-core';
-import { components } from '../components/registry';
-import { docsConfig } from '../../docs.config';
-import sidebar from '../../sidebar.json';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { buildHomeData } from '../utils/docs';
+import { docsConfig } from 'virtual:notes-core/config';
+import { components } from 'virtual:notes-core/components';
+import { sidebar } from 'virtual:notes-core/sidebar';
 
 const entries = await getCollection('docs');
-// This site uses an explicit, curated left navigation (sidebar.json) instead of
-// the auto-generated one — see buildDocRoutes in [...slug].astro.
-const { rootEntry, next } = buildHomeData(entries, {
-  sidebarConfig: sidebar as SidebarConfig,
-});
+const { rootEntry, next } = buildHomeData(
+  entries,
+  sidebar ? { sidebarConfig: sidebar } : {},
+);
 if (!rootEntry) {
   throw new Error('Missing root landing note: add src/content/docs/index.mdx');
 }

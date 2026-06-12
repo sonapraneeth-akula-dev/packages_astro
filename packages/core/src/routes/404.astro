@@ -1,6 +1,10 @@
 ---
-import BaseLayout from '@grihasetu/notes-core/layouts/BaseLayout.astro';
-import { docsConfig } from '../../docs.config';
+/**
+ * Injected 404 route. Registered for every site by the route integration in
+ * `defineDocsAstroConfig`.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { docsConfig } from 'virtual:notes-core/config';
 ---
 
 <BaseLayout config={docsConfig} title="Page not found" description="That page does not exist.">

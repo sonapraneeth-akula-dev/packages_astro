@@ -36,6 +36,10 @@ export type { DocEntry } from './content';
 export { defineDocsAstroConfig } from './astro-config';
 export type { DocsAstroConfigOptions } from './astro-config';
 
+// Route-injection integration (used internally by the config factory)
+export { notesRoutes } from './routes-integration';
+export type { NotesRoutesOptions } from './routes-integration';
+
 // Routing + sidebar generation
 export {
   buildDocRoutes,

@@ -8,6 +8,9 @@ import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import { execSync } from 'node:child_process';
+import { notesRoutes } from './routes-integration';
+import type { DocsConfig } from './config';
+import type { SidebarConfig } from './schema';
 
 export interface DocsAstroConfigOptions {
   /** Dev/preview port. Each site picks its own (e.g. demo 4310, app 4320). */
@@ -16,6 +19,19 @@ export interface DocsAstroConfigOptions {
   site?: string;
   /** Extra integrations appended after the docs defaults. */
   integrations?: AstroIntegration[];
+  /**
+   * The site's resolved docs config (from {@link defineDocsConfig}). The engine
+   * owns all page routing, so this is how a site's branding, nav and search
+   * setting reach the injected routes.
+   */
+  docsConfig: DocsConfig;
+  /**
+   * Project-root-relative path to the site's MDX component registry module.
+   * Defaults to `./src/components/registry.ts`.
+   */
+  components?: string;
+  /** Optional curated sidebar that overrides the auto-generated tree. */
+  sidebar?: SidebarConfig;
 }
 
 /** Run a git command at build time, falling back gracefully (e.g. in CI/Docker). */
@@ -37,7 +53,7 @@ function git(command: string, fallback: string): string {
  *   import { defineDocsAstroConfig } from '@grihasetu/notes-core/astro';
  *   export default defineDocsAstroConfig({ port: 4310 });
  */
-export function defineDocsAstroConfig(options: DocsAstroConfigOptions = {}) {
+export function defineDocsAstroConfig(options: DocsAstroConfigOptions) {
   const port = options.port ?? 4310;
   const site = options.site ?? process.env.PUBLIC_SITE_URL ?? `http://localhost:${port}`;
 
@@ -71,6 +87,13 @@ export function defineDocsAstroConfig(options: DocsAstroConfigOptions = {}) {
       }),
       mdx(),
       sitemap(),
+      // The engine owns all page routing/search: this injects `/`, `/[...slug]`,
+      // `/search` and `/404` so sites need no `src/pages/` of their own.
+      notesRoutes({
+        docsConfig: options.docsConfig,
+        components: options.components,
+        sidebar: options.sidebar,
+      }),
       ...(options.integrations ?? []),
     ],
     compressHTML: true,
