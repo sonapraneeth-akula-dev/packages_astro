@@ -1,0 +1,28 @@
+{
+  "name": "@grihasetu/rehype-satteri-autolink-headings",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Rehype plugin that appends a clickable SVG anchor link beside each heading — a small, from-scratch replacement for rehype-autolink-headings.",
+  "keywords": [
+    "rehype",
+    "rehype-plugin",
+    "unified",
+    "hast",
+    "headings",
+    "anchor",
+    "autolink",
+    "astro",
+    "mdx"
+  ],
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "unist-util-visit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/hast": "^3.0.4",
+    "@types/node": "^25.9.3",
+    "typescript": "^6.0.3"
+  }
+}
