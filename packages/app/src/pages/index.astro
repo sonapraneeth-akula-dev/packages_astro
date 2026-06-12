@@ -1,0 +1,49 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '@grihasetu/notes-core/layouts/BaseLayout.astro';
+import { buildHomeData } from '@grihasetu/notes-core';
+import type { SidebarConfig } from '@grihasetu/notes-core';
+import { components } from '../components/registry';
+import { docsConfig } from '../../docs.config';
+import sidebar from '../../sidebar.json';
+
+const entries = await getCollection('docs');
+// This site uses an explicit, curated left navigation (sidebar.json) instead of
+// the auto-generated one — see buildDocRoutes in [...slug].astro.
+const { rootEntry, next } = buildHomeData(entries, {
+  sidebarConfig: sidebar as SidebarConfig,
+});
+if (!rootEntry) {
+  throw new Error('Missing root landing note: add src/content/docs/index.mdx');
+}
+const { Content } = await render(rootEntry);
+---
+
+<BaseLayout
+  config={docsConfig}
+  title={docsConfig.title}
+  description={docsConfig.description}
+>
+  <article class="home container" data-pagefind-body>
+    <div class="home-prose">
+      <Content components={components} />
+    </div>
+    {next && (
+      <a class="btn btn-primary home-cta" href={next.href} data-pagefind-ignore>
+        Start reading: {next.label} →
+      </a>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .home { padding-block: 3rem 4rem; max-width: 52rem; }
+  .home-prose :global(h1) { margin-bottom: 0.75rem; }
+  .home-prose :global(h2) { margin-top: 2.5rem; }
+  .home-prose :global(p),
+  .home-prose :global(ul),
+  .home-prose :global(ol) { margin-block: 1rem; }
+  .home-prose :global(ul),
+  .home-prose :global(ol) { padding-left: 1.4rem; }
+  .home-cta { margin-top: 2rem; }
+</style>

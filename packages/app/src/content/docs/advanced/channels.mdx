@@ -1,0 +1,109 @@
+---
+title: Channels
+description: Typed pipes for communicating between goroutines, plus select.
+---
+
+Channels are typed conduits that let goroutines communicate and synchronise.
+Send with `ch <- v`, receive with `v := <-ch`:
+
+```go
+ch := make(chan int)
+
+go func() {
+	ch <- 42 // send (blocks until received)
+}()
+
+v := <-ch    // receive
+fmt.Println(v) // 42
+```
+
+## Buffered vs unbuffered
+
+```go
+unbuffered := make(chan int)    // send blocks until a receiver is ready
+buffered   := make(chan int, 3) // send blocks only when the buffer is full
+```
+
+## Closing and ranging
+
+The sender closes a channel to signal "no more values". Receivers can range
+over it:
+
+```go
+func produce(ch chan<- int) {
+	for i := 0; i < 3; i++ {
+		ch <- i
+	}
+	close(ch) // only the sender should close
+}
+
+ch := make(chan int)
+go produce(ch)
+for v := range ch { // ends when ch is closed
+	fmt.Println(v)
+}
+```
+
+<Callout type="warning">
+  Sending on a closed channel **panics**, and closing twice panics. Only the
+  sending side should close — never the receiver.
+</Callout>
+
+## select
+
+`select` waits on multiple channel operations, proceeding with whichever is
+ready first. Combined with `context`, it's the standard way to add timeouts and
+cancellation:
+
+```go
+select {
+case v := <-in:
+	fmt.Println("received", v)
+case out <- next:
+	fmt.Println("sent")
+case <-time.After(time.Second):
+	fmt.Println("timeout")
+case <-ctx.Done():
+	return ctx.Err()
+}
+```
+
+<Callout type="tip">
+  Directional channel types (`chan<- int` send-only, `<-chan int` receive-only)
+  document intent and let the compiler catch misuse at function boundaries.
+</Callout>
+
+## A worker pool
+
+Channels make fan-out/fan-in trivial. Start N workers reading from a shared
+jobs channel and writing to a results channel:
+
+```go
+func pool(jobs <-chan int, results chan<- int, workers int) {
+	var wg sync.WaitGroup
+	for i := 0; i < workers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := range jobs {
+				results <- j * j
+			}
+		}()
+	}
+	go func() { wg.Wait(); close(results) }() // close once all workers finish
+}
+```
+
+## Common channel patterns
+
+| Pattern | How |
+| --- | --- |
+| Signal "done" | `close(ch)` and range/receive |
+| Timeout | `case <-time.After(d)` in a `select` |
+| Cancellation | `case <-ctx.Done()` in a `select` |
+| Rate limiting | receive from a `time.Tick` channel |
+
+<Callout type="note">
+  An operation on a `nil` channel blocks **forever**. Setting a channel variable
+  to `nil` inside a `select` is a deliberate trick to disable that case.
+</Callout>

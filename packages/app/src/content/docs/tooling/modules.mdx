@@ -1,0 +1,110 @@
+---
+title: Modules & Packages
+description: Organise code into packages and manage dependencies with modules.
+---
+
+## Packages
+
+Every Go file belongs to a package declared on its first line. Identifiers
+starting with an **uppercase** letter are exported (public); lowercase ones are
+package-private:
+
+```go
+package mathx
+
+// Exported — usable as mathx.Double
+func Double(n int) int { return n * 2 }
+
+// unexported — only visible inside the package
+func half(n int) int { return n / 2 }
+```
+
+## Modules
+
+A **module** is a collection of packages with a `go.mod` file at its root that
+records the module path and dependencies:
+
+```bash
+# Start a new module
+go mod init github.com/you/project
+```
+
+```go title="go.mod"
+module github.com/you/project
+
+go 1.23
+
+require (
+	github.com/google/uuid v1.6.0
+)
+```
+
+## Managing dependencies
+
+<Steps>
+
+1. **Add** a dependency by importing it and running `go mod tidy`, or directly:
+
+   ```bash
+   go get github.com/google/uuid@latest
+   ```
+
+2. **Tidy** removes unused requires and adds missing ones:
+
+   ```bash
+   go mod tidy
+   ```
+
+3. **Vendor** (optional) copies dependencies into the repo for hermetic builds:
+
+   ```bash
+   go mod vendor
+   ```
+
+</Steps>
+
+<Callout type="tip">
+  Run `go mod tidy` before committing. It keeps `go.mod` and `go.sum` accurate
+  and reproducible.
+</Callout>
+
+## Common commands
+
+| Command | Purpose |
+| --- | --- |
+| `go build ./...` | Compile every package |
+| `go run .` | Build and run the current package |
+| `go install` | Build and install a binary into `$GOBIN` |
+| `go list -m all` | List the full dependency graph |
+
+## Semantic versioning & upgrades
+
+Go modules follow semantic versioning, and the tooling respects it. Upgrade
+within the current major version safely, or query what's available:
+
+```bash
+go get -u ./...                 # upgrade to latest minor/patch
+go get github.com/google/uuid@v1.6.0  # pin an exact version
+go list -m -u all               # show available upgrades
+```
+
+<Callout type="important">
+  A **major** version bump (v2+) changes the import path itself —
+  `github.com/you/project/v2`. This is Go's "semantic import versioning", and it
+  lets v1 and v2 coexist in one build.
+</Callout>
+
+## Workspaces (multi-module)
+
+When you develop several related modules together, a `go.work` file lets them
+resolve each other locally without `replace` directives:
+
+```bash
+go work init ./api ./worker
+go work use ./newmodule
+```
+
+<Callout type="tip">
+  Commit `go.mod` and `go.sum`, but usually **not** `go.work` — workspaces are a
+  local development convenience, not part of the published module.
+</Callout>

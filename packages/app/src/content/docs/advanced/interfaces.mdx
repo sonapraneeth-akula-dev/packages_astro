@@ -1,0 +1,112 @@
+---
+title: Interfaces
+description: Implicit satisfaction, the empty interface, and type assertions.
+---
+
+An interface is a set of method signatures. A type satisfies an interface
+**implicitly** — there is no `implements` keyword:
+
+```go
+type Stringer interface {
+	String() string
+}
+
+type User struct{ Name string }
+
+// User now satisfies Stringer simply by having this method.
+func (u User) String() string { return "User: " + u.Name }
+```
+
+## Programming to an interface
+
+Accept interfaces, return concrete types. Standard library examples are
+`io.Reader` and `io.Writer`:
+
+```go
+func WriteGreeting(w io.Writer, name string) error {
+	_, err := fmt.Fprintf(w, "Hello, %s\n", name)
+	return err
+}
+
+WriteGreeting(os.Stdout, "Ada")   // a file
+WriteGreeting(&buf, "Ada")        // a bytes.Buffer
+```
+
+<Callout type="tip">
+  Keep interfaces **small**. Single-method interfaces (like `io.Reader`) compose
+  beautifully — this is why Go interfaces are usually one or two methods.
+</Callout>
+
+## The empty interface & `any`
+
+`interface{}` (aliased as `any` since Go 1.18) holds a value of any type:
+
+```go
+func describe(v any) {
+	fmt.Printf("%v has type %T\n", v, v)
+}
+```
+
+## Type assertions & switches
+
+Recover the concrete type with an assertion (use the comma-ok form to stay
+safe), or a type switch:
+
+```go
+if s, ok := v.(string); ok {
+	fmt.Println("a string of length", len(s))
+}
+
+switch x := v.(type) {
+case int:
+	fmt.Println("int", x)
+case string:
+	fmt.Println("string", x)
+default:
+	fmt.Printf("unhandled %T\n", x)
+}
+```
+
+<Callout type="warning">
+  A failing single-value assertion (`v.(string)` without the `ok`) **panics**.
+  Prefer the two-value form unless you are certain of the type.
+</Callout>
+
+## The nil interface trap
+
+An interface holds both a *type* and a *value*. An interface is `nil` only when
+**both** are nil — a common source of bugs when returning a typed nil pointer:
+
+```go
+func doWork() error {
+	var e *MyError = nil
+	return e // ⚠️ returns a non-nil error holding a nil *MyError!
+}
+
+if doWork() != nil {
+	// this runs, surprisingly
+}
+```
+
+<Callout type="caution">
+  Return a literal `nil` (not a typed nil pointer) to signal "no error". Declare
+  the function's return as `error` and `return nil` directly.
+</Callout>
+
+## Embedding interfaces
+
+Interfaces compose by embedding. `io.ReadWriter` is literally the union of two
+smaller interfaces:
+
+```go
+type Reader interface{ Read(p []byte) (int, error) }
+type Writer interface{ Write(p []byte) (int, error) }
+
+type ReadWriter interface {
+	Reader
+	Writer
+}
+```
+
+This is why Go encourages tiny interfaces — they snap together into larger ones
+exactly where needed.

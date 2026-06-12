@@ -1,0 +1,100 @@
+---
+title: Arrays, Slices & Maps
+description: Go's built-in collections — fixed arrays, dynamic slices and maps.
+---
+
+## Arrays
+
+An array has a **fixed** length that is part of its type. Arrays are values —
+assigning one copies it:
+
+```go
+var grid [3]int          // [0 0 0]
+primes := [5]int{2, 3, 5, 7, 11}
+auto := [...]string{"a", "b"} // length inferred → [2]string
+```
+
+Arrays are rarely used directly; **slices** are the everyday tool.
+
+## Slices
+
+A slice is a lightweight view (pointer, length, capacity) over a backing array.
+It grows with `append`:
+
+```go
+nums := []int{1, 2, 3}      // slice literal
+nums = append(nums, 4, 5)   // [1 2 3 4 5]
+
+// make([]T, len, cap)
+buf := make([]byte, 0, 1024)
+
+// Slicing: half-open ranges [low:high]
+mid := nums[1:3]            // [2 3] — shares backing storage!
+```
+
+<Callout type="caution">
+  Slices share their backing array. Mutating a re-slice can change the original.
+  Use `copy(dst, src)` or `append([]T(nil), s...)` when you need an independent
+  copy.
+</Callout>
+
+## Maps
+
+Maps are unordered key→value hash tables. Always create them with `make` (or a
+literal) before writing:
+
+```go
+ages := map[string]int{
+	"Ada":   36,
+	"Alan":  41,
+}
+
+ages["Grace"] = 30        // insert / update
+delete(ages, "Alan")      // remove
+
+// Comma-ok idiom: distinguish "missing" from "zero value"
+if age, ok := ages["Ada"]; ok {
+	fmt.Println(age)
+}
+```
+
+<Callout type="important">
+  Iteration order over a map is **randomised** by design. Sort the keys if you
+  need deterministic output.
+</Callout>
+
+```go
+keys := make([]string, 0, len(ages))
+for k := range ages {
+	keys = append(keys, k)
+}
+sort.Strings(keys)
+```
+
+### Sets via maps
+
+Go has no built-in set type; a `map[T]struct{}` is the idiomatic stand-in. The
+empty struct uses zero memory for the value:
+
+```go
+seen := map[string]struct{}{}
+seen["a"] = struct{}{}
+
+if _, ok := seen["a"]; ok {
+	fmt.Println("already seen")
+}
+```
+
+## Choosing a collection
+
+| Need | Use |
+| --- | --- |
+| Fixed-size, value semantics | array `[N]T` |
+| Growable ordered list | slice `[]T` |
+| Key → value lookup | map `map[K]V` |
+| Membership / uniqueness | `map[T]struct{}` |
+
+<Callout type="tip">
+  Pre-size slices and maps with `make([]T, 0, n)` / `make(map[K]V, n)` when you
+  know the rough size — it avoids repeated re-allocations as they grow.
+</Callout>

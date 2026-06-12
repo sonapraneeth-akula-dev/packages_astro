@@ -1,0 +1,85 @@
+[
+  {
+    "doc": "index",
+    "label": "Overview"
+  },
+  {
+    "label": "Basics",
+    "collapsed": false,
+    "items": [
+      {
+        "doc": "basics/hello-world",
+        "label": "Hello, World"
+      },
+      {
+        "doc": "basics/variables-and-types",
+        "label": "Variables & Types"
+      },
+      {
+        "doc": "basics/control-flow",
+        "label": "Control Flow"
+      },
+      {
+        "doc": "basics/functions",
+        "label": "Functions"
+      },
+      {
+        "doc": "basics/collections",
+        "label": "Arrays, Slices & Maps"
+      },
+      {
+        "doc": "basics/structs-and-methods",
+        "label": "Structs & Methods"
+      }
+    ]
+  },
+  {
+    "label": "Advanced",
+    "collapsed": false,
+    "items": [
+      {
+        "doc": "advanced/interfaces",
+        "label": "Interfaces"
+      },
+      {
+        "doc": "advanced/error-handling",
+        "label": "Error Handling"
+      },
+      {
+        "label": "Concurrency",
+        "items": [
+          {
+            "doc": "advanced/goroutines",
+            "label": "Goroutines"
+          },
+          {
+            "doc": "advanced/channels",
+            "label": "Channels"
+          }
+        ]
+      },
+      {
+        "doc": "advanced/generics",
+        "label": "Generics",
+        "badge": "new"
+      }
+    ]
+  },
+  {
+    "label": "Tooling",
+    "items": [
+      {
+        "doc": "tooling/modules",
+        "label": "Modules & Packages"
+      },
+      {
+        "doc": "tooling/testing",
+        "label": "Testing"
+      }
+    ]
+  },
+  {
+    "label": "Go by Example ↗",
+    "link": "https://gobyexample.com/"
+  }
+]

@@ -1,0 +1,111 @@
+---
+title: Goroutines
+description: Lightweight concurrency with the go keyword and sync primitives.
+---
+
+A **goroutine** is a function running concurrently, multiplexed onto OS threads
+by the Go runtime. Starting one is as simple as the `go` keyword:
+
+```go
+go fmt.Println("runs concurrently")
+```
+
+Goroutines are cheap — a few kilobytes of stack — so it's normal to have
+thousands.
+
+## Waiting with WaitGroup
+
+`main` won't wait for goroutines on its own. Use a `sync.WaitGroup` to wait for
+a set of them to finish:
+
+```go
+var wg sync.WaitGroup
+
+for _, url := range urls {
+	wg.Add(1)
+	go func(u string) {
+		defer wg.Done()
+		fetch(u)
+	}(url)
+}
+
+wg.Wait() // blocks until all Done()
+```
+
+<Callout type="caution">
+  Before Go 1.22, loop variables were shared across iterations, so you had to
+  pass `url` as an argument (as above). On Go 1.22+ each iteration gets a fresh
+  variable, but passing it explicitly is still clear and safe.
+</Callout>
+
+## Protecting shared state
+
+When goroutines touch the same memory, guard it with a `sync.Mutex`:
+
+```go
+type Counter struct {
+	mu sync.Mutex
+	n  int
+}
+
+func (c *Counter) Inc() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.n++
+}
+```
+
+<Callout type="tip">
+  *"Don't communicate by sharing memory; share memory by communicating."*
+  Prefer [channels](/advanced/channels) for coordination; reach for a mutex when
+  you're protecting a small piece of shared state.
+</Callout>
+
+## Detecting races
+
+Run your tests and programs with the race detector during development:
+
+```bash
+go test -race ./...
+go run -race main.go
+```
+
+## Once and atomic helpers
+
+The `sync` and `sync/atomic` packages provide lighter tools than a full mutex
+for common patterns:
+
+```go
+var once sync.Once
+func initConfig() { once.Do(loadConfig) } // loadConfig runs exactly once
+
+var hits atomic.Int64
+hits.Add(1)         // lock-free counter
+fmt.Println(hits.Load())
+```
+
+## Cancelling goroutines with context
+
+A long-running goroutine should accept a `context.Context` so callers can cancel
+it or set a deadline — this is the standard cancellation mechanism in Go:
+
+```go
+func worker(ctx context.Context, jobs <-chan Job) {
+	for {
+		select {
+		case <-ctx.Done():
+			return // cancelled or timed out
+		case j := <-jobs:
+			process(j)
+		}
+	}
+}
+```
+
+<Callout type="warning" title="Goroutine leaks">
+  A goroutine blocked forever on a channel send/receive never gets collected.
+  Always give blocked goroutines a way out — a closed channel, a `context`, or a
+  `select` with `ctx.Done()`.
+</Callout>
+
+<GoPlayground label="Run a goroutine example" />

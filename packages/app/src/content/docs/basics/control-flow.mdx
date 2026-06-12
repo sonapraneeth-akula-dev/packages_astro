@@ -1,0 +1,133 @@
+---
+title: Control Flow
+description: if, for, switch and defer — Go keeps control flow minimal.
+---
+
+Go has exactly **one** loop keyword (`for`), a flexible `switch`, and `defer`
+for cleanup. There is no `while` and no ternary operator.
+
+## if
+
+Conditions need no parentheses, and braces are mandatory. `if` can carry an
+initialiser whose scope is the `if`/`else` block:
+
+```go
+if n := len(s); n > 0 {
+	fmt.Println("non-empty", n)
+} else {
+	fmt.Println("empty")
+}
+```
+
+## for
+
+`for` covers every looping need:
+
+```go
+// Classic three-clause loop
+for i := 0; i < 5; i++ {
+	fmt.Println(i)
+}
+
+// As a while loop
+for n > 0 {
+	n /= 2
+}
+
+// Infinite loop
+for {
+	if done() {
+		break
+	}
+}
+
+// Range over a slice (index, value)
+for i, v := range items {
+	fmt.Println(i, v)
+}
+```
+
+<Callout type="tip">
+  Use the blank identifier `_` to discard a value you don't need:
+  `for _, v := range items { ... }`.
+</Callout>
+
+## switch
+
+Cases do **not** fall through by default (no `break` needed). A bare `switch`
+acts as a clean `if/else` chain:
+
+```go
+switch {
+case score >= 90:
+	grade = "A"
+case score >= 80:
+	grade = "B"
+default:
+	grade = "C"
+}
+
+// Switch on a value, with multiple matches per case
+switch day {
+case "Sat", "Sun":
+	fmt.Println("weekend")
+default:
+	fmt.Println("weekday")
+}
+```
+
+## defer
+
+`defer` schedules a call to run when the surrounding function returns — ideal
+for releasing resources. Deferred calls run in **LIFO** order:
+
+```go
+func readConfig(path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close() // runs no matter how we return
+
+	// ... use f ...
+	return nil
+}
+```
+
+### Argument evaluation
+
+A deferred call's **arguments are evaluated immediately**, but the call itself
+runs at return. This trips up newcomers:
+
+```go
+func trace() {
+	i := 0
+	defer fmt.Println("deferred:", i) // captures i = 0 now
+	i = 99
+	fmt.Println("immediate:", i)      // prints 99
+}
+// immediate: 99
+// deferred: 0
+```
+
+## goto and labels
+
+Go has `goto`, plus labelled `break`/`continue` to jump out of nested loops.
+Reach for these rarely — labelled `break` is the main legitimate use:
+
+```go
+outer:
+for _, row := range grid {
+	for _, cell := range row {
+		if cell == target {
+			fmt.Println("found")
+			break outer // breaks both loops
+		}
+	}
+}
+```
+
+<Callout type="note">
+  Prefer extracting a function and `return`ing over `goto`. Labelled `break`/
+  `continue`, however, are idiomatic for escaping nested loops.
+</Callout>

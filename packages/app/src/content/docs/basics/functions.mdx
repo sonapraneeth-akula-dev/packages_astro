@@ -1,0 +1,126 @@
+---
+title: Functions
+description: Multiple returns, named results, variadics and closures.
+---
+
+## Basics
+
+A function declares its parameter and return types explicitly:
+
+```go
+func add(a int, b int) int {
+	return a + b
+}
+
+// Consecutive params of the same type can share it
+func add2(a, b int) int { return a + b }
+```
+
+## Multiple return values
+
+Returning multiple values is idiomatic — especially `(result, error)`:
+
+```go
+func divide(a, b float64) (float64, error) {
+	if b == 0 {
+		return 0, fmt.Errorf("division by zero")
+	}
+	return a / b, nil
+}
+
+q, err := divide(10, 2)
+if err != nil {
+	// handle it
+}
+```
+
+## Named results
+
+Named return values are pre-declared and can be returned bare. Use sparingly —
+they read best in short functions:
+
+```go
+func split(sum int) (x, y int) {
+	x = sum * 4 / 9
+	y = sum - x
+	return // returns x, y
+}
+```
+
+## Variadic functions
+
+A trailing `...T` parameter accepts any number of arguments as a slice:
+
+```go
+func sum(nums ...int) int {
+	total := 0
+	for _, n := range nums {
+		total += n
+	}
+	return total
+}
+
+sum(1, 2, 3)        // 6
+sum(xs...)          // spread an existing slice
+```
+
+## Closures
+
+Functions are first-class values and can capture surrounding variables:
+
+```go
+func counter() func() int {
+	count := 0
+	return func() int {
+		count++
+		return count
+	}
+}
+
+next := counter()
+next() // 1
+next() // 2
+```
+
+<Callout type="note">
+  Each call to `counter()` gets its own independent `count` — the returned
+  closure keeps the captured variable alive.
+</Callout>
+
+## Functions as parameters
+
+Because functions are values, you can pass them to other functions — the basis
+of callbacks and higher-order helpers:
+
+```go
+func apply(xs []int, fn func(int) int) []int {
+	out := make([]int, len(xs))
+	for i, x := range xs {
+		out[i] = fn(x)
+	}
+	return out
+}
+
+doubled := apply([]int{1, 2, 3}, func(n int) int { return n * 2 })
+```
+
+## Defer, panic and the call stack
+
+A function can register cleanup with `defer`, which runs even if the function
+panics. This makes `defer` the idiomatic place to release locks, close files or
+restore state:
+
+```go
+func withLock(mu *sync.Mutex, fn func()) {
+	mu.Lock()
+	defer mu.Unlock() // always runs, even if fn panics
+	fn()
+}
+```
+
+<Callout type="tip">
+  See [Control Flow](/basics/control-flow) for how `defer` evaluates its
+  arguments eagerly but runs at return time.
+</Callout>
+
+<GoPlayground label="Play with closures" />

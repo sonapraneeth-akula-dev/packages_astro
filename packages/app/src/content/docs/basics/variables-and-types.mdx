@@ -1,0 +1,128 @@
+---
+title: Variables & Types
+description: Declarations, zero values, constants and Go's basic type set.
+---
+
+## Declaring variables
+
+Go offers a verbose `var` form and a short `:=` form (only usable inside
+functions):
+
+```go
+var name string = "Ada"   // explicit type
+var age = 36              // type inferred → int
+city := "London"          // short form, function-scoped only
+
+// Group related declarations
+var (
+	width  = 1024
+	height = 768
+)
+```
+
+## Zero values
+
+Every variable is initialised to its **zero value** — there are no
+uninitialised variables in Go:
+
+| Type | Zero value |
+| --- | --- |
+| numbers (`int`, `float64`, …) | `0` |
+| `bool` | `false` |
+| `string` | `""` |
+| pointers, slices, maps, channels, funcs, interfaces | `nil` |
+
+```go
+var count int      // 0
+var ready bool     // false
+var label string   // ""
+var data []byte    // nil
+```
+
+## Basic types
+
+```go
+// Integers (sized + platform-width)
+var i int        // 32- or 64-bit, platform dependent
+var b byte       // alias for uint8
+var r rune       // alias for int32, a Unicode code point
+
+// Floating point and complex
+var f float64
+var c complex128
+
+// Text and booleans
+var s string
+var ok bool
+```
+
+<Callout type="important">
+  Go has **no implicit numeric conversions**. You must convert explicitly, even
+  between numeric types: `var f = float64(i)`.
+</Callout>
+
+## Constants
+
+Constants are computed at compile time. `iota` generates incrementing values,
+which is the idiomatic way to build enumerations:
+
+```go
+const Pi = 3.14159
+
+type Weekday int
+
+const (
+	Sunday Weekday = iota // 0
+	Monday                // 1
+	Tuesday               // 2
+	Wednesday             // 3
+)
+```
+
+### Typed vs untyped constants
+
+An *untyped* constant has no fixed type until it's used, so it can be assigned
+to any compatible numeric type without a conversion:
+
+```go
+const big = 1 << 30   // untyped — works as int, int64, float64, …
+
+var i int     = big
+var f float64 = big   // no conversion needed
+```
+
+This is why `const Pi = 3.14159` can be used both where a `float32` and a
+`float64` are expected.
+
+## Type conversions
+
+Because Go has no implicit conversions, you convert with `T(value)`:
+
+```go
+i := 42
+f := float64(i)    // int → float64
+u := uint(f)       // float64 → uint (truncates toward zero)
+s := string(rune(65)) // rune → "A"
+```
+
+<Callout type="warning">
+  `string(65)` converts a *code point* to its character ("A"), not the text
+  "65". To turn a number into its decimal text, use `strconv.Itoa(65)` or
+  `fmt.Sprint(65)`.
+</Callout>
+
+## Strings, bytes and runes
+
+A `string` is an immutable sequence of bytes (UTF-8). Indexing yields a `byte`;
+ranging yields runes (code points) with their byte offset:
+
+```go
+s := "héllo"
+fmt.Println(len(s))       // 6 — bytes, not characters!
+
+for i, r := range s {     // i is the byte index, r is a rune
+	fmt.Printf("%d:%c ", i, r)
+}
+```
+
+<GoPlayground label="Experiment with iota" />

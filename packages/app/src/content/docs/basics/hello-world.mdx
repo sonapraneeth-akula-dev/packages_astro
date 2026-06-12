@@ -1,0 +1,119 @@
+---
+title: Hello, World
+description: Write, run and build your first Go program, and understand each line.
+---
+
+Every Go program starts in `package main` with a `main` function. Here is the
+canonical first program:
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("Hello, World")
+}
+```
+
+<GoPlayground label="Run Hello, World on the Go Playground" />
+
+## Anatomy
+
+<Steps>
+
+1. **`package main`** — an executable program must live in the `main` package.
+   Library packages use any other name.
+
+2. **`import "fmt"`** — pulls in the standard library's formatted-I/O package.
+   Unused imports are a *compile error* in Go, which keeps imports honest.
+
+3. **`func main()`** — the entry point. It takes no arguments and returns
+   nothing; the program exits when it returns.
+
+4. **`fmt.Println(...)`** — prints its arguments followed by a newline.
+
+</Steps>
+
+## Running it
+
+<Tabs>
+  <TabItem label="Run directly">
+
+```bash
+# Compile to a temp binary and run it in one step
+go run main.go
+```
+
+  </TabItem>
+  <TabItem label="Build a binary">
+
+```bash
+# Produce a standalone, statically linked binary
+go build -o hello main.go
+./hello
+```
+
+  </TabItem>
+</Tabs>
+
+<Callout type="note">
+  `go run` is great for quick iteration; `go build` produces the self-contained
+  binary you ship. There is no separate runtime to install on the target.
+</Callout>
+
+## Formatting
+
+Go ships an opinionated formatter. Run it before committing — there is no style
+debate in Go code:
+
+```bash
+gofmt -w .   # or: go fmt ./...
+```
+
+Most editors run `gofmt` (or `goimports`, which also fixes imports) on save, so
+in practice you rarely run it by hand.
+
+## A slightly bigger program
+
+Real programs read input, branch, and call functions. Here is a small step up
+that greets a name from the command line:
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	name := "World"
+	if len(os.Args) > 1 {
+		name = os.Args[1]
+	}
+	fmt.Printf("Hello, %s!\n", name)
+}
+```
+
+Run it with an argument:
+
+```bash
+go run main.go Ada   # Hello, Ada!
+```
+
+## Where to go next
+
+<CardGrid>
+  <Card title="Variables & Types" icon="📘">
+    Declarations, zero values, constants and the basic type set.
+  </Card>
+  <Card title="Control Flow" icon="🔀">
+    `if`, `for`, `switch` and `defer` — Go's minimal control flow.
+  </Card>
+</CardGrid>
+
+<Callout type="tip">
+  Keep the [Go Playground](https://go.dev/play/) open in another tab as you read
+  — every snippet on this site is small enough to paste and run.
+</Callout>

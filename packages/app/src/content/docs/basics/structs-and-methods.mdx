@@ -1,0 +1,114 @@
+---
+title: Structs & Methods
+description: Composite types, methods, pointer receivers and embedding.
+---
+
+## Structs
+
+A struct groups named fields. Go has no classes — structs plus methods cover
+the same ground:
+
+```go
+type Point struct {
+	X, Y int
+}
+
+p := Point{X: 1, Y: 2}   // keyed literal (preferred)
+q := Point{3, 4}          // positional
+fmt.Println(p.X, q.Y)
+```
+
+## Methods
+
+A method is a function with a **receiver**. Receivers can be values or pointers:
+
+```go
+// Value receiver — operates on a copy
+func (p Point) Add(o Point) Point {
+	return Point{p.X + o.X, p.Y + o.Y}
+}
+
+// Pointer receiver — can mutate the original
+func (p *Point) Scale(f int) {
+	p.X *= f
+	p.Y *= f
+}
+```
+
+<Callout type="tip">
+  Rule of thumb: use a **pointer receiver** if the method mutates the value, the
+  struct is large, or you want all methods on a type to be consistent.
+</Callout>
+
+## Embedding (composition)
+
+Go favours composition over inheritance. Embedding a type promotes its fields
+and methods:
+
+```go
+type Animal struct {
+	Name string
+}
+
+func (a Animal) Speak() string { return a.Name + " makes a sound" }
+
+type Dog struct {
+	Animal // embedded
+	Breed  string
+}
+
+d := Dog{Animal{"Rex"}, "Lab"}
+fmt.Println(d.Name)    // promoted field
+fmt.Println(d.Speak()) // promoted method
+```
+
+## Constructors
+
+There is no special constructor syntax; by convention you write a `New…`
+function that returns a configured value (or pointer):
+
+```go
+func NewPoint(x, y int) *Point {
+	return &Point{X: x, Y: y}
+}
+```
+
+## Struct tags
+
+Fields can carry **tags** — string metadata read via reflection. The standard
+library uses them heavily, e.g. to map struct fields to JSON keys:
+
+```go
+type User struct {
+	Name  string `json:"name"`
+	Email string `json:"email,omitempty"`
+	id    int    `json:"-"` // unexported & ignored
+}
+```
+
+```go
+b, _ := json.Marshal(User{Name: "Ada", Email: ""})
+// {"name":"Ada"}  — Email omitted because it's empty
+```
+
+## Comparing structs
+
+Structs are comparable with `==` when all their fields are comparable, which
+also lets them be used as map keys:
+
+```go
+a := Point{1, 2}
+b := Point{1, 2}
+fmt.Println(a == b) // true
+
+seen := map[Point]bool{}
+seen[a] = true
+```
+
+<Callout type="caution">
+  Structs containing slices, maps or functions are **not** comparable and will
+  not compile under `==`. Use `reflect.DeepEqual` (or a hand-written method)
+  for those.
+</Callout>
+
+<GoPlayground label="Try structs & methods" />

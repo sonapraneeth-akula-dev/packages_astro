@@ -1,0 +1,139 @@
+---
+title: Error Handling
+description: Errors as values, wrapping, and errors.Is / errors.As.
+---
+
+Go treats errors as ordinary values of the built-in `error` interface — there
+are no exceptions for ordinary failures:
+
+```go
+type error interface {
+	Error() string
+}
+```
+
+## The idiom
+
+Functions return an error as their last value; callers check it immediately:
+
+```go
+f, err := os.Open("config.yaml")
+if err != nil {
+	return fmt.Errorf("open config: %w", err)
+}
+defer f.Close()
+```
+
+<Callout type="important">
+  Handle each error where it happens. The `if err != nil` block is the
+  backbone of robust Go code — don't ignore returned errors.
+</Callout>
+
+## Creating errors
+
+```go
+// Simple, static message
+err := errors.New("not found")
+
+// Formatted message; %w *wraps* an underlying error
+err = fmt.Errorf("load user %d: %w", id, err)
+```
+
+## Inspecting wrapped errors
+
+`%w` builds a chain you can inspect with `errors.Is` (sentinel match) and
+`errors.As` (extract a typed error):
+
+```go
+var ErrNotFound = errors.New("not found")
+
+if errors.Is(err, ErrNotFound) {
+	// matches anywhere in the wrap chain
+}
+
+var perr *fs.PathError
+if errors.As(err, &perr) {
+	fmt.Println("path:", perr.Path)
+}
+```
+
+## Custom error types
+
+Any type with an `Error() string` method is an error:
+
+```go
+type ValidationError struct {
+	Field string
+	Msg   string
+}
+
+func (e *ValidationError) Error() string {
+	return fmt.Sprintf("%s: %s", e.Field, e.Msg)
+}
+```
+
+## panic / recover
+
+`panic` is for *unrecoverable* programmer errors, not control flow. `recover`
+(inside a deferred function) can stop a panic from crashing the program:
+
+```go
+func safeRun(fn func()) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("recovered: %v", r)
+		}
+	}()
+	fn()
+	return
+}
+```
+
+<Callout type="caution">
+  Reserve `panic`/`recover` for truly exceptional situations (e.g. a corrupt
+  invariant). Normal failures should return an `error`.
+</Callout>
+
+## Adding context as errors propagate
+
+Wrap errors with `%w` at each layer so the final message reads like a trace,
+while `errors.Is`/`errors.As` can still inspect the original cause:
+
+```go
+func loadUser(id int) (*User, error) {
+	row, err := db.Query(id)
+	if err != nil {
+		return nil, fmt.Errorf("loadUser %d: %w", id, err)
+	}
+	// …
+}
+// open config: loadUser 7: sql: no rows in result set
+```
+
+<Callout type="tip">
+  Add context that the *caller* doesn't already have (the id, the file path).
+  Don't restate the operation the wrapped error already names.
+</Callout>
+
+## Errors vs panics: a decision guide
+
+| Situation | Mechanism |
+| --- | --- |
+| File missing, bad input, network failure | return an `error` |
+| Programmer bug (nil deref, impossible state) | `panic` |
+| Library boundary swallowing a panic | `recover` in a deferred func |
+
+## Joining multiple errors
+
+Since Go 1.20, `errors.Join` combines several errors into one — useful when
+validating many fields or closing multiple resources:
+
+```go
+err := errors.Join(
+	validateName(u.Name),
+	validateEmail(u.Email),
+)
+if err != nil {
+	return err // reports every failed check at once
+}
+```

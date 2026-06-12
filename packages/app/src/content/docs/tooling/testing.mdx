@@ -1,0 +1,128 @@
+---
+title: Testing
+description: The built-in testing package, table-driven tests and benchmarks.
+---
+
+Go ships a first-class testing toolchain — no external framework required. Put
+tests in `_test.go` files alongside the code they cover.
+
+## A first test
+
+A test is a function `TestXxx(t *testing.T)`:
+
+```go title="mathx_test.go"
+package mathx
+
+import "testing"
+
+func TestDouble(t *testing.T) {
+	got := Double(3)
+	want := 6
+	if got != want {
+		t.Errorf("Double(3) = %d; want %d", got, want)
+	}
+}
+```
+
+Run it:
+
+```bash
+go test ./...          # run all tests
+go test -v -run Double # verbose, filter by name
+```
+
+## Table-driven tests
+
+The idiomatic Go pattern packs many cases into a table and runs each as a
+subtest with `t.Run`:
+
+```go
+func TestDouble_Table(t *testing.T) {
+	cases := []struct {
+		name string
+		in   int
+		want int
+	}{
+		{"zero", 0, 0},
+		{"positive", 3, 6},
+		{"negative", -2, -4},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := Double(c.in); got != c.want {
+				t.Errorf("Double(%d) = %d; want %d", c.in, got, c.want)
+			}
+		})
+	}
+}
+```
+
+<Callout type="tip">
+  Subtests give you per-case names in the output and let you run one with
+  `go test -run TestDouble_Table/negative`.
+</Callout>
+
+## Benchmarks
+
+Benchmark functions start with `Benchmark` and loop `b.N` times:
+
+```go
+func BenchmarkDouble(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Double(21)
+	}
+}
+```
+
+```bash
+go test -bench=. -benchmem
+```
+
+## Coverage
+
+```bash
+go test -cover ./...
+go test -coverprofile=cover.out ./... && go tool cover -html=cover.out
+```
+
+## Test fixtures and helpers
+
+Mark helpers with `t.Helper()` so failures report the *caller's* line, and use
+`t.Cleanup` to register teardown that runs after the test:
+
+```go
+func mustOpen(t *testing.T, path string) *os.File {
+	t.Helper()
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatalf("open %s: %v", path, err)
+	}
+	t.Cleanup(func() { f.Close() })
+	return f
+}
+```
+
+<Callout type="tip">
+  Put read-only test data in a `testdata/` directory — the Go toolchain ignores
+  it during builds, and `go test` runs with the package directory as its working
+  directory.
+</Callout>
+
+## Examples as documentation
+
+Example functions (`ExampleXxx`) with an `// Output:` comment are compiled,
+run, and verified by `go test` — and they appear in your generated docs:
+
+```go
+func ExampleDouble() {
+	fmt.Println(Double(21))
+	// Output: 42
+}
+```
+
+<Callout type="note">
+  Example functions double as living documentation: they can't drift from the
+  code because `go test` fails if the actual output stops matching the
+  `// Output:` comment.
+</Callout>

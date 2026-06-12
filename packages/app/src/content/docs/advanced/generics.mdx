@@ -1,0 +1,115 @@
+---
+title: Generics
+description: Type parameters, constraints and the constraints package (Go 1.18+).
+sidebar:
+  badge: new
+---
+
+Since **Go 1.18**, functions and types can take **type parameters**, letting
+you write reusable code without `any` and reflection.
+
+## Generic functions
+
+Type parameters go in square brackets before the value parameters. A
+*constraint* limits which types are allowed:
+
+```go
+// any type T that is comparable
+func Index[T comparable](s []T, target T) int {
+	for i, v := range s {
+		if v == target {
+			return i
+		}
+	}
+	return -1
+}
+
+Index([]int{1, 2, 3}, 2)        // 1
+Index([]string{"a", "b"}, "b")  // 1
+```
+
+## Constraints
+
+A constraint is an interface listing the permitted types or methods. The
+`~` token means "any type whose underlying type is this":
+
+```go
+type Number interface {
+	~int | ~int64 | ~float64
+}
+
+func Sum[T Number](xs []T) T {
+	var total T
+	for _, x := range xs {
+		total += x
+	}
+	return total
+}
+```
+
+<Callout type="tip">
+  The standard `cmp.Ordered` constraint (Go 1.21+) covers all ordered types, so
+  you rarely need to spell out numeric unions for comparisons.
+</Callout>
+
+## Generic types
+
+Types can be generic too — here's a type-safe stack:
+
+```go
+type Stack[T any] struct {
+	items []T
+}
+
+func (s *Stack[T]) Push(v T) { s.items = append(s.items, v) }
+
+func (s *Stack[T]) Pop() (T, bool) {
+	var zero T
+	if len(s.items) == 0 {
+		return zero, false
+	}
+	v := s.items[len(s.items)-1]
+	s.items = s.items[:len(s.items)-1]
+	return v, true
+}
+```
+
+<Callout type="note">
+  Reach for generics when you'd otherwise duplicate a function per type or fall
+  back to `any` + assertions. For most everyday code, plain types and interfaces
+  are still the right tool.
+</Callout>
+
+## Type inference
+
+You usually don't need to spell out type arguments — the compiler infers them
+from the values you pass:
+
+```go
+Index([]int{1, 2, 3}, 2)         // T inferred as int
+Index[string]([]string{"a"}, "a") // explicit, rarely needed
+```
+
+## Constraints in the standard library
+
+The `cmp` and `slices`/`maps` packages (Go 1.21+) ship generic helpers so you
+rarely write low-level generic code yourself:
+
+```go
+import "slices"
+
+xs := []int{3, 1, 2}
+slices.Sort(xs)              // [1 2 3]
+i, found := slices.BinarySearch(xs, 2)
+fmt.Println(slices.Max(xs))  // 3
+```
+
+## When *not* to use generics
+
+<Callout type="caution">
+  Generics add a layer of indirection. If a plain interface (like `io.Writer`)
+  or a concrete type expresses the idea clearly, prefer it. Generics shine for
+  *containers* and *algorithms* that are genuinely type-agnostic.
+</Callout>
+
+<GoPlayground label="Play with generics" />
