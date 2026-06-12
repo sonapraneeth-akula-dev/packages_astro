@@ -1,0 +1,21 @@
+{
+  "name": "@grihasetu/notes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.3.14",
+  "description": "Grihasetu docs/notes platform — a static MDX docs engine (Astro + MDX) split into a shared core, a feature demo and real note apps.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun astro dev --root packages/demo",
+    "dev:app": "bun astro dev --root packages/app",
+    "build": "bun run build:demo && bun run build:app",
+    "build:demo": "bun astro build --root packages/demo && bun pagefind --site packages/demo/dist",
+    "build:app": "bun astro build --root packages/app && bun pagefind --site packages/app/dist",
+    "preview": "bun astro preview --root packages/demo",
+    "preview:app": "bun astro preview --root packages/app",
+    "check": "bun astro check --root packages/demo && bun astro check --root packages/app"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  // Editor settings
+  "editor.cursorStyle": "block",
+  "editor.detectIndentation": false,
+  "editor.fontLigatures": true,
+  "editor.fontSize": 21,
+  "editor.fontFamily": "'Cascadia Code PL', Consolas, 'Courier New', monospace",
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.insertSpaces": true,
+  "editor.rulers": [
+    80,
+    100,
+    120
+  ],
+  "editor.tabSize": 2,
+  "editor.wordWrap": "wordWrapColumn",
+  "css.lint.unknownAtRules": "ignore",
+  // Github Copilot chat settings
+  "chat.useAgentSkills": true,
+  "github.copilot.chat.summarizeAgentConversationHistory.enabled": true,
+}

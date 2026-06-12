@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "anthropic.claude-code",
+    "eamodio.gitlens",
+    "github.copilot-chat",
+    "google.geminicodeassist",
+    "ms-vscode.powershell",
+    "pflannery.vscode-versionlens",
+    "bradlc.vscode-tailwindcss"
+  ]
+}

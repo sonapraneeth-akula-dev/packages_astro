@@ -1,0 +1,17 @@
+# Use the hoisted (npm-style) node_modules layout instead of Bun's default
+# isolated (pnpm-style) workspace linker.
+#
+# Why hoisted:
+#   Astro's static build relies on Vite externalizing node_modules deps. Under
+#   the isolated linker Bun nests every dependency in a `.bun/<pkg>@<ver>` store
+#   reached through symlinks, which defeats Vite's "is this path inside
+#   node_modules?" externalization heuristic. The result is that Vite *bundles*
+#   build tooling and data-driven deps into the prerender chunks, then fails at
+#   runtime looking for data files that were never emitted
+#   (e.g. `Cannot find module '../data/patch.json'`).
+#
+#   With the hoisted layout dependencies live in a flat top-level node_modules,
+#   externalization works correctly and the build succeeds. This mirrors the
+#   standalone blog (a single hoisted package).
+[install]
+linker = "hoisted"
