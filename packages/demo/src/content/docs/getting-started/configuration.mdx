@@ -1,0 +1,98 @@
+---
+title: Configuration
+description: Wire up the Astro config factory, the docs collection and your site config.
+sidebar:
+  order: 2
+---
+
+# Configuration
+
+Three small files connect your site to the engine. Each has a single, focused
+job, so configuration stays declarative and easy to reason about.
+
+## `astro.config.ts`
+
+The engine ships a factory that pre-wires MDX, the image service, Expressive
+Code and the sitemap. You only supply the bits unique to your site:
+
+```ts title="astro.config.ts"
+import { defineDocsAstroConfig } from '@grihasetu/notes-core/astro';
+
+export default defineDocsAstroConfig({ port: 4310 });
+```
+
+## `src/content.config.ts`
+
+Register the docs collection so Astro validates frontmatter against the engine's
+schema:
+
+```ts title="src/content.config.ts"
+import { docsCollection } from '@grihasetu/notes-core/content';
+
+export const collections = {
+  docs: docsCollection('./src/content/docs'),
+};
+```
+
+## `docs.config.ts`
+
+This is your site's identity — branding, navigation and search settings:
+
+```ts title="docs.config.ts"
+import { defineDocsConfig } from '@grihasetu/notes-core/config';
+
+export const docsConfig = defineDocsConfig({
+  brand: 'Notes',
+  title: 'My Handbook',
+  subject: 'Handbook',
+  // editUrlBase, nav, socials, search …
+});
+```
+
+### Key options
+
+| Option | Purpose |
+| --- | --- |
+| `brand` | Short name shown in the header. |
+| `title` | Default `<title>` and home hero heading. |
+| `subject` | Label for the sidebar's collection heading. |
+| `editUrlBase` | Base URL for "Edit this page" links. |
+| `nav` | Top navigation links. |
+| `socials` | Social/profile links in the header and footer. |
+
+## Frontmatter reference
+
+Each note supports the following frontmatter fields:
+
+| Field | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `title` | string | — | Required. Used in the sidebar and page heading. |
+| `description` | string | `''` | Page lede + meta description. |
+| `slug` | string | derived | Override the URL path (otherwise from the file path). |
+| `sidebar.label` | string | `title` | Override the sidebar label. |
+| `sidebar.order` | number | `0` | Sort order within its group. |
+| `sidebar.hidden` | boolean | `false` | Hide from the sidebar. |
+| `sidebar.badge` | string | — | Small badge next to the label. |
+| `draft` | boolean | `false` | Hide in production; visible in dev. |
+| `lastUpdated` | date | — | Shown in the page meta. |
+| `cover` | string | — | Emoji/glyph shown before the title. |
+| `tableOfContents` | boolean | `true` | Toggle the "On this page" panel. |
+
+### Toggling the table of contents
+
+The right-hand **"On this page"** rail is shown automatically whenever a note
+has headings. Set `tableOfContents: false` in a note's frontmatter to hide it —
+this very section's site does exactly that on its landing and section-overview
+pages, where a contents rail adds noise rather than value:
+
+```yaml title="index.mdx frontmatter"
+---
+title: Getting Started
+tableOfContents: false
+---
+```
+
+<Callout type="tip" title="Custom sidebar">
+  Prefer to curate the order by hand? Pass a `sidebar.json` (validated by the
+  engine's schema) to `buildDocRoutes` and it overrides the automatic tree.
+</Callout>

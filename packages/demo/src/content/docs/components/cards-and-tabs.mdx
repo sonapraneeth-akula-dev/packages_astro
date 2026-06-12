@@ -1,0 +1,88 @@
+---
+title: Cards & Tabs
+description: Card grids, link cards, badges, buttons and tabbed content.
+sidebar:
+  order: 2
+---
+
+# Cards & Tabs
+
+Cards and tabs help you present parallel options and navigation targets without
+long walls of text. This page shows the layout primitives the engine ships
+with.
+
+## Card grid
+
+`<CardGrid>` lays out `<Card>` children in a responsive grid that collapses to a
+single column on narrow screens. Each card takes a `title` and an optional
+`icon`:
+
+<CardGrid>
+  <Card title="Fast by default" icon="rocket">Static output, islands only where needed.</Card>
+  <Card title="Accessible" icon="heart">Semantic markup and AA contrast in both themes.</Card>
+</CardGrid>
+
+### When to use a card grid
+
+Use a grid for 2–6 sibling topics of equal weight — feature highlights, section
+landing pages, or "what to read next" blocks. For a single call to action,
+prefer a link card or button instead.
+
+## Link cards
+
+A `<LinkCard>` is a whole card that is clickable, ideal for "next step"
+navigation:
+
+<LinkCard title="Read the configuration guide" href="/getting-started/configuration" description="Wire up the three config files." />
+
+## Badges & buttons
+
+Badges annotate inline text; buttons are prominent calls to action.
+
+### Badges
+
+A status badge <Badge text="New" variant="success" /> sits inline with text.
+Variants cover the common states:
+
+<Badge text="New" variant="success" /> <Badge text="Beta" variant="warning" /> <Badge text="Deprecated" variant="danger" /> <Badge text="Info" />
+
+### Buttons
+
+<LinkButton href="/getting-started/installation" icon="arrow-right">Get started</LinkButton>
+
+## Tabs
+
+`<Tabs>` groups mutually-exclusive content — perfect for per-tool or
+per-platform instructions. Only one panel shows at a time:
+
+<Tabs>
+  <TabItem label="Bun">Run with `bun run dev`.</TabItem>
+  <TabItem label="Node">Run with `npm run dev`.</TabItem>
+  <TabItem label="Deno">Run with `deno task dev`.</TabItem>
+</Tabs>
+
+### Tabs with code
+
+Tab panels are full MDX, so they commonly hold code blocks:
+
+<Tabs>
+  <TabItem label="TypeScript">
+
+```ts
+export const greet = (name: string) => `Hello, ${name}!`;
+```
+
+  </TabItem>
+  <TabItem label="JavaScript">
+
+```js
+export const greet = (name) => `Hello, ${name}!`;
+```
+
+  </TabItem>
+</Tabs>
+
+<Callout type="tip">
+  Keep tab labels short and parallel (e.g. all package managers, or all
+  languages) so readers can scan them quickly.
+</Callout>

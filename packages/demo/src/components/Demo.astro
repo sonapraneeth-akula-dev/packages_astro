@@ -1,0 +1,36 @@
+---
+/**
+ * A site-specific MDX component, available only to the demo site (not shipped
+ * in core). It demonstrates how a notes site can add its own components on top
+ * of the shared set via the registry. Use it in MDX as <Demo label="…">…</Demo>.
+ */
+interface Props {
+  label?: string;
+}
+const { label = 'Demo component' } = Astro.props;
+---
+
+<div class="demo-box">
+  <span class="demo-tag">{label}</span>
+  <div class="demo-body"><slot /></div>
+</div>
+
+<style>
+  .demo-box {
+    margin: 1.5rem 0;
+    border: 1px dashed var(--accent);
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+    padding: 1.1rem 1.25rem;
+  }
+  .demo-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent-text);
+    margin-bottom: 0.5rem;
+  }
+  .demo-body :global(p:last-child) { margin-bottom: 0; }
+</style>

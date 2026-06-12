@@ -1,0 +1,79 @@
+---
+title: Code Blocks
+description: Syntax highlighting, titled frames, line numbers and markers via Expressive Code.
+sidebar:
+  order: 3
+---
+
+# Code Blocks
+
+Fenced code is rendered by [Expressive Code](https://expressive-code.com/) with
+a copy button, dual light/dark themes and optional frames. All of the features
+below are driven by the meta string after the language tag — no imports or
+configuration in the note itself.
+
+## Titled frame
+
+Add `title="…"` to render a labelled editor frame with the file name in a tab:
+
+```ts title="src/greet.ts"
+export function greet(name: string): string {
+  return `Hello, ${name}!`;
+}
+```
+
+## Line numbers and highlights
+
+`showLineNumbers` adds a gutter; `{2}` marks line 2 as highlighted. Ranges like
+`{2-4}` and lists like `{1,3}` also work:
+
+```ts {2} showLineNumbers
+const items = [1, 2, 3];
+const doubled = items.map((n) => n * 2); // highlighted line
+console.log(doubled);
+```
+
+### Inserted and deleted lines
+
+Mark diffs with `ins={…}` and `del={…}` to show what changed:
+
+```ts ins={3} del={2}
+function total(items: number[]) {
+  return items.reduce((a, b) => a + b, 0);
+  return items.reduce((sum, n) => sum + n, 0);
+}
+```
+
+### Highlighting by text
+
+Wrap a substring in the meta string to highlight every occurrence — handy for
+drawing the eye to one identifier:
+
+```ts "reduce"
+const sum = [1, 2, 3].reduce((a, b) => a + b, 0);
+const product = [1, 2, 3].reduce((a, b) => a * b, 1);
+```
+
+## Terminal frame
+
+A `bash`, `sh`, or `shell` block renders as a terminal window rather than an
+editor:
+
+```bash
+bun run build
+```
+
+## Inline code
+
+Reference a symbol like `buildDocRoutes()` or a path like `src/content/docs/`
+inline with backticks.
+
+## Copying and themes
+
+Every block has a hover **copy** button, and the same code renders with the
+site's light and dark syntax themes automatically — no duplicate markup.
+
+<Callout type="tip">
+  Combine features freely: `ts title="util.ts" showLineNumbers {3-4}` produces a
+  titled frame with line numbers and a highlighted range.
+</Callout>

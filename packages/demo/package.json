@@ -1,0 +1,25 @@
+{
+  "name": "@grihasetu/notes-demo",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "Showcase docs/notes site demonstrating every @grihasetu/notes-core feature.",
+  "scripts": {
+    "dev": "bun ../../node_modules/astro/bin/astro.mjs dev",
+    "start": "bun ../../node_modules/astro/bin/astro.mjs dev",
+    "build": "bun ../../node_modules/astro/bin/astro.mjs build && bun ../../node_modules/pagefind/lib/runner/bin.cjs --site dist",
+    "search:index": "bun ../../node_modules/pagefind/lib/runner/bin.cjs --site dist --output-path public/pagefind",
+    "preview": "bun ../../node_modules/astro/bin/astro.mjs preview",
+    "check": "bun ../../node_modules/astro/bin/astro.mjs check"
+  },
+  "dependencies": {
+    "@grihasetu/notes-core": "workspace:*",
+    "astro": "^6.4.6"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@types/node": "^25.9.3",
+    "pagefind": "^1.3.0",
+    "typescript": "^6.0.3"
+  }
+}

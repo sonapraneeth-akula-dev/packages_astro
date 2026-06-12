@@ -1,0 +1,87 @@
+---
+title: Images
+description: Responsive, lazy-loaded, format-optimised images that keep Lighthouse scores high.
+sidebar:
+  order: 4
+---
+
+import sample from '../../../assets/sample.jpeg';
+
+# Images
+
+Images are the biggest performance risk in docs. The engine optimises them two
+ways so you get high Lighthouse scores with no extra effort.
+
+## Why image optimisation matters
+
+Unoptimised images are the single most common cause of poor Largest Contentful
+Paint (LCP) and Cumulative Layout Shift (CLS) scores. The engine addresses both
+automatically:
+
+- **Modern formats** — images are re-encoded to AVIF/WebP, which are far smaller
+  than JPEG/PNG at the same quality.
+- **Intrinsic dimensions** — width and height are emitted so the browser
+  reserves space and never reflows the page (avoiding CLS).
+- **Lazy loading** — off-screen images defer their download until needed.
+
+## Markdown images (automatic)
+
+Plain Markdown images are run through Astro's image service (modern format,
+intrinsic dimensions to avoid layout shift) and then upgraded to
+`loading="lazy"` + `decoding="async"` automatically:
+
+```md
+![A scenic landscape](../../../assets/sample.jpeg)
+```
+
+![A scenic landscape](../../../assets/sample.jpeg)
+
+## `<DocImage>` (responsive)
+
+For full control, use `<DocImage>`. Local images get a responsive `srcset` and a
+`sizes` hint, so the browser downloads only the resolution it needs:
+
+```mdx
+import sample from '../../../assets/sample.jpeg';
+
+<DocImage
+  src={sample}
+  alt="A scenic landscape"
+  caption="Served as a responsive, format-optimised image."
+/>
+```
+
+<DocImage
+  src={sample}
+  alt="A scenic landscape"
+  caption="Served as a responsive, format-optimised image."
+/>
+
+### Captions and alt text
+
+`caption` renders a visible `<figcaption>`; `alt` is required for accessibility
+and is read by screen readers. Keep `alt` descriptive but concise, and use
+`caption` for supplementary context.
+
+### Prioritising the hero image
+
+<Callout type="tip" title="Above-the-fold images">
+  Pass `priority` to a single hero image to load it eagerly with
+  `fetchpriority="high"`; leave everything else lazy.
+</Callout>
+
+## Remote images
+
+Remote URLs are rendered as plain lazy images. Provide `width` and `height` so
+the browser can reserve space and avoid layout shift:
+
+```mdx
+<DocImage src="https://example.com/diagram.png" alt="…" width={1200} height={630} />
+```
+
+## Checklist
+
+- Always provide meaningful `alt` text.
+- Prefer **local** imports so images get a responsive `srcset`.
+- Set `width`/`height` (or `priority`) on remote and hero images.
+- Don't mark more than one image as `priority` per page.

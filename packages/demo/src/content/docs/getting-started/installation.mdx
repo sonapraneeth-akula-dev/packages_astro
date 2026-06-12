@@ -1,0 +1,99 @@
+---
+title: Installation
+description: Add the engine to a Bun workspace and install dependencies.
+sidebar:
+  order: 1
+---
+
+# Installation
+
+The engine is published as `@grihasetu/notes-core` and is designed for a Bun
+workspace, but works with any package manager.
+
+## Prerequisites
+
+You'll need a recent JavaScript runtime and package manager:
+
+- **Bun** 1.3+ (recommended) or **Node** 20+.
+- A terminal and a code editor (VS Code works great with the Astro extension).
+
+## Add the dependency
+
+<Tabs>
+  <TabItem label="bun">
+    ```bash
+    bun add @grihasetu/notes-core astro
+    bun add -d pagefind @astrojs/check typescript
+    ```
+  </TabItem>
+  <TabItem label="npm">
+    ```bash
+    npm install @grihasetu/notes-core astro
+    npm install -D pagefind @astrojs/check typescript
+    ```
+  </TabItem>
+  <TabItem label="pnpm">
+    ```bash
+    pnpm add @grihasetu/notes-core astro
+    pnpm add -D pagefind @astrojs/check typescript
+    ```
+  </TabItem>
+</Tabs>
+
+### What each dependency does
+
+| Package | Role |
+| --- | --- |
+| `@grihasetu/notes-core` | The engine: components, layouts and config helpers. |
+| `astro` | The static site generator the engine builds on. |
+| `pagefind` | Builds the offline search index from the built HTML. |
+| `@astrojs/check` | Type-checks your `.astro` and `.mdx` files. |
+| `typescript` | Required by `@astrojs/check` and editor tooling. |
+
+## Project layout
+
+A minimal site looks like this:
+
+<FileTree>
+
+- src
+  - content
+    - docs
+      - index.mdx        the landing note
+      - guide.mdx
+  - pages
+    - index.astro
+    - "[...slug].astro"
+    - search.astro
+  - content.config.ts
+  - env.d.ts
+- docs.config.ts
+- astro.config.ts
+
+</FileTree>
+
+<Callout type="note">
+  The landing note (`index.mdx`) is rendered on `/`; every other note is added
+  to the sidebar automatically.
+</Callout>
+
+## Verify the install
+
+Start the dev server and open the printed URL:
+
+```bash
+bun run dev
+```
+
+If you see your landing note rendered with the sidebar, you're ready. If not,
+check the troubleshooting tips below.
+
+### Troubleshooting
+
+<Callout type="warning" title="Bin not found in a workspace">
+  In a hoisted monorepo the per-package `astro` bin shim can be broken. Invoke
+  the binary directly (`bun ../../node_modules/astro/bin/astro.mjs dev`) or run
+  from the repo root with `bun astro dev --root packages/<pkg>`.
+</Callout>
+
+Next: [Configuration](/getting-started/configuration).

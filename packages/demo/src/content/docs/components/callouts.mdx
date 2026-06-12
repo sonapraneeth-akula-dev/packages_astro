@@ -1,0 +1,86 @@
+---
+title: Callouts
+description: Admonition boxes for notes, tips, warnings and more.
+sidebar:
+  order: 1
+---
+
+# Callouts
+
+Use `<Callout>` to draw attention to a piece of information. Callouts (also
+called *admonitions*) break up long prose, flag risks, and guide the reader's
+eye to what matters. Six semantic types ship out of the box.
+
+## The six types
+
+Each type has its own colour, icon and default title, so readers learn to
+recognise them at a glance.
+
+<Callout type="note">A neutral note for general information.</Callout>
+<Callout type="tip" title="Pro tip">Tips highlight a helpful shortcut.</Callout>
+<Callout type="important">Important details you shouldn't miss.</Callout>
+<Callout type="caution">Caution before a potentially risky action.</Callout>
+<Callout type="warning" title="Heads up">Warnings flag breaking behaviour.</Callout>
+<Callout type="danger">Danger marks destructive or irreversible steps.</Callout>
+
+### Choosing the right type
+
+Reach for the weakest type that fits — overusing `danger` or `warning` trains
+readers to ignore them.
+
+| Type | Use it for |
+| --- | --- |
+| `note` | Neutral context or an aside. |
+| `tip` | A shortcut or recommended practice. |
+| `important` | Something easy to miss but not dangerous. |
+| `caution` | A risky action with recoverable consequences. |
+| `warning` | Breaking behaviour or a common pitfall. |
+| `danger` | Destructive or irreversible operations. |
+
+## Usage
+
+The only required prop is `type`. The body is plain MDX, so you can nest lists,
+code and links inside a callout.
+
+```mdx
+<Callout type="tip" title="Pro tip">
+  Tips highlight a helpful shortcut.
+</Callout>
+```
+
+### Custom titles
+
+Pass `title` to override the default heading. Omit it to use the type's name:
+
+```mdx
+<Callout type="warning" title="Heads up">
+  Warnings flag breaking behaviour.
+</Callout>
+```
+
+### Rich content inside callouts
+
+Because the body is MDX, you can include code blocks, lists and inline
+formatting:
+
+<Callout type="note" title="Multi-line note">
+  Callouts can contain **bold text**, `inline code`, and even lists:
+
+  - First point
+  - Second point
+</Callout>
+
+## Accessibility
+
+Callouts use semantic colour *and* an icon plus a text label, so meaning never
+depends on colour alone. Contrast meets WCAG AA in both light and dark themes.
+
+## Site-specific components
+
+You can also surface your own site components — this demo adds a `<Demo>`
+component on top of the shared set:
+
+<Demo label="Site-specific component">
+  This box comes from `packages/demo/src/components/Demo.astro`, merged into the
+  component registry alongside the shared ones.
+</Demo>
