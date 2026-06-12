@@ -281,7 +281,10 @@ const showToc = tableOfContents && headings.length > 0;
     text-align: left;
   }
   .doc-body :global(th) { background: var(--bg-subtle); }
-  .doc-body :global(a) { text-decoration: underline; text-underline-offset: 2px; }
+  /* Underline plain prose links only. Markdown links render without a class,
+     while button/anchor components (LinkButton, .btn, GoPlayground, heading
+     anchors, …) always carry one — so this leaves them untouched. */
+  .doc-body :global(a:not([class])) { text-decoration: underline; text-underline-offset: 2px; }
 
   .doc-body :global(.heading-anchor) {
     display: inline-flex;
