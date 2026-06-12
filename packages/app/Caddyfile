@@ -1,0 +1,43 @@
+# Caddy reverse proxy for the Go Notes app.
+#
+# Local development:
+#   The dev/test/ppe/prod hosts are served over HTTPS with Caddy's internal CA
+#   (`tls internal`). Combined with a hosts-file entry pointing these names at
+#   127.0.1.3 (run `bun run hosts:setup`), you can browse them locally.
+#
+# Production server:
+#   For deployment on a public host with real DNS, remove `tls internal` from
+#   the production block so Caddy automatically provisions and renews HTTPS
+#   certificates via Let's Encrypt — no extra config needed.
+
+{
+	# Set an email to receive ACME/Let's Encrypt expiry notices in production.
+	# email you@example.com
+}
+
+# ─── Development (hot reload) ────────────────────────────────────────────────
+dev.go-notes.sonapraneeth.in {
+	tls internal
+	reverse_proxy dev:4320
+}
+
+# ─── Test (built output) ─────────────────────────────────────────────────────
+test.go-notes.sonapraneeth.in {
+	tls internal
+	reverse_proxy test:4320
+}
+
+# ─── PPE / Pre-production (built output) ─────────────────────────────────────
+ppe.go-notes.sonapraneeth.in {
+	tls internal
+	reverse_proxy ppe:4320
+}
+
+# ─── Production (built output, automatic HTTPS on a public server) ───────────
+# Locally we use 'tls internal' as well. For deployment, remove 'tls internal'
+# so Caddy can automatically provision real public certificates via
+# Let's Encrypt / ZeroSSL.
+go-notes.sonapraneeth.in {
+	tls internal
+	reverse_proxy prod:4320
+}

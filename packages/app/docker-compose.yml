@@ -1,0 +1,141 @@
+# Docker Compose for the Go Notes app (@grihasetu/notes-app).
+#
+# The build context is the MONOREPO ROOT (../..) because the app depends on the
+# @grihasetu/notes-core workspace package. The Dockerfile lives in this package.
+#
+# Environments:
+#   dev   → dev.go-notes.sonapraneeth.in   (live watching + hot reload, source bind-mounted)
+#   test  → test.go-notes.sonapraneeth.in  (built output, used for Lighthouse + screenshots)
+#   ppe   → ppe.go-notes.sonapraneeth.in   (built output, pre-production gate)
+#   prod  → go-notes.sonapraneeth.in       (built output, production)
+#
+# Routing is handled by Caddy. For local testing, add the hostnames to your
+# hosts file pointing at 127.0.1.3 (bun run hosts:setup).
+#
+# Usage (from packages/app):
+#   bun run docker:dev     # development with hot reload
+#   bun run docker:test    # test environment (detached)
+#   bun run docker:ppe     # pre-production (detached)
+#   bun run docker:prod    # production (detached)
+
+name: go-notes
+
+services:
+  # ─── Reverse proxy (Caddy) ─────────────────────────────────────────────────
+  caddy:
+    image: caddy:2.10-alpine
+    container_name: go-notes-caddy
+    restart: unless-stopped
+    ports:
+      - "127.0.1.3:80:80"
+      - "127.0.1.3:443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - web
+
+  # ─── Development (hot reload) ──────────────────────────────────────────────
+  dev:
+    build:
+      context: ../..
+      dockerfile: packages/app/Dockerfile
+      target: dev
+    container_name: go-notes-dev
+    restart: unless-stopped
+    environment:
+      - PUBLIC_APP_ENV=dev
+      - PUBLIC_SITE_URL=https://dev.go-notes.sonapraneeth.in
+      # Bind-mounted host files don't forward inotify events into the container
+      # on Windows/macOS, so use polling to make HMR pick up live edits.
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      # Bind-mount the workspace for live watching; keep the container's
+      # node_modules and built dist.
+      - ../../:/app
+      - /app/node_modules
+      - /app/packages/app/dist
+    depends_on:
+      - caddy
+    networks:
+      - web
+    expose:
+      - "4320"
+
+  # ─── Test (built output) ───────────────────────────────────────────────────
+  test:
+    build:
+      context: ../..
+      dockerfile: packages/app/Dockerfile
+      target: runtime
+      args:
+        PUBLIC_APP_ENV: test
+        PUBLIC_SITE_URL: https://test.go-notes.sonapraneeth.in
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
+        GIT_BRANCH: ${GIT_BRANCH:-unknown}
+    container_name: go-notes-test
+    restart: unless-stopped
+    environment:
+      - PUBLIC_APP_ENV=test
+      - PUBLIC_SITE_URL=https://test.go-notes.sonapraneeth.in
+    depends_on:
+      - caddy
+    networks:
+      - web
+    expose:
+      - "4320"
+
+  # ─── PPE / Pre-production (built output) ───────────────────────────────────
+  ppe:
+    build:
+      context: ../..
+      dockerfile: packages/app/Dockerfile
+      target: runtime
+      args:
+        PUBLIC_APP_ENV: ppe
+        PUBLIC_SITE_URL: https://ppe.go-notes.sonapraneeth.in
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
+        GIT_BRANCH: ${GIT_BRANCH:-unknown}
+    container_name: go-notes-ppe
+    restart: unless-stopped
+    environment:
+      - PUBLIC_APP_ENV=ppe
+      - PUBLIC_SITE_URL=https://ppe.go-notes.sonapraneeth.in
+    depends_on:
+      - caddy
+    networks:
+      - web
+    expose:
+      - "4320"
+
+  # ─── Production (built output) ─────────────────────────────────────────────
+  prod:
+    build:
+      context: ../..
+      dockerfile: packages/app/Dockerfile
+      target: runtime
+      args:
+        PUBLIC_APP_ENV: prod
+        PUBLIC_SITE_URL: https://go-notes.sonapraneeth.in
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
+        GIT_BRANCH: ${GIT_BRANCH:-unknown}
+    container_name: go-notes-prod
+    restart: unless-stopped
+    environment:
+      - PUBLIC_APP_ENV=prod
+      - PUBLIC_SITE_URL=https://go-notes.sonapraneeth.in
+    depends_on:
+      - caddy
+    networks:
+      - web
+    expose:
+      - "4320"
+
+networks:
+  web:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
