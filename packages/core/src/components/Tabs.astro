@@ -1,0 +1,174 @@
+---
+/**
+ * Synced tabbed panels for MDX. Tabs in different groups that share the same
+ * `syncKey` switch together, and the choice is remembered via localStorage.
+ *
+ *   import { Tabs, TabItem } from '@grihasetu/notes-core/components/mdx';
+ *   <Tabs syncKey="pkg">
+ *     <TabItem label="bun">```sh\nbun add astro\n```</TabItem>
+ *     <TabItem label="npm">```sh\nnpm i astro\n```</TabItem>
+ *   </Tabs>
+ */
+interface Props {
+  syncKey?: string;
+}
+const { syncKey } = Astro.props;
+---
+
+<docs-tabs class="tabs" data-sync-key={syncKey}>
+  <div class="tablist" role="tablist"></div>
+  <div class="tab-panels"><slot /></div>
+</docs-tabs>
+
+<script>
+  class DocsTabs extends HTMLElement {
+    connectedCallback() {
+      const syncKey = this.dataset.syncKey || '';
+      const panels = Array.from(
+        this.querySelectorAll<HTMLElement>(':scope > .tab-panels > .tab-panel'),
+      );
+      if (panels.length === 0) return;
+
+      const tablist = this.querySelector<HTMLElement>('.tablist');
+      if (!tablist) return;
+
+      const uid = Math.random().toString(36).slice(2, 8);
+      const tabs: HTMLButtonElement[] = [];
+
+      panels.forEach((panel, i) => {
+        const label = panel.dataset.label || `Tab ${i + 1}`;
+        const icon = panel.dataset.icon || '';
+        const tabId = `tab-${uid}-${i}`;
+        const panelId = `panel-${uid}-${i}`;
+        panel.id = panelId;
+        panel.setAttribute('role', 'tabpanel');
+        panel.setAttribute('aria-labelledby', tabId);
+        panel.dataset.tabLabel = label;
+
+        const btn = document.createElement('button');
+        btn.className = 'tab';
+        btn.id = tabId;
+        btn.type = 'button';
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-controls', panelId);
+        btn.dataset.label = label;
+        btn.innerHTML = (icon ? `<span class="tab-icon" aria-hidden="true">${icon}</span>` : '') + `<span>${label}</span>`;
+        btn.addEventListener('click', () => this.select(label, true));
+        btn.addEventListener('keydown', (e) => this.onKey(e, i));
+        tablist.appendChild(btn);
+        tabs.push(btn);
+      });
+
+      this._tabs = tabs;
+      this._panels = panels;
+      this._syncKey = syncKey;
+
+      const stored = syncKey ? localStorage.getItem(`tabs:${syncKey}`) : null;
+      const initial =
+        (stored && panels.find((p) => p.dataset.label === stored)?.dataset.label) ||
+        panels[0].dataset.label!;
+      this.select(initial, false);
+
+      if (syncKey) {
+        document.addEventListener('docs-tabs:sync', (e: Event) => {
+          const detail = (e as CustomEvent).detail;
+          if (detail.key === syncKey && detail.source !== this) {
+            this.select(detail.label, false);
+          }
+        });
+      }
+    }
+
+    private _tabs: HTMLButtonElement[] = [];
+    private _panels: HTMLElement[] = [];
+    private _syncKey = '';
+
+    select(label: string, broadcast: boolean) {
+      let matched = false;
+      this._panels.forEach((panel) => {
+        const isActive = panel.dataset.label === label;
+        panel.hidden = !isActive;
+        if (isActive) matched = true;
+      });
+      if (!matched) return;
+
+      this._tabs.forEach((tab) => {
+        const isActive = tab.dataset.label === label;
+        tab.setAttribute('aria-selected', String(isActive));
+        tab.tabIndex = isActive ? 0 : -1;
+        tab.classList.toggle('active', isActive);
+      });
+
+      if (broadcast && this._syncKey) {
+        localStorage.setItem(`tabs:${this._syncKey}`, label);
+        document.dispatchEvent(
+          new CustomEvent('docs-tabs:sync', {
+            detail: { key: this._syncKey, label, source: this },
+          }),
+        );
+      }
+    }
+
+    private onKey(e: KeyboardEvent, index: number) {
+      const tabs = this._tabs;
+      let next = index;
+      if (e.key === 'ArrowRight') next = (index + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = tabs.length - 1;
+      else return;
+      e.preventDefault();
+      const label = tabs[next].dataset.label!;
+      this.select(label, true);
+      tabs[next].focus();
+    }
+  }
+
+  if (!customElements.get('docs-tabs')) {
+    customElements.define('docs-tabs', DocsTabs);
+  }
+</script>
+
+<style>
+  .tabs {
+    display: block;
+    margin: 1.5rem 0;
+  }
+
+  :global(.tabs .tablist) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  :global(.tabs .tab) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  :global(.tabs .tab:hover) { color: var(--text); }
+  :global(.tabs .tab.active) {
+    color: var(--accent-text);
+    border-bottom-color: var(--accent);
+  }
+  :global(.tabs .tab-icon) { display: inline-flex; }
+
+  .tab-panels { display: block; }
+  .tab-panel { display: block; }
+
+  .tab-panel:not(:first-child) { display: none; }
+  .tab-panel[hidden] { display: none !important; }
+  .tab-panel:not([hidden]) { display: block; }
+</style>

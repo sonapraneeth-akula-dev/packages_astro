@@ -1,0 +1,145 @@
+---
+/**
+ * Recursive renderer for the left navigation. Groups use native <details> so
+ * folding works without JavaScript and is keyboard accessible. Ancestors of the
+ * active page are expanded on load. Supports arbitrarily deep nesting (the docs
+ * engine guarantees up to six levels).
+ */
+import type { SidebarNode } from '../utils/docs';
+import SidebarTree from './SidebarTree.astro';
+
+interface Props {
+  items: SidebarNode[];
+  currentPath: string;
+  depth?: number;
+}
+
+const { items, currentPath, depth = 1 } = Astro.props;
+
+function trimSlash(p: string): string {
+  return p.length > 1 && p.endsWith('/') ? p.slice(0, -1) : p;
+}
+const current = trimSlash(currentPath);
+
+function isActive(href: string | undefined): boolean {
+  return !!href && trimSlash(href) === current;
+}
+
+function containsActive(node: SidebarNode): boolean {
+  if (node.type === 'doc') return isActive(node.href);
+  if (isActive(node.href)) return true;
+  return node.items.some(containsActive);
+}
+---
+
+<ul class="st" data-depth={depth}>
+  {items.map((node) =>
+    node.type === 'group' ? (
+      <li class="st-group">
+        <details open={containsActive(node)}>
+          <summary class="st-summary">
+            <svg class="st-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            {node.href ? (
+              <a
+                href={node.href}
+                class:list={['st-grouplink', { active: isActive(node.href) }]}
+                aria-current={isActive(node.href) ? 'page' : undefined}
+              >{node.label}</a>
+            ) : (
+              <span class="st-grouplabel">{node.label}</span>
+            )}
+            {node.badge && <span class="st-badge">{node.badge}</span>}
+          </summary>
+          <SidebarTree items={node.items} currentPath={currentPath} depth={depth + 1} />
+        </details>
+      </li>
+    ) : (
+      <li class="st-leaf">
+        <a
+          href={node.href}
+          class:list={['st-link', { active: isActive(node.href) }]}
+          aria-current={isActive(node.href) ? 'page' : undefined}
+          target={node.isExternal ? '_blank' : undefined}
+          rel={node.isExternal ? 'noopener noreferrer' : undefined}
+        >
+          <span>{node.label}</span>
+          {node.badge && <span class="st-badge">{node.badge}</span>}
+        </a>
+      </li>
+    ),
+  )}
+</ul>
+
+<style>
+  .st {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+  /* Each nested level indents and gains a guide rail. */
+  .st .st {
+    margin-left: 0.5rem;
+    padding-left: 0.6rem;
+    border-left: 1px solid var(--border);
+  }
+
+  .st-link,
+  .st-grouplink,
+  .st-grouplabel {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.32rem 0.5rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    line-height: 1.35;
+    font-weight: 500;
+  }
+  .st-link:hover,
+  .st-grouplink:hover {
+    color: var(--text);
+    background: var(--bg-subtle);
+  }
+  .st-link.active,
+  .st-grouplink.active {
+    color: var(--accent-text);
+    background: var(--accent-soft);
+    font-weight: 700;
+  }
+
+  details > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    border-radius: var(--radius-sm);
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary:hover { background: var(--bg-subtle); }
+  .st-summary .st-grouplink,
+  .st-summary .st-grouplabel { flex: 1; }
+  .st-grouplabel { font-weight: 700; color: var(--text); cursor: pointer; }
+
+  .st-caret {
+    flex: none;
+    color: var(--text-muted);
+    transition: transform 0.18s ease;
+  }
+  details[open] > summary .st-caret { transform: rotate(90deg); }
+
+  .st-badge {
+    flex: none;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0.05rem 0.35rem;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+  }
+</style>

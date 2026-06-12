@@ -1,0 +1,49 @@
+---
+/**
+ * Small inline label for statuses, categories or versions. Accepts any extra
+ * <span> attributes (class, style, …).
+ *
+ *   <Badge text="New" variant="success" />
+ *   <Badge text="Beta" variant="caution" size="large" />
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Variant = 'note' | 'tip' | 'caution' | 'danger' | 'success' | 'default';
+type Size = 'small' | 'medium' | 'large';
+
+interface Props extends Omit<HTMLAttributes<'span'>, 'size'> {
+  text: string;
+  variant?: Variant;
+  size?: Size;
+}
+
+const { text, variant = 'default', size = 'small', class: className, ...attrs } = Astro.props;
+---
+
+<span class:list={['badge', `badge--${variant}`, `badge--${size}`, className]} {...attrs}>{text}</span>
+
+<style>
+  .badge {
+    --c: var(--accent);
+    display: inline-block;
+    border: 1px solid color-mix(in srgb, var(--c) 35%, transparent);
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--c) 14%, var(--surface));
+    color: color-mix(in srgb, var(--c) 75%, var(--text));
+    font-family: var(--font-sans);
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .badge--default { --c: var(--accent); }
+  .badge--note { --c: #3b82f6; }
+  .badge--tip { --c: #8b5cf6; }
+  .badge--success { --c: #10b981; }
+  .badge--caution { --c: #f59e0b; }
+  .badge--danger { --c: #ef4444; }
+
+  .badge--small { padding: 0.05rem 0.5rem; font-size: 0.75rem; }
+  .badge--medium { padding: 0.15rem 0.6rem; font-size: 0.85rem; }
+  .badge--large { padding: 0.25rem 0.7rem; font-size: 0.95rem; }
+</style>

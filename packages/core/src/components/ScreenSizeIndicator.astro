@@ -1,0 +1,93 @@
+---
+// Dev-only screen-size indicator. Renders a small fixed badge showing the live
+// viewport size, the active named breakpoint and the resolved --container width.
+// Never shown in production.
+const appEnv = __APP_ENV__;
+const show = appEnv !== 'prod';
+---
+
+{
+  show && (
+    <div id="screen-size-indicator" aria-hidden="true">
+      <span class="ssi-size" data-ssi-size>—</span>
+      <span class="ssi-tier" data-ssi-tier>—</span>
+    </div>
+  )
+}
+
+{show && (
+  <script>
+    const tiers = [
+      { name: 'Small Mobile', max: 360 },
+      { name: 'Big Mobile', max: 480 },
+      { name: 'Small Tablet', max: 768 },
+      { name: 'Big Tablet', max: 1024 },
+      { name: 'Small Laptop', max: 1280 },
+      { name: 'Big Laptop', max: 1440 },
+      { name: 'Desktop', max: 1920 },
+      { name: 'Ultra HD', max: 2560 },
+      { name: '4K Display', max: 3840 },
+      { name: '8K Display', max: Infinity },
+    ];
+
+    const sizeEl = document.querySelector('[data-ssi-size]');
+    const tierEl = document.querySelector('[data-ssi-tier]');
+
+    function update() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      let lower = 0;
+      let active = tiers[tiers.length - 1];
+      for (const tier of tiers) {
+        if (w <= tier.max) {
+          active = tier;
+          break;
+        }
+        lower = tier.max + 1;
+      }
+      const range =
+        active.max === Infinity ? `≥ ${lower}px` : `${lower}–${active.max}px`;
+      const container = getComputedStyle(document.documentElement)
+        .getPropertyValue('--container')
+        .trim();
+
+      if (sizeEl) sizeEl.textContent = `${w} × ${h}px`;
+      if (tierEl)
+        tierEl.textContent =
+          `${active.name} · ${range}` + (container ? ` · ${container}` : '');
+    }
+
+    update();
+    window.addEventListener('resize', update, { passive: true });
+  </script>
+)}
+
+<style>
+  #screen-size-indicator {
+    position: fixed;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.25;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    opacity: 0.85;
+    pointer-events: none;
+    user-select: none;
+  }
+  .ssi-size {
+    font-weight: 700;
+  }
+  .ssi-tier {
+    color: var(--text-muted);
+  }
+</style>

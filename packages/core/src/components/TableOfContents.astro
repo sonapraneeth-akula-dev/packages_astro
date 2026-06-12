@@ -1,0 +1,122 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+const { headings } = Astro.props;
+
+// Surface h2–h4 in the "On this page" rail.
+const items = headings.filter((h) => h.depth >= 2 && h.depth <= 4);
+
+// Track each heading's nearest shallower parent so an active sub-heading also
+// lights up its ancestor line in the rail.
+const parentOf = new Map<string, string>();
+const stack: { depth: number; slug: string }[] = [];
+for (const h of items) {
+  while (stack.length && stack[stack.length - 1].depth >= h.depth) stack.pop();
+  if (stack.length) parentOf.set(h.slug, stack[stack.length - 1].slug);
+  stack.push({ depth: h.depth, slug: h.slug });
+}
+---
+
+{items.length > 0 && (
+  <nav class="toc" aria-labelledby="toc-title">
+    <p class="toc-title" id="toc-title">On this page</p>
+    <ul>
+      {items.map((h) => (
+        <li class:list={[`toc-l${h.depth}`]}>
+          <a
+            href={`#${h.slug}`}
+            data-toc-link={h.slug}
+            data-toc-parent={parentOf.get(h.slug)}
+          >{h.text}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<script>
+  const links = Array.from(
+    document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'),
+  );
+  if (links.length) {
+    const byId = new Map(links.map((l) => [l.dataset.tocLink!, l]));
+    const headings = links
+      .map((l) => document.getElementById(l.dataset.tocLink!))
+      .filter((el): el is HTMLElement => el !== null);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            links.forEach((l) => l.classList.remove('active', 'parent-active'));
+            const active = byId.get(entry.target.id);
+            active?.classList.add('active');
+            let parentId = active?.dataset.tocParent;
+            // Walk up the ancestor chain so every parent line stays highlighted.
+            while (parentId) {
+              const parent = byId.get(parentId);
+              parent?.classList.add('parent-active');
+              parentId = parent?.dataset.tocParent;
+            }
+          }
+        }
+      },
+      { rootMargin: '-80px 0px -70% 0px', threshold: 0 },
+    );
+    headings.forEach((h) => observer.observe(h));
+  }
+</script>
+
+<style>
+  .toc {
+    border-left: 2px solid var(--border);
+    padding-left: 1rem;
+    font-size: 0.88rem;
+  }
+  .toc-title {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.75rem;
+  }
+  .toc ul { list-style: none; margin: 0; padding: 0; }
+  .toc li { margin: 0; }
+  .toc-l3 { padding-left: 0.85rem; }
+  .toc-l4 { padding-left: 1.7rem; }
+  .toc a {
+    display: block;
+    padding: 0.3rem 0;
+    color: var(--text-muted);
+    line-height: 1.35;
+    border-left: 2px solid transparent;
+    margin-left: -1rem;
+    padding-left: 1rem;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .toc a:hover { color: var(--text); }
+  .toc a.active,
+  .toc a.parent-active {
+    color: var(--accent-text);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  @media (max-width: 60rem) {
+    .toc {
+      border-left: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+    }
+    .toc a { margin-left: 0; padding-left: 0.5rem; border-left: none; }
+    .toc a.active,
+    .toc a.parent-active { border-left: none; }
+  }
+</style>

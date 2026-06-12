@@ -1,0 +1,33 @@
+{
+  "name": "@grihasetu/notes-core",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared docs/notes engine for Astro + MDX: components, layouts, sidebar generation, config schema and an Astro config factory.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./content": "./src/content.ts",
+    "./config": "./src/config.ts",
+    "./schema": "./src/schema.ts",
+    "./astro": "./src/astro-config.ts",
+    "./styles/global.css": "./src/styles/global.css",
+    "./components/mdx": "./src/components/mdx.ts",
+    "./components/icons": "./src/components/icons.ts",
+    "./components/*": "./src/components/*",
+    "./layouts/*": "./src/layouts/*",
+    "./utils/*": "./src/utils/*"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.2.0",
+    "@astrojs/mdx": "^6.0.3",
+    "@astrojs/sitemap": "^3.7.3",
+    "@expressive-code/plugin-line-numbers": "^0.43.1",
+    "astro": "^6.4.6",
+    "astro-expressive-code": "^0.43.1",
+    "rehype-autolink-headings": "^7.1.0",
+    "rehype-slug": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "typescript": "^6.0.3"
+  }
+}

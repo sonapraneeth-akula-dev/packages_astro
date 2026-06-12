@@ -1,0 +1,75 @@
+---
+/**
+ * Prominent clickable card linking to another page. Accepts any extra <a>
+ * attributes (e.g. target, rel).
+ *
+ *   <LinkCard title="Theming" href="/basics/theming/"
+ *     description="How the design tokens fit together." />
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'title'> {
+  title: string;
+  href: string;
+  description?: string;
+}
+
+const { title, href, description, ...attrs } = Astro.props;
+---
+
+<div class="link-card">
+  <a href={href} {...attrs}>
+    <span class="link-card-title">
+      <span>{title}</span>
+      <svg class="link-card-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </span>
+    {description && <span class="link-card-desc">{description}</span>}
+  </a>
+</div>
+
+<style>
+  .link-card {
+    margin: 1rem 0;
+  }
+  .link-card a {
+    display: block;
+    padding: 1.1rem 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    text-decoration: none;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .link-card a:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.07);
+  }
+  .link-card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--accent-text);
+  }
+  .link-card-arrow {
+    flex: none;
+    transition: transform 0.2s ease;
+  }
+  .link-card a:hover .link-card-arrow {
+    transform: translateX(3px);
+  }
+  .link-card-desc {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+</style>

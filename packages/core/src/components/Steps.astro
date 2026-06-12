@@ -1,0 +1,60 @@
+---
+/**
+ * Numbered step-by-step guide. Wrap a standard Markdown ordered list — each
+ * top-level item becomes a numbered step with a connecting rail.
+ *
+ *   <Steps>
+ *
+ *   1. Install the dependency.
+ *   2. Import the component.
+ *   3. Render it.
+ *
+ *   </Steps>
+ */
+---
+
+<div class="steps"><slot /></div>
+
+<style>
+  .steps :global(ol) {
+    counter-reset: step;
+    list-style: none;
+    margin: 1.5rem 0;
+    padding-left: 0;
+    --step-marker: 1.75rem;
+  }
+  .steps :global(ol > li) {
+    counter-increment: step;
+    position: relative;
+    padding-left: calc(var(--step-marker) + 1rem);
+    padding-bottom: 1.25rem;
+  }
+  .steps :global(ol > li)::before {
+    content: counter(step);
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    display: grid;
+    place-items: center;
+    width: var(--step-marker);
+    height: var(--step-marker);
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-contrast);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .steps :global(ol > li)::after {
+    content: '';
+    position: absolute;
+    inset-block: var(--step-marker) 0;
+    inset-inline-start: calc(var(--step-marker) / 2);
+    width: 1px;
+    background: var(--border);
+    transform: translateX(-0.5px);
+  }
+  .steps :global(ol > li:last-child)::after { display: none; }
+  .steps :global(ol > li > :first-child) { margin-top: 0.2rem; }
+  .steps :global(ol > li > :last-child) { margin-bottom: 0; }
+</style>

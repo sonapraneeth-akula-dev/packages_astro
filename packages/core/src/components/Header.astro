@@ -1,0 +1,223 @@
+---
+import type { DocsConfig } from '../config';
+
+interface Props {
+  config: DocsConfig;
+}
+const { config } = Astro.props;
+
+const path = Astro.url.pathname;
+function isActive(href: string) {
+  if (href === '/') return path === '/';
+  return path === href || path.startsWith(`${href}/`);
+}
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="brand">
+      {config.brand}<span class="accent-dot">.</span>
+    </a>
+
+    <div class="nav-container">
+      <nav aria-label="Primary">
+        <ul>
+          {config.nav.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                aria-current={isActive(link.href) ? 'page' : undefined}
+                class:list={['nav-link', { active: isActive(link.href) }]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <button id="theme-toggle" class="theme-btn" aria-label="Toggle color theme">
+        <svg class="icon-system" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+          <line x1="8" y1="21" x2="16" y2="21"></line>
+          <line x1="12" y1="17" x2="12" y2="21"></line>
+        </svg>
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="bottom-nav" aria-label="Primary">
+  <ul>
+    {config.nav.map((link) => (
+      <li>
+        <a
+          href={link.href}
+          aria-current={isActive(link.href) ? 'page' : undefined}
+          class:list={['bottom-link', { active: isActive(link.href) }]}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <Fragment set:html={link.icon} />
+          </svg>
+          <span>{link.label}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<script>
+  // Theme cycle: system → light → dark → system
+  const CYCLE = ['system', 'light', 'dark'] as const;
+  type Theme = (typeof CYCLE)[number];
+
+  const toggleBtn = document.getElementById('theme-toggle');
+
+  function getStoredTheme(): Theme {
+    const stored = typeof localStorage !== 'undefined' && localStorage.getItem('theme');
+    if (stored === 'light' || stored === 'dark') return stored;
+    return 'system';
+  }
+
+  function applyTheme(theme: Theme) {
+    if (theme === 'system') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  }
+
+  let currentTheme = getStoredTheme();
+
+  toggleBtn?.addEventListener('click', () => {
+    currentTheme = CYCLE[(CYCLE.indexOf(currentTheme) + 1) % CYCLE.length];
+    applyTheme(currentTheme);
+    if (currentTheme === 'system') localStorage.removeItem('theme');
+    else localStorage.setItem('theme', currentTheme);
+  });
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 4.25rem;
+  }
+  .brand {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1.25rem;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+  .brand:hover { color: var(--text); }
+  .accent-dot { color: var(--accent); }
+
+  .nav-container { display: flex; align-items: center; gap: 1.25rem; }
+  nav ul {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nav-link {
+    display: inline-block;
+    padding: 0.45rem 0.8rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.15s ease;
+  }
+  .nav-link:hover { color: var(--text); background: var(--bg-subtle); }
+  .nav-link.active { color: var(--accent-text); background: var(--accent-soft); }
+
+  .theme-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .theme-btn:hover { color: var(--text); border-color: var(--border-hover); background: var(--bg-subtle); }
+  .theme-btn svg { transition: transform 0.25s ease; }
+  .theme-btn:hover svg { transform: rotate(15deg); }
+
+  .icon-sun, .icon-moon, .icon-system { display: none; }
+  :global(html:not([data-theme])) .icon-system { display: block; }
+  :global(html[data-theme="light"]) .icon-sun { display: block; }
+  :global(html[data-theme="dark"]) .icon-moon { display: block; }
+
+  /* Mobile bottom tab bar */
+  .bottom-nav { display: none; }
+
+  @media (max-width: 40rem) {
+    .site-header nav { display: none; }
+
+    .bottom-nav {
+      display: block;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 100;
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .bottom-nav ul {
+      display: flex;
+      justify-content: space-around;
+      align-items: stretch;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .bottom-nav li { flex: 1; }
+    .bottom-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.15rem;
+      min-height: 3.75rem;
+      padding: 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .bottom-link.active { color: var(--accent-text); }
+  }
+</style>

@@ -1,0 +1,19 @@
+---
+/**
+ * Default replacement for the Markdown `![alt](src)` image element. Astro has
+ * already optimised relative images (modern format + intrinsic width/height) by
+ * the time they reach here; this wrapper just adds `loading="lazy"` and
+ * `decoding="async"` so off-screen images never block rendering, keeping
+ * Lighthouse performance scores high. It is auto-mapped to `img` via mdx.ts.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'img'> {
+  src: string;
+  alt?: string;
+}
+
+const { src, alt = '', loading = 'lazy', decoding = 'async', ...rest } = Astro.props;
+---
+
+<img src={src} alt={alt} loading={loading} decoding={decoding} {...rest} />

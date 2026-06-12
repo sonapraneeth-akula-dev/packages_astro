@@ -1,0 +1,13 @@
+---
+/** A single panel inside <Tabs>. `label` is the tab caption and the sync token. */
+interface Props {
+  label: string;
+  /** Optional inline HTML/emoji shown before the label. */
+  icon?: string;
+}
+const { label, icon } = Astro.props;
+---
+
+<div class="tab-panel" data-label={label} data-icon={icon}>
+  <slot />
+</div>

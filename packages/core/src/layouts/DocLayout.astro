@@ -1,0 +1,388 @@
+---
+import type { MarkdownHeading } from 'astro';
+import BaseLayout from './BaseLayout.astro';
+import DocsSidebar from '../components/DocsSidebar.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import ProgressBar from '../components/ProgressBar.astro';
+import Icon from '../components/Icon.astro';
+import { formatDateTime } from '../utils/format';
+import type { DocsConfig } from '../config';
+import type { SidebarNode, DocLink, Breadcrumb } from '../utils/docs';
+
+interface Props {
+  config: DocsConfig;
+  title: string;
+  description?: string;
+  headings: MarkdownHeading[];
+  tree: SidebarNode[];
+  breadcrumbs: Breadcrumb[];
+  prev?: DocLink;
+  next?: DocLink;
+  readingTime?: string;
+  lastUpdated?: Date;
+  editUrl?: string;
+  cover?: string;
+  tableOfContents?: boolean;
+}
+
+const {
+  config,
+  title,
+  description,
+  headings,
+  tree,
+  breadcrumbs,
+  prev,
+  next,
+  readingTime,
+  lastUpdated,
+  editUrl,
+  cover,
+  tableOfContents = true,
+} = Astro.props;
+
+const currentPath = Astro.url.pathname;
+const showToc = tableOfContents && headings.length > 0;
+---
+
+<BaseLayout config={config} title={title} description={description} article>
+  <ProgressBar />
+  <div class="docs container">
+    <DocsSidebar tree={tree} currentPath={currentPath} label={config.subject} />
+
+    <article class="doc" data-pagefind-body>
+      <header class="doc-head">
+        <nav class="crumbs" aria-label="Breadcrumb">
+          {breadcrumbs.map((crumb, i) => (
+            <>
+              {i > 0 && <span aria-hidden="true">/</span>}
+              {crumb.href ? <a href={crumb.href}>{crumb.label}</a> : <span>{crumb.label}</span>}
+            </>
+          ))}
+        </nav>
+        <h1>{cover && <span class="doc-cover" aria-hidden="true">{cover} </span>}{title}</h1>
+        {description && <p class="doc-lede">{description}</p>}
+        {(readingTime || lastUpdated) && (
+          <div class="doc-meta">
+            {lastUpdated && (
+              <span class="meta-item">
+                <span class="meta-label">Updated</span>
+                <time datetime={lastUpdated.toISOString()}>
+                  {formatDateTime(lastUpdated, config.timeZone, config.timeZoneLabel)}
+                </time>
+              </span>
+            )}
+            {readingTime && lastUpdated && <span class="dot" aria-hidden="true">·</span>}
+            {readingTime && <span>{readingTime}</span>}
+          </div>
+        )}
+        <div class="doc-actions" data-pagefind-ignore>
+          <button type="button" class="ghost-btn" data-print-doc>
+            <Icon name="printer" /><span>Print / Save as PDF</span>
+          </button>
+          {editUrl && (
+            <a class="ghost-btn" href={editUrl} target="_blank" rel="noopener">
+              <Icon name="pencil" /><span>Edit this page</span>
+            </a>
+          )}
+        </div>
+      </header>
+
+      <div class="doc-grid">
+        <div class="doc-body">
+          <slot />
+        </div>
+        {showToc && (
+          <aside class="doc-aside" data-pagefind-ignore>
+            <TableOfContents headings={headings} />
+          </aside>
+        )}
+      </div>
+
+      {(prev || next) && (
+        <nav class="doc-nav" aria-label="Pagination" data-pagefind-ignore>
+          {prev ? (
+            <a class="doc-nav-link prev" href={prev.href} rel="prev">
+              <span class="doc-nav-dir">← Previous</span>
+              <span class="doc-nav-title">{prev.label}</span>
+            </a>
+          ) : (
+            <span class="doc-nav-spacer"></span>
+          )}
+          {next ? (
+            <a class="doc-nav-link next" href={next.href} rel="next">
+              <span class="doc-nav-dir">Next →</span>
+              <span class="doc-nav-title">{next.label}</span>
+            </a>
+          ) : (
+            <span class="doc-nav-spacer"></span>
+          )}
+        </nav>
+      )}
+    </article>
+  </div>
+</BaseLayout>
+
+<script>
+  document
+    .querySelector('[data-print-doc]')
+    ?.addEventListener('click', () => window.print());
+</script>
+
+<style>
+  /* Three columns on desktop: nav sidebar · article · on-this-page TOC. */
+  .docs {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    gap: 2.5rem;
+    padding-block: 2.5rem 4rem;
+    align-items: start;
+  }
+  .doc { min-width: 0; padding-block: 0; }
+
+  .crumbs {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+  .crumbs a { color: var(--text-muted); font-weight: 600; }
+  .crumbs a:hover { color: var(--accent-text); }
+
+  .doc-head { max-width: 48rem; }
+  .doc-head h1 { margin: 0 0 0.75rem; }
+  .doc-cover { font-size: 1.1em; }
+  .doc-lede {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    margin: 0 0 1rem;
+  }
+  .doc-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .doc-meta time { font-family: var(--font-mono); }
+  .dot { opacity: 0.5; }
+  .meta-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .meta-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent-text);
+  }
+
+  .doc-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+  }
+  .ghost-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+  .ghost-btn:hover {
+    border-color: var(--border-hover);
+    color: var(--accent-text);
+    transform: translateY(-1px);
+  }
+
+  .doc-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 16rem;
+    gap: 3.5rem;
+    margin-top: 2.5rem;
+    align-items: start;
+  }
+  .doc-aside { position: sticky; top: 5.5rem; }
+
+  /* Tablet: drop the on-this-page TOC into a single column. */
+  @media (max-width: 75rem) {
+    .doc-grid { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+    .doc-aside { position: static; order: -1; }
+  }
+
+  /* Mobile: the nav sidebar becomes a collapsible drawer (handled inside
+     DocsSidebar), so the page is a single column. */
+  @media (max-width: 60rem) {
+    .docs { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  }
+
+  /* Prose */
+  .doc-body { font-size: 1.05rem; }
+  .doc-body :global(p),
+  .doc-body :global(ul),
+  .doc-body :global(ol),
+  .doc-body :global(blockquote),
+  .doc-body :global(h2),
+  .doc-body :global(h3),
+  .doc-body :global(h4) { max-width: 48rem; }
+  .doc-body :global(h2) {
+    margin-top: 2.75rem;
+    padding-top: 0.5rem;
+    scroll-margin-top: 5.5rem;
+  }
+  .doc-body :global(h3) { margin-top: 2rem; scroll-margin-top: 5.5rem; }
+  .doc-body :global(h4) { margin-top: 1.5rem; scroll-margin-top: 5.5rem; }
+  .doc-body :global(p),
+  .doc-body :global(ul),
+  .doc-body :global(ol) { margin-block: 1rem; }
+  .doc-body :global(ul),
+  .doc-body :global(ol) { padding-left: 1.4rem; }
+  .doc-body :global(li) { margin-block: 0.35rem; }
+  .doc-body :global(img) {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .doc-body :global(hr) {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2.5rem 0;
+  }
+  .doc-body :global(blockquote) {
+    margin: 1.5rem 0;
+    padding: 0.75rem 1.25rem;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    color: var(--text-muted);
+  }
+  .doc-body :global(blockquote p:last-child) { margin-bottom: 0; }
+  .doc-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+  }
+  .doc-body :global(th),
+  .doc-body :global(td) {
+    border: 1px solid var(--border);
+    padding: 0.6rem 0.85rem;
+    text-align: left;
+  }
+  .doc-body :global(th) { background: var(--bg-subtle); }
+  .doc-body :global(a) { text-decoration: underline; text-underline-offset: 2px; }
+
+  .doc-body :global(.heading-anchor) {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+    opacity: 0;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: opacity 0.15s ease, color 0.15s ease;
+  }
+  .doc-body :global(.heading-anchor:hover) { color: var(--accent-text); }
+  .doc-body :global(h2:hover .heading-anchor),
+  .doc-body :global(h3:hover .heading-anchor),
+  .doc-body :global(h4:hover .heading-anchor) { opacity: 1; }
+
+  /* Previous / next navigation */
+  .doc-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .doc-nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    text-decoration: none;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .doc-nav-link:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  }
+  .doc-nav-link.next { text-align: right; align-items: flex-end; }
+  .doc-nav-link.prev:hover { transform: translateX(-2px); }
+  .doc-nav-link.next:hover { transform: translateX(2px); }
+  .doc-nav-dir {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent-text);
+  }
+  .doc-nav-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .doc-nav-spacer { display: none; }
+
+  @media (max-width: 40rem) {
+    .doc-nav { grid-template-columns: 1fr; }
+    .doc-nav-link.next { text-align: left; align-items: flex-start; }
+  }
+
+  @media (min-width: 100rem) {
+    .doc-grid { grid-template-columns: minmax(0, 1fr) 18rem; gap: 4.5rem; }
+  }
+
+  /* Print / Save as PDF */
+  @media print {
+    .docs {
+      display: block;
+      padding: 0;
+    }
+    :global(.docs-sidebar),
+    .crumbs,
+    .doc-lede,
+    .doc-actions,
+    .doc-nav { display: none !important; }
+    .doc-grid {
+      display: flex;
+      flex-direction: column;
+      margin-top: 1.5rem;
+    }
+    .doc-aside {
+      order: -1;
+      position: static;
+      margin-bottom: 2rem;
+      break-inside: avoid;
+    }
+    .doc-body { font-size: 11pt; }
+    .doc-body :global(p),
+    .doc-body :global(ul),
+    .doc-body :global(ol),
+    .doc-body :global(blockquote),
+    .doc-body :global(h2),
+    .doc-body :global(h3),
+    .doc-body :global(h4) { max-width: none; }
+    .doc-body :global(h2),
+    .doc-body :global(h3) { break-after: avoid; }
+    .doc-body :global(pre),
+    .doc-body :global(figure),
+    .doc-body :global(table) { break-inside: avoid; }
+  }
+</style>

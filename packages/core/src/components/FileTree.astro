@@ -1,0 +1,90 @@
+---
+/**
+ * Render a directory structure from a Markdown unordered list. An item is a
+ * directory if it has nested items or its name ends with `/`; everything else
+ * is a file. Bold names (**name**) are highlighted; `...` renders as an ellipsis.
+ *
+ *   <FileTree>
+ *
+ *   - src
+ *     - components
+ *       - **Header.astro**
+ *       - Footer.astro
+ *     - pages/
+ *   - astro.config.ts
+ *
+ *   </FileTree>
+ */
+---
+
+<docs-file-tree class="file-tree"><slot /></docs-file-tree>
+
+<script>
+  const FOLDER =
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+  const FILE =
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+
+  class DocsFileTree extends HTMLElement {
+    connectedCallback() {
+      const items = this.querySelectorAll<HTMLLIElement>('li');
+      items.forEach((li) => {
+        const firstNode = li.firstChild;
+        const label = (firstNode?.textContent ?? '').trim();
+        const hasChildren = !!li.querySelector(':scope > ul, :scope > ol');
+        const isPlaceholder = label === '...' || label === '…';
+        const isDirectory = hasChildren || label.endsWith('/');
+
+        const icon = document.createElement('span');
+        icon.className = 'file-tree-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        if (!isPlaceholder) {
+          icon.innerHTML = isDirectory ? FOLDER : FILE;
+          icon.classList.add(isDirectory ? 'is-directory' : 'is-file');
+        }
+        li.insertBefore(icon, li.firstChild);
+        if (isPlaceholder) li.classList.add('is-placeholder');
+      });
+    }
+  }
+
+  if (!customElements.get('docs-file-tree')) {
+    customElements.define('docs-file-tree', DocsFileTree);
+  }
+</script>
+
+<style>
+  .file-tree {
+    display: block;
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+
+  .file-tree :global(ul) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .file-tree :global(li) {
+    line-height: 1.85;
+  }
+  .file-tree :global(li ul) {
+    margin-inline-start: 0.55rem;
+    padding-inline-start: 0.7rem;
+    border-inline-start: 1px solid var(--border);
+  }
+  .file-tree :global(.file-tree-icon) {
+    display: inline-flex;
+    margin-inline-end: 0.45rem;
+    vertical-align: -0.2em;
+  }
+  .file-tree :global(.file-tree-icon.is-directory) { color: var(--accent-text); }
+  .file-tree :global(.file-tree-icon.is-file) { color: var(--text-muted); }
+  .file-tree :global(strong) { color: var(--accent-text); font-weight: 700; }
+  .file-tree :global(.is-placeholder) { color: var(--text-muted); }
+</style>

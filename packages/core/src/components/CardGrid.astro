@@ -1,0 +1,35 @@
+---
+/**
+ * Responsive grid wrapper for <Card> or <LinkCard> children. Cards flow into as
+ * many columns as fit; pass `stagger` to offset alternating cards.
+ *
+ *   <CardGrid stagger>
+ *     <Card title="…">…</Card>
+ *     <Card title="…">…</Card>
+ *   </CardGrid>
+ */
+interface Props {
+  stagger?: boolean;
+}
+
+const { stagger = false } = Astro.props;
+---
+
+<div class:list={['card-grid', { 'card-grid--stagger': stagger }]}>
+  <slot />
+</div>
+
+<style>
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  @media (min-width: 50rem) {
+    .card-grid--stagger > :global(*:nth-child(2n)) {
+      margin-top: 2.5rem;
+    }
+  }
+</style>

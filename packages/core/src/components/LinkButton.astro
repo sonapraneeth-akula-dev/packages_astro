@@ -1,0 +1,108 @@
+---
+/**
+ * Call-to-action link styled as a button. `icon` accepts either a named icon
+ * from the curated set (e.g. icon="external") or inline HTML / an emoji.
+ *
+ *   <LinkButton href="/basics/">Get started</LinkButton>
+ *   <LinkButton href="https://astro.build" variant="secondary" icon="external">
+ *     Astro docs
+ *   </LinkButton>
+ */
+import type { HTMLAttributes } from 'astro/types';
+import Icon from './Icon.astro';
+import { isIconName } from './icons';
+
+type Variant = 'primary' | 'secondary' | 'minimal';
+
+interface Props extends HTMLAttributes<'a'> {
+  href: string;
+  variant?: Variant;
+  icon?: string;
+  iconPlacement?: 'start' | 'end';
+}
+
+const {
+  href,
+  variant = 'primary',
+  icon,
+  iconPlacement = 'end',
+  class: className,
+  ...attrs
+} = Astro.props;
+
+const iconName = icon && isIconName(icon) ? icon : undefined;
+
+const isExternal = /^[a-z]+:/i.test(href);
+const target = attrs.target ?? (isExternal ? '_blank' : undefined);
+const rel = attrs.rel ?? (isExternal ? 'noopener noreferrer' : undefined);
+---
+
+<a href={href} class:list={['link-button', `link-button--${variant}`, className]} {...attrs} target={target} rel={rel}>
+  {icon && iconPlacement === 'start' && (
+    iconName
+      ? <span class="link-button-icon"><Icon name={iconName} /></span>
+      : <span class="link-button-icon" aria-hidden="true" set:html={icon} />
+  )}
+  <span><slot /></span>
+  {icon && iconPlacement === 'end' && (
+    iconName
+      ? <span class="link-button-icon"><Icon name={iconName} /></span>
+      : <span class="link-button-icon" aria-hidden="true" set:html={icon} />
+  )}
+</a>
+
+<style>
+  .link-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 0.6rem 0.6rem 0;
+    padding: 0.55rem 1.1rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+  .link-button:hover { transform: translateY(-1px); }
+
+  .link-button--primary {
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+  .link-button--primary:hover {
+    background: color-mix(in srgb, var(--accent) 88%, #000);
+  }
+
+  .link-button--secondary {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
+  }
+  .link-button--secondary:hover {
+    border-color: var(--border-hover);
+  }
+
+  .link-button--minimal {
+    padding-inline: 0.25rem;
+    color: var(--accent-text);
+  }
+  .link-button--minimal:hover {
+    text-decoration: underline;
+  }
+
+  .link-button--primary.link-button--primary,
+  .link-button--secondary.link-button--secondary {
+    text-decoration: none;
+  }
+
+  .link-button-icon {
+    display: inline-flex;
+    line-height: 0;
+    font-size: 1.05em;
+  }
+</style>

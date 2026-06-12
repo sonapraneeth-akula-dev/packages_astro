@@ -1,0 +1,58 @@
+---
+/**
+ * Content card with a title and optional leading icon. Group several inside
+ * <CardGrid>. `icon` accepts either a named icon from the curated set (e.g.
+ * icon="rocket") or inline HTML / an emoji (e.g. icon="📦").
+ *
+ *   <Card title="Fast by default" icon="rocket">Built on Astro's islands.</Card>
+ */
+import Icon from './Icon.astro';
+import { isIconName } from './icons';
+
+interface Props {
+  title: string;
+  icon?: string;
+}
+
+const { title, icon } = Astro.props;
+const iconName = icon && isIconName(icon) ? icon : undefined;
+---
+
+<article class="card-box">
+  <p class="card-box-title">
+    {icon && (
+      iconName
+        ? <span class="card-box-icon"><Icon name={iconName} /></span>
+        : <span class="card-box-icon" aria-hidden="true" set:html={icon} />
+    )}
+    <span>{title}</span>
+  </p>
+  <div class="card-box-body"><slot /></div>
+</article>
+
+<style>
+  .card-box {
+    padding: 1.25rem 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .card-box-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.5rem;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+  .card-box-icon {
+    display: inline-flex;
+    color: var(--accent-text);
+    font-size: 1.15em;
+    line-height: 0;
+  }
+  .card-box-body :global(p:first-child) { margin-top: 0; }
+  .card-box-body :global(p:last-child) { margin-bottom: 0; }
+</style>

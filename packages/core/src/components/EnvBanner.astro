@@ -1,0 +1,46 @@
+---
+// Non-production environment banner. Shown on dev/test/ppe; hidden on prod.
+interface Props {
+  env: string;
+}
+const { env } = Astro.props;
+
+const show = env !== 'prod';
+const labels: Record<string, string> = {
+  dev: 'Development',
+  test: 'Test',
+  ppe: 'Pre-Production (PPE)',
+};
+const label = labels[env] ?? env;
+---
+
+{
+  show && (
+    <div class:list={['env-banner', `env-${env}`]} role="status">
+      <span class="container">{label} environment — not production</span>
+    </div>
+  )
+}
+
+<style>
+  .env-banner {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0.35rem 0;
+  }
+  .env-dev {
+    background: #fca5a5;
+    color: #7f1d1d;
+  }
+  .env-test {
+    background: #fef08a;
+    color: #713f12;
+  }
+  .env-ppe {
+    background: #fed7aa;
+    color: #7c2d12;
+  }
+</style>

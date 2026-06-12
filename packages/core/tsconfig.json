@@ -1,0 +1,15 @@
+{
+  "extends": [
+    "astro/tsconfigs/strict",
+    "../../tsconfig.base.json"
+  ],
+  "compilerOptions": {
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "env.d.ts"
+  ]
+}
