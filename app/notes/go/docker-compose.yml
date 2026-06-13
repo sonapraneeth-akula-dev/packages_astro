@@ -1,7 +1,8 @@
 # Docker Compose for the Go Notes app (@grihasetu/notes-app).
 #
-# The build context is the MONOREPO ROOT (../..) because the app depends on the
-# @grihasetu/notes-core workspace package. The Dockerfile lives in this package.
+# The build context is the MONOREPO ROOT (../../..) because the app depends on
+# the @grihasetu/notes-core workspace package. The Dockerfile lives in this
+# package.
 #
 # Environments:
 #   dev   → dev.go-notes.sonapraneeth.in   (live watching + hot reload, source bind-mounted)
@@ -12,7 +13,7 @@
 # Routing is handled by Caddy. For local testing, add the hostnames to your
 # hosts file pointing at 127.0.1.3 (bun run hosts:setup).
 #
-# Usage (from packages/app):
+# Usage (from app/notes/go):
 #   bun run docker:dev     # development with hot reload
 #   bun run docker:test    # test environment (detached)
 #   bun run docker:ppe     # pre-production (detached)
@@ -39,8 +40,8 @@ services:
   # ─── Development (hot reload) ──────────────────────────────────────────────
   dev:
     build:
-      context: ../..
-      dockerfile: packages/app/Dockerfile
+      context: ../../..
+      dockerfile: app/notes/go/Dockerfile
       target: dev
     container_name: go-notes-dev
     restart: unless-stopped
@@ -53,9 +54,9 @@ services:
     volumes:
       # Bind-mount the workspace for live watching; keep the container's
       # node_modules and built dist.
-      - ../../:/app
+      - ../../../:/app
       - /app/node_modules
-      - /app/packages/app/dist
+      - /app/app/notes/go/dist
     depends_on:
       - caddy
     networks:
@@ -66,8 +67,8 @@ services:
   # ─── Test (built output) ───────────────────────────────────────────────────
   test:
     build:
-      context: ../..
-      dockerfile: packages/app/Dockerfile
+      context: ../../..
+      dockerfile: app/notes/go/Dockerfile
       target: runtime
       args:
         PUBLIC_APP_ENV: test
@@ -89,8 +90,8 @@ services:
   # ─── PPE / Pre-production (built output) ───────────────────────────────────
   ppe:
     build:
-      context: ../..
-      dockerfile: packages/app/Dockerfile
+      context: ../../..
+      dockerfile: app/notes/go/Dockerfile
       target: runtime
       args:
         PUBLIC_APP_ENV: ppe
@@ -112,8 +113,8 @@ services:
   # ─── Production (built output) ─────────────────────────────────────────────
   prod:
     build:
-      context: ../..
-      dockerfile: packages/app/Dockerfile
+      context: ../../..
+      dockerfile: app/notes/go/Dockerfile
       target: runtime
       args:
         PUBLIC_APP_ENV: prod

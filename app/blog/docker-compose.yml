@@ -9,6 +9,11 @@
 # Routing is handled by Caddy using the hostnames above. For local testing,
 # add the hostnames to your hosts file pointing at 127.0.1.2 (bun run hosts:setup).
 #
+# The build context is the MONOREPO ROOT (../../..) because the app depends on
+# the @grihasetu/blog-core workspace package (which in turn pulls in
+# @grihasetu/components and the satteri plugin). The Dockerfile lives in this
+# package.
+#
 # Pagefind search:
 #   The built environments (test/ppe/prod) run `bun run build`
 #   (astro build && pagefind --site dist), so the search index ships inside the
@@ -45,7 +50,8 @@ services:
   # ─── Development (hot reload) ──────────────────────────────────────────────
   dev:
     build:
-      context: .
+      context: ../../..
+      dockerfile: app/blog/Dockerfile
       target: dev
     container_name: blog-dev
     restart: unless-stopped
@@ -57,8 +63,9 @@ services:
       - CHOKIDAR_USEPOLLING=true
     volumes:
       # Bind-mount source for live watching; keep container's node_modules.
-      - ./:/app
+      - ../../../:/app
       - /app/node_modules
+      - /app/app/blog/dist
     depends_on:
       - caddy
     networks:
@@ -69,7 +76,8 @@ services:
   # ─── Test (built output) ───────────────────────────────────────────────────
   test:
     build:
-      context: .
+      context: ../../..
+      dockerfile: app/blog/Dockerfile
       target: runtime
       args:
         PUBLIC_APP_ENV: test
@@ -91,7 +99,8 @@ services:
   # ─── PPE / Pre-production (built output) ───────────────────────────────────
   ppe:
     build:
-      context: .
+      context: ../../..
+      dockerfile: app/blog/Dockerfile
       target: runtime
       args:
         PUBLIC_APP_ENV: ppe
@@ -113,7 +122,8 @@ services:
   # ─── Production (built output) ─────────────────────────────────────────────
   prod:
     build:
-      context: .
+      context: ../../..
+      dockerfile: app/blog/Dockerfile
       target: runtime
       args:
         PUBLIC_APP_ENV: prod

@@ -3,9 +3,10 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # Multi-stage build for the @grihasetu/notes-app (Go Notes) site.
 #
-# IMPORTANT: the build context is the MONOREPO ROOT, not packages/app, because
-# the app depends on the workspace package @grihasetu/notes-core. The compose
-# file sets `context: ../..` and `dockerfile: packages/app/Dockerfile`.
+# IMPORTANT: the build context is the MONOREPO ROOT, not app/notes/go, because
+# the app depends on the workspace packages @grihasetu/notes-core,
+# @grihasetu/components and the satteri plugin. The compose file sets
+# `context: ../../..` and `dockerfile: app/notes/go/Dockerfile`.
 #
 # We use Bun's hoisted linker (see /bunfig.toml) so a single top-level
 # node_modules is shared by every workspace package — Astro's static build
@@ -23,9 +24,14 @@ ENV NODE_ENV=production
 # manifest is needed for Bun to resolve the `packages/*` workspace graph.
 FROM base AS deps
 COPY package.json bun.lock* bunfig.toml tsconfig.base.json ./
-COPY packages/core/package.json ./packages/core/package.json
-COPY packages/demo/package.json ./packages/demo/package.json
-COPY packages/app/package.json ./packages/app/package.json
+COPY packages/components/package.json ./packages/components/package.json
+COPY packages/notes-core/package.json ./packages/notes-core/package.json
+COPY packages/blog-core/package.json ./packages/blog-core/package.json
+COPY packages/plugins/satteri/package.json ./packages/plugins/satteri/package.json
+COPY demo/notes/package.json ./demo/notes/package.json
+COPY demo/blog/package.json ./demo/blog/package.json
+COPY app/blog/package.json ./app/blog/package.json
+COPY app/notes/go/package.json ./app/notes/go/package.json
 RUN bun install --frozen-lockfile
 
 # ─── Development ─────────────────────────────────────────────────────────────
@@ -36,16 +42,18 @@ RUN bun install --frozen-lockfile
 FROM deps AS dev
 ENV NODE_ENV=development
 ENV PUBLIC_APP_ENV=dev
-COPY packages/core ./packages/core
-COPY packages/app ./packages/app
-WORKDIR /app/packages/app
+COPY packages/components ./packages/components
+COPY packages/notes-core ./packages/notes-core
+COPY packages/plugins/satteri ./packages/plugins/satteri
+COPY app/notes/go ./app/notes/go
+WORKDIR /app/app/notes/go
 EXPOSE 4320
 HEALTHCHECK --interval=15s --timeout=5s --start-period=40s --retries=3 \
   CMD wget -q --spider http://127.0.0.1:4320/ || exit 1
 CMD ["sh", "-c", "bun run search:index && { bun run watch:content & bun run dev:serve; }"]
 
 # ─── Build ───────────────────────────────────────────────────────────────────
-# Produces the static output in /app/packages/app/dist. `bun run build` runs
+# Produces the static output in /app/app/notes/go/dist. `bun run build` runs
 # `astro build && pagefind --site dist`, so the Pagefind index ships in dist.
 FROM deps AS build
 ARG PUBLIC_APP_ENV=prod
@@ -57,14 +65,17 @@ ARG GIT_COMMIT=unknown
 ARG GIT_BRANCH=unknown
 ENV GIT_COMMIT=${GIT_COMMIT}
 ENV GIT_BRANCH=${GIT_BRANCH}
-COPY packages/core ./packages/core
-COPY packages/app ./packages/app
-RUN cd packages/app && bun run build
+COPY packages/components ./packages/components
+COPY packages/notes-core ./packages/notes-core
+COPY packages/plugins/satteri ./packages/plugins/satteri
+COPY app/notes/go ./app/notes/go
+RUN cd app/notes/go && bun run build
 
 # ─── Runtime ─────────────────────────────────────────────────────────────────
 # Serves the built output (including dist/pagefind) via `astro preview`. Only
-# the artifacts needed to preview are copied. The core package is required
-# because astro.config.ts imports @grihasetu/notes-core/astro.
+# the artifacts needed to preview are copied. The engine packages are required
+# because astro.config.ts imports @grihasetu/notes-core/astro (which in turn
+# pulls in @grihasetu/components and the satteri plugin).
 FROM base AS runtime
 ENV NODE_ENV=production
 ARG PUBLIC_APP_ENV=prod
@@ -74,12 +85,13 @@ ENV PUBLIC_SITE_URL=${PUBLIC_SITE_URL}
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
-COPY --from=build /app/packages/core ./packages/core
-COPY --from=build /app/packages/app/dist ./packages/app/dist
-COPY --from=build /app/packages/app/package.json ./packages/app/package.json
-COPY --from=build /app/packages/app/astro.config.ts ./packages/app/astro.config.ts
+COPY --from=deps /app/tsconfig.base.json ./tsconfig.base.json
+COPY --from=build /app/packages/components ./packages/components
+COPY --from=build /app/packages/notes-core ./packages/notes-core
+COPY --from=build /app/packages/plugins/satteri ./packages/plugins/satteri
+COPY --from=build /app/app/notes/go ./app/notes/go
 
-WORKDIR /app/packages/app
+WORKDIR /app/app/notes/go
 EXPOSE 4320
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget -q --spider http://127.0.0.1:4320/ || exit 1

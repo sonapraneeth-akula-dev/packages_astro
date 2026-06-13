@@ -1,4 +1,5 @@
-# Docker build context is the monorepo root (see packages/app/docker-compose.yml).
+# Docker build context is the monorepo root for both apps (see
+# app/notes/go/docker-compose.yml and app/blog/docker-compose.yml).
 # Keep the build context lean and reproducible.
 **/node_modules
 **/dist
