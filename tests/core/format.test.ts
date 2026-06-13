@@ -4,7 +4,7 @@ import {
   humanize,
   readingTime,
   slugify,
-} from '../../packages/core/src/utils/format.ts';
+} from '../../packages/notes-core/src/utils/format.ts';
 
 describe('slugify', () => {
   it('lowercases and hyphenates a label', () => {

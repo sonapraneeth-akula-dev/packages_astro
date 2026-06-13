@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { normalizePath } from '../../packages/core/src/utils/docs.ts';
+import { normalizePath } from '../../packages/notes-core/src/utils/docs.ts';
 
 describe('normalizePath', () => {
   it('adds a leading slash', () => {
