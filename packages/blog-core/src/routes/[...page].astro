@@ -1,0 +1,109 @@
+---
+import type { GetStaticPaths, Page } from 'astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FeaturedPost from '../components/FeaturedPost.astro';
+import PostCard from '../components/PostCard.astro';
+import PostRow from '../components/PostRow.astro';
+import Pagination from '@grihasetu/components/Pagination.astro';
+import { blogConfig } from 'virtual:blog-core/config';
+import { getPublishedPosts, readingTime, type Post } from '../utils/posts';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getPublishedPosts();
+  return paginate(posts, { pageSize: blogConfig.pageSize });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props as { page: Page<Post> };
+
+const isFirst = page.currentPage === 1;
+// Page 1 uses the editorial layout: 1 hero + up to 3 cards + the rest as rows.
+const hero = isFirst ? page.data[0] : undefined;
+const grid = isFirst ? page.data.slice(1, 4) : [];
+const rows = isFirst ? page.data.slice(4) : page.data;
+
+const rt = (p: Post) => readingTime(p.body);
+const hrefFor = (n: number) => (n === 1 ? '/' : `/${n}`);
+---
+
+<BaseLayout>
+  <section class="hero-head container">
+    <p class="eyebrow">{blogConfig.brand} Journal</p>
+    <h1>{blogConfig.title}</h1>
+    <p class="lede">{blogConfig.description}</p>
+  </section>
+
+  <div class="container feed">
+    {hero && (
+      <section class="block">
+        <FeaturedPost post={hero} readingTime={rt(hero)} />
+      </section>
+    )}
+
+    {grid.length > 0 && (
+      <section class="block">
+        <div class="section-bar">
+          <h2>Fresh off the press</h2>
+          <span class="count">{grid.length} posts</span>
+        </div>
+        <div class="grid-3">
+          {grid.map((post) => (
+            <PostCard post={post} readingTime={rt(post)} />
+          ))}
+        </div>
+      </section>
+    )}
+
+    {rows.length > 0 && (
+      <section class="block">
+        <div class="section-bar">
+          <h2>{isFirst ? 'More from the archive' : `Page ${page.currentPage}`}</h2>
+        </div>
+        <div class="rows">
+          {rows.map((post) => (
+            <PostRow post={post} readingTime={rt(post)} />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <Pagination
+      current={page.currentPage}
+      total={page.lastPage}
+      prevUrl={page.url.prev}
+      nextUrl={page.url.next}
+      hrefFor={hrefFor}
+    />
+  </div>
+</BaseLayout>
+
+<style>
+  .hero-head { padding-block: 3rem 1rem; max-width: 52rem; }
+  .hero-head h1 { margin: 0.5rem 0 0.75rem; }
+  .hero-head .lede { font-size: 1.2rem; color: var(--text-muted); margin: 0; }
+
+  .feed { padding-bottom: 2rem; }
+  .block { margin-top: 2.5rem; }
+  .section-bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .section-bar h2 { font-size: 1.4rem; margin: 0; }
+  .count { color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-mono); }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  .rows { display: flex; flex-direction: column; gap: 0.85rem; }
+
+  @media (max-width: 60rem) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 40rem) {
+    .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>

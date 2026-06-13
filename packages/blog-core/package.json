@@ -1,0 +1,32 @@
+{
+  "name": "@grihasetu/blog-core",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared blog engine for Astro + MDX: components, layouts, injected routes, posts collection, config schema and an Astro config factory.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./content": "./src/content.ts",
+    "./config": "./src/config.ts",
+    "./schema": "./src/schema.ts",
+    "./astro": "./src/astro-config.ts",
+    "./styles/global.css": "./src/styles/global.css",
+    "./components/mdx": "./src/components/mdx.ts",
+    "./components/*": "./src/components/*",
+    "./layouts/*": "./src/layouts/*",
+    "./routes/*": "./src/routes/*",
+    "./utils/*": "./src/utils/*"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.12",
+    "@astrojs/sitemap": "^3.7.3",
+    "@expressive-code/plugin-line-numbers": "^0.43.1",
+    "@grihasetu/components": "workspace:*",
+    "@grihasetu/rehype-satteri-autolink-headings": "workspace:*",
+    "astro": "^6.4.6",
+    "astro-expressive-code": "^0.43.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "typescript": "^6.0.3"
+  }
+}

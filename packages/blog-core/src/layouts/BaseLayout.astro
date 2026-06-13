@@ -1,0 +1,79 @@
+---
+import '../styles/global.css';
+import { Font } from 'astro:assets';
+import Header from '@grihasetu/components/Header.astro';
+import Footer from '@grihasetu/components/Footer.astro';
+import EnvBanner from '@grihasetu/components/EnvBanner.astro';
+import { blogConfig } from 'virtual:blog-core/config';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Absolute or root-relative image for social cards. */
+  ogImage?: string;
+  /** Set to true on article pages for og:type=article. */
+  article?: boolean;
+}
+
+const {
+  title,
+  description = blogConfig.description,
+  ogImage,
+  article = false,
+} = Astro.props;
+
+const fullTitle = !title || title === blogConfig.title
+  ? blogConfig.title
+  : `${title} · ${blogConfig.title}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImageUrl = ogImage ? new URL(ogImage, Astro.site) : undefined;
+const appEnv = __APP_ENV__;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" type="application/rss+xml" title={blogConfig.title} href="/rss.xml" />
+
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={blogConfig.title} />
+    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    <meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
+    <meta name="generator" content={Astro.generator} />
+
+    {/* Self-hosted fonts. Body + heading preload (above the fold); mono is
+        deferred since it only appears inside code blocks. */}
+    <Font cssVariable="--font-sans-files" preload />
+    <Font cssVariable="--font-heading-files" preload />
+    <Font cssVariable="--font-mono-files" />
+
+    {/* Theme-flash preventer: set data-theme before paint. Intentionally tiny
+        and synchronous (the only blocking script in <head>). */}
+    <script is:inline>
+      (() => {
+        const stored = typeof localStorage !== 'undefined' && localStorage.getItem('theme');
+        if (stored === 'light' || stored === 'dark') {
+          document.documentElement.setAttribute('data-theme', stored);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <EnvBanner env={appEnv} />
+    <Header config={blogConfig} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer config={blogConfig} />
+  </body>
+</html>

@@ -1,0 +1,84 @@
+---
+import type { Post } from '../utils/posts';
+import { formatDate, slugify } from '../utils/posts';
+import CategoryIcon from './CategoryIcon.astro';
+
+interface Props {
+  post: Post;
+  readingTime: string;
+}
+const { post, readingTime } = Astro.props;
+const { title, description, pubDate, category, cover } = post.data;
+const href = `/blog/${post.id}`;
+---
+
+<article class="card post-card">
+  <a class="card-link" href={href} aria-label={title}></a>
+  <div class="card-visual" aria-hidden="true">
+    <span class="cover-glyph">{cover ?? '◆'}</span>
+  </div>
+  <div class="card-content">
+    <a class="chip" href={`/categories/${slugify(category)}`}><CategoryIcon />{category}</a>
+    <h3 class="card-title">{title}</h3>
+    <p class="card-desc">{description}</p>
+    <div class="card-meta">
+      <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+      <span class="dot" aria-hidden="true">·</span>
+      <span>{readingTime}</span>
+    </div>
+  </div>
+</article>
+
+<style>
+  /* Vertical card: full-bleed visual on top, padded content below. */
+  .post-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .card-link { position: absolute; inset: 0; z-index: 1; }
+  .post-card .chip { position: relative; z-index: 2; align-self: flex-start; }
+
+  .card-visual {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    background:
+      radial-gradient(circle at 70% 20%, var(--accent-glow), transparent 60%),
+      linear-gradient(135deg, var(--accent-soft), var(--surface-2));
+    border-bottom: 1px solid var(--border);
+  }
+  .cover-glyph { font-size: 2.75rem; opacity: 0.9; }
+
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1.25rem;
+    flex: 1;
+  }
+
+  .card-title { font-size: 1.2rem; margin: 0; line-height: 1.25; }
+  .card-desc {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+  }
+  .card-meta time { font-family: var(--font-mono); }
+  .dot { opacity: 0.5; }
+</style>

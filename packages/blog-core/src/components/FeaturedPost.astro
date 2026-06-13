@@ -1,0 +1,116 @@
+---
+import type { Post } from '../utils/posts';
+import { formatDate, slugify } from '../utils/posts';
+import CategoryIcon from './CategoryIcon.astro';
+import TagIcon from './TagIcon.astro';
+
+interface Props {
+  post: Post;
+  readingTime: string;
+}
+const { post, readingTime } = Astro.props;
+const { title, description, pubDate, category, tags, cover } = post.data;
+const href = `/blog/${post.id}`;
+---
+
+<article class="featured">
+  <a class="featured-link" href={href} aria-label={title}></a>
+  <div class="featured-visual" aria-hidden="true">
+    <span class="cover-glyph">{cover ?? '✦'}</span>
+  </div>
+  <div class="featured-body">
+    <div class="featured-top">
+      <span class="chip chip--accent">Latest</span>
+      <a class="chip" href={`/categories/${slugify(category)}`}><CategoryIcon />{category}</a>
+    </div>
+    <h2 class="featured-title">{title}</h2>
+    <p class="featured-desc">{description}</p>
+    <div class="featured-meta">
+      <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+      <span class="dot" aria-hidden="true">·</span>
+      <span>{readingTime}</span>
+    </div>
+    {tags.length > 0 && (
+      <ul class="featured-tags">
+        {tags.slice(0, 4).map((t) => (
+          <li><a class="chip" href={`/tags/${slugify(t)}`}><TagIcon />{t}</a></li>
+        ))}
+      </ul>
+    )}
+  </div>
+</article>
+
+<style>
+  .featured {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.1fr 1.4fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--surface);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .featured:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+  /* Full-card click target while keeping inner links accessible. */
+  .featured-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .featured-top,
+  .featured-tags { position: relative; z-index: 2; }
+  .featured-tags a,
+  .featured-top a { position: relative; z-index: 2; }
+
+  .featured-visual {
+    display: grid;
+    place-items: center;
+    min-height: 16rem;
+    background:
+      radial-gradient(circle at 30% 30%, var(--accent-glow), transparent 60%),
+      linear-gradient(135deg, var(--accent) 0%, var(--accent-gradient-end) 100%);
+  }
+  .cover-glyph { font-size: 4.5rem; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.25)); }
+
+  .featured-body {
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .featured-top { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .featured-title {
+    font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.1rem);
+    margin: 0;
+    line-height: 1.2;
+  }
+  .featured-desc { color: var(--text-muted); margin: 0; font-size: 1.02rem; }
+  .featured-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+  }
+  .featured-meta time { font-family: var(--font-mono); }
+  .dot { opacity: 0.5; }
+  .featured-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    list-style: none;
+    margin: 0.25rem 0 0;
+    padding: 0;
+  }
+
+  @media (max-width: 52rem) {
+    .featured { grid-template-columns: 1fr; }
+    .featured-visual { min-height: 9rem; }
+  }
+</style>

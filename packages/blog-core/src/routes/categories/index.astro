@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublishedPosts, getCategories } from '../../utils/posts';
+
+const posts = await getPublishedPosts();
+const categories = getCategories(posts);
+---
+
+<BaseLayout title="Categories" description="Browse posts by category.">
+  <div class="container page-head">
+    <p class="eyebrow">Browse</p>
+    <h1>Categories</h1>
+    <p class="lede">{categories.length} topics across {posts.length} posts.</p>
+  </div>
+
+  <div class="container cat-grid">
+    {categories.map((cat) => (
+      <a class="card cat-card" href={`/categories/${cat.slug}`}>
+        <span class="cat-glyph" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 8a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v1H4z"></path>
+            <path d="M2 11h18.5a1.5 1.5 0 0 1 1.45 1.9l-1.4 5A2 2 0 0 1 18.6 19H4a2 2 0 0 1-2-2z"></path>
+          </svg>
+        </span>
+        <span class="cat-name">{cat.name}</span>
+        <span class="cat-count">{cat.count} {cat.count === 1 ? 'post' : 'posts'}</span>
+      </a>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1.25rem;
+    padding-bottom: 2rem;
+  }
+  .cat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.25rem;
+    color: var(--text);
+  }
+  .cat-card:hover { color: var(--text); }
+  .cat-glyph {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    font-size: 1.25rem;
+    margin-bottom: 0.4rem;
+  }
+  .cat-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; }
+  .cat-count { color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-mono); }
+</style>

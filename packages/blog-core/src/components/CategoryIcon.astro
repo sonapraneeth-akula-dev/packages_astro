@@ -1,0 +1,27 @@
+---
+// Open-folder icon used to mark categories consistently across the site.
+interface Props {
+  size?: string;
+}
+const { size = '1em' } = Astro.props;
+---
+
+<svg
+  class="icon-category"
+  aria-hidden="true"
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M2 8a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v1H4z"></path>
+  <path d="M2 11h18.5a1.5 1.5 0 0 1 1.45 1.9l-1.4 5A2 2 0 0 1 18.6 19H4a2 2 0 0 1-2-2z"></path>
+</svg>
+
+<style>
+  .icon-category { flex: none; vertical-align: -0.15em; }
+</style>

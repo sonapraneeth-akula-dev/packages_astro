@@ -1,0 +1,408 @@
+---
+import type { MarkdownHeading } from 'astro';
+import type { Post } from '../utils/posts';
+import { formatDateTime, slugify } from '../utils/posts';
+import BaseLayout from './BaseLayout.astro';
+import TableOfContents from '@grihasetu/components/TableOfContents.astro';
+import ProgressBar from '@grihasetu/components/ProgressBar.astro';
+import CategoryIcon from '../components/CategoryIcon.astro';
+import TagIcon from '../components/TagIcon.astro';
+import Icon from '@grihasetu/components/Icon.astro';
+
+interface Props {
+  post: Post;
+  headings: MarkdownHeading[];
+  readingTime: string;
+  newerPost?: Post | null;
+  olderPost?: Post | null;
+}
+
+const { post, headings, readingTime, newerPost, olderPost } = Astro.props;
+const { title, description, pubDate, updatedDate, category, tags, cover } = post.data;
+---
+
+<BaseLayout title={title} description={description} article>
+  <ProgressBar />
+  <article class="post container" data-pagefind-body>
+    <header class="post-head">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true">/</span>
+        <a href={`/categories/${slugify(category)}`}>{category}</a>
+      </nav>
+      <h1>{title}</h1>
+      <p class="post-lede">{description}</p>
+      <div class="post-meta">
+        {cover && <span class="post-cover" aria-hidden="true">{cover}</span>}
+        <span class="meta-item">
+          <span class="meta-label">Published</span>
+          <time datetime={pubDate.toISOString()}>{formatDateTime(pubDate)}</time>
+        </span>
+        {updatedDate && (
+          <>
+            <span class="dot" aria-hidden="true">·</span>
+            <span class="meta-item">
+              <span class="meta-label">Last updated</span>
+              <time datetime={updatedDate.toISOString()}>{formatDateTime(updatedDate)}</time>
+            </span>
+          </>
+        )}
+        <span class="dot" aria-hidden="true">·</span>
+        <span>{readingTime}</span>
+      </div>
+      <ul class="post-tags" data-pagefind-ignore>
+        <li>
+          <a class="chip chip--accent" href={`/categories/${slugify(category)}`}>
+            <CategoryIcon />{category}
+          </a>
+        </li>
+        {tags.map((t) => (
+          <li>
+            <a class="chip" href={`/tags/${slugify(t)}`}><TagIcon />{t}</a>
+          </li>
+        ))}
+      </ul>
+      <div class="post-actions" data-pagefind-ignore>
+        <button type="button" class="print-btn" data-print-post>
+          <Icon name="printer" /><span>Print / Save as PDF</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="post-grid">
+      <div class="post-body">
+        <slot />
+      </div>
+      <aside class="post-aside" data-pagefind-ignore>
+        <TableOfContents headings={headings} />
+      </aside>
+    </div>
+
+    <footer class="post-foot" data-pagefind-ignore>
+      <a class="btn" href="/">← Back to all posts</a>
+      <a class="btn btn-rss" href="/rss.xml">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 11a9 9 0 0 1 9 9"></path>
+          <path d="M4 4a16 16 0 0 1 16 16"></path>
+          <circle cx="5" cy="19" r="1.4"></circle>
+        </svg>
+        Subscribe via RSS
+      </a>
+    </footer>
+
+    {(olderPost || newerPost) && (
+      <nav class="post-nav" aria-label="More posts" data-pagefind-ignore>
+        {olderPost ? (
+          <a class="post-nav-link prev" href={`/blog/${olderPost.id}`} rel="prev">
+            <span class="post-nav-dir">← Previous post</span>
+            <span class="post-nav-title">{olderPost.data.title}</span>
+          </a>
+        ) : (
+          <span class="post-nav-spacer"></span>
+        )}
+        {newerPost ? (
+          <a class="post-nav-link next" href={`/blog/${newerPost.id}`} rel="next">
+            <span class="post-nav-dir">Next post →</span>
+            <span class="post-nav-title">{newerPost.data.title}</span>
+          </a>
+        ) : (
+          <span class="post-nav-spacer"></span>
+        )}
+      </nav>
+    )}
+  </article>
+</BaseLayout>
+
+<script>
+  // "Print / Save as PDF" opens the browser print dialog; the @media print
+  // rules below pare the page down to the article and reorder the TOC first.
+  document
+    .querySelector('[data-print-post]')
+    ?.addEventListener('click', () => window.print());
+</script>
+
+<style>
+  /* The post uses the full --container width. Readable text inside is capped to
+     a comfortable measure (see .post-body text children) while code blocks,
+     tables and images stretch to the full article column so large screens are
+     used well on this code-heavy blog. */
+  .post { padding-block: 2.5rem 4rem; }
+
+  .crumbs {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+  .crumbs a { color: var(--text-muted); font-weight: 600; }
+  .crumbs a:hover { color: var(--accent-text); }
+
+  .post-head { max-width: 48rem; }
+  .post-head h1 { margin: 0 0 0.75rem; }
+  .post-lede {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    margin: 0 0 1rem;
+  }
+  .post-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .post-meta time { font-family: var(--font-mono); }
+  .post-cover { font-size: 1.25rem; }
+  .dot { opacity: 0.5; }
+  .meta-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .meta-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent-text);
+  }
+
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 1.25rem 0 0;
+    padding: 0;
+  }
+
+  /* Two-column layout: article fills the available width, sticky TOC on the
+     right. Collapses to one column on tablet. */
+  .post-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 16rem;
+    gap: 3.5rem;
+    margin-top: 2.5rem;
+    align-items: start;
+  }
+  .post-aside {
+    position: sticky;
+    top: 5.5rem;
+  }
+
+  @media (max-width: 60rem) {
+    .post-grid { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+    .post-aside { position: static; order: -1; }
+  }
+
+  /* Prose. The body fills its column; individual text elements are capped to a
+     readable measure below, but code blocks, tables and images are free to use
+     the full width. */
+  .post-body {
+    font-size: 1.05rem;
+  }
+  /* Keep running text at a comfortable line length even when the column is wide. */
+  .post-body :global(p),
+  .post-body :global(ul),
+  .post-body :global(ol),
+  .post-body :global(blockquote),
+  .post-body :global(h2),
+  .post-body :global(h3),
+  .post-body :global(h4) {
+    max-width: 48rem;
+  }
+  .post-body :global(h2) {
+    margin-top: 2.75rem;
+    padding-top: 0.5rem;
+    scroll-margin-top: 5.5rem;
+  }
+  .post-body :global(h3) {
+    margin-top: 2rem;
+    scroll-margin-top: 5.5rem;
+  }
+  .post-body :global(p),
+  .post-body :global(ul),
+  .post-body :global(ol) { margin-block: 1rem; }
+  .post-body :global(ul),
+  .post-body :global(ol) { padding-left: 1.4rem; }
+  .post-body :global(li) { margin-block: 0.35rem; }
+  .post-body :global(img) {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .post-body :global(hr) {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2.5rem 0;
+  }
+  .post-body :global(blockquote) {
+    margin: 1.5rem 0;
+    padding: 0.75rem 1.25rem;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    color: var(--text-muted);
+  }
+  .post-body :global(blockquote p:last-child) { margin-bottom: 0; }
+  .post-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+  }
+  .post-body :global(th),
+  .post-body :global(td) {
+    border: 1px solid var(--border);
+    padding: 0.6rem 0.85rem;
+    text-align: left;
+  }
+  .post-body :global(th) { background: var(--bg-subtle); }
+  .post-body :global(a) { text-decoration: underline; text-underline-offset: 2px; }
+
+  /* Heading anchor links (added via rehype-autolink). */
+  .post-body :global(.heading-anchor) {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+    opacity: 0;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: opacity 0.15s ease, color 0.15s ease;
+  }
+  .post-body :global(.heading-anchor:hover) { color: var(--accent-text); }
+  .post-body :global(h2:hover .heading-anchor),
+  .post-body :global(h3:hover .heading-anchor),
+  .post-body :global(h4:hover .heading-anchor) { opacity: 1; }
+
+  .post-foot {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .btn-rss { display: inline-flex; align-items: center; gap: 0.45rem; }
+
+  /* Previous / next post navigation. */
+  .post-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .post-nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    text-decoration: none;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .post-nav-link:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  }
+  .post-nav-link.next { text-align: right; align-items: flex-end; }
+  .post-nav-link.prev:hover { transform: translateX(-2px); }
+  .post-nav-link.next:hover { transform: translateX(2px); }
+  .post-nav-dir {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent-text);
+  }
+  .post-nav-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .post-nav-spacer { display: none; }
+
+  @media (max-width: 40rem) {
+    .post-nav { grid-template-columns: 1fr; }
+    .post-nav-link.next { text-align: left; align-items: flex-start; }
+  }
+
+  /* Widen the sticky TOC and gap on large screens; the article column already
+     grows to fill the wider container, so code blocks make full use of the
+     extra space while text stays at its readable measure. */
+  @media (min-width: 90rem) {
+    .post-grid { grid-template-columns: minmax(0, 1fr) 18rem; gap: 4.5rem; }
+  }
+
+  /* Print / Save-as-PDF action. */
+  .post-actions {
+    margin-top: 1.25rem;
+  }
+  .print-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+  .print-btn:hover {
+    border-color: var(--border-hover);
+    color: var(--accent-text);
+    transform: translateY(-1px);
+  }
+
+  /* Print / Save as PDF: keep only the article, with the table of contents
+     moved above the content. Colours and graphics are preserved (see the
+     global @media print block that sets print-color-adjust: exact). */
+  @media print {
+    .post { padding: 0; }
+    /* Chrome that doesn't belong in the PDF. */
+    .crumbs,
+    .post-lede,
+    .post-actions,
+    .post-foot,
+    .post-nav { display: none !important; }
+
+    /* Single column, TOC first. */
+    .post-grid {
+      display: flex;
+      flex-direction: column;
+      margin-top: 1.5rem;
+    }
+    .post-aside {
+      order: -1;
+      position: static;
+      margin-bottom: 2rem;
+      break-inside: avoid;
+    }
+
+    /* Let prose use the full width of the page. */
+    .post-body { font-size: 11pt; }
+    .post-body :global(p),
+    .post-body :global(ul),
+    .post-body :global(ol),
+    .post-body :global(blockquote),
+    .post-body :global(h2),
+    .post-body :global(h3),
+    .post-body :global(h4) { max-width: none; }
+
+    /* Avoid orphaned headings and split code blocks where possible. */
+    .post-body :global(h2),
+    .post-body :global(h3) { break-after: avoid; }
+    .post-body :global(pre),
+    .post-body :global(figure),
+    .post-body :global(table) { break-inside: avoid; }
+  }
+</style>

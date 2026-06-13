@@ -1,0 +1,35 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import BlogPost from '../../layouts/BlogPost.astro';
+import { components } from 'virtual:blog-core/components';
+import { getPublishedPosts, readingTime } from '../../utils/posts';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPublishedPosts();
+  // Posts are newest-first, so the newer neighbour sits before the current
+  // post in the list and the older one after it.
+  return posts.map((post, i) => ({
+    params: { id: post.id },
+    props: {
+      post,
+      newerPost: posts[i - 1] ?? null,
+      olderPost: posts[i + 1] ?? null,
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { post, newerPost, olderPost } = Astro.props;
+const { Content, headings } = await render(post);
+const rt = readingTime(post.body);
+---
+
+<BlogPost
+  post={post}
+  headings={headings}
+  readingTime={rt}
+  newerPost={newerPost}
+  olderPost={olderPost}
+>
+  <Content components={components} />
+</BlogPost>

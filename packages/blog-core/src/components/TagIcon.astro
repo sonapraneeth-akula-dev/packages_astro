@@ -1,0 +1,27 @@
+---
+// Tag icon used in place of a leading "#" to mark tags across the site.
+interface Props {
+  size?: string;
+}
+const { size = '1em' } = Astro.props;
+---
+
+<svg
+  class="icon-tag"
+  aria-hidden="true"
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3H4a1 1 0 0 0-1 1v5.59A2 2 0 0 0 3.83 11l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83z"></path>
+  <circle cx="7" cy="7" r="1.2"></circle>
+</svg>
+
+<style>
+  .icon-tag { flex: none; vertical-align: -0.15em; }
+</style>

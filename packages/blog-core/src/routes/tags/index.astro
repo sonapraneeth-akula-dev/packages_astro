@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublishedPosts, getTags } from '../../utils/posts';
+
+const posts = await getPublishedPosts();
+const tags = getTags(posts);
+
+// Scale chip size by relative frequency for a tag-cloud feel.
+const max = Math.max(1, ...tags.map((t) => t.count));
+function scale(count: number): number {
+  return 0.85 + (count / max) * 0.6; // rem font-size between ~0.85 and ~1.45
+}
+---
+
+<BaseLayout title="Tags" description="Browse posts by tag.">
+  <div class="container page-head">
+    <p class="eyebrow">Browse</p>
+    <h1>Tags</h1>
+    <p class="lede">{tags.length} tags across {posts.length} posts.</p>
+  </div>
+
+  <div class="container cloud">
+    {tags.map((tag) => (
+      <a class="cloud-tag" href={`/tags/${tag.slug}`} style={`font-size:${scale(tag.count)}rem`}>
+        <svg class="tag-icon" aria-hidden="true" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3H4a1 1 0 0 0-1 1v5.59A2 2 0 0 0 3.83 11l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83z"></path>
+          <circle cx="7" cy="7" r="1.2"></circle>
+        </svg>
+        {tag.name}
+        <span class="ct">{tag.count}</span>
+      </a>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding-bottom: 2rem;
+    align-items: center;
+  }
+  .cloud-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 600;
+    line-height: 1.2;
+    transition: all 0.15s ease;
+  }
+  .cloud-tag:hover {
+    color: var(--accent-text);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-1px);
+  }
+  .tag-icon { color: var(--accent-text); flex: none; }
+  .ct {
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    background: var(--bg-subtle);
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+  }
+</style>
