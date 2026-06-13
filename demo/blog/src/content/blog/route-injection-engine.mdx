@@ -1,0 +1,38 @@
+---
+title: Designing a Route-Injection Engine in Astro
+description: How the blog-core engine owns every page route so individual sites carry no src/pages of their own.
+pubDate: 2026-01-12
+category: Engineering
+tags: [astro, architecture, dx]
+cover: "🛠️"
+---
+
+import { Callout, Steps } from '@grihasetu/blog-core/components/mdx';
+
+The engine injects all of its routes at build time, so a site only ships
+content, a config and a component registry.
+
+<Callout type="tip">
+  Page routing, search, RSS and the MDX pipeline all live in the shared engine —
+  upgrade once, every site benefits.
+</Callout>
+
+## Why route injection
+
+Astro's `injectRoute` lets a package register pages on behalf of the consuming
+app. The injected components read per-site data through a virtual module.
+
+<Steps>
+
+1. The site calls `defineBlogAstroConfig({ blogConfig })`.
+2. The engine injects `/`, `/blog/[...id]`, `/categories`, `/tags`, `/search`.
+3. Each injected route imports config from `virtual:blog-core/config`.
+
+</Steps>
+
+```ts title="astro.config.ts"
+import { defineBlogAstroConfig } from '@grihasetu/blog-core/astro';
+import { blogConfig } from './blog.config';
+
+export default defineBlogAstroConfig({ port: 4312, blogConfig });
+```

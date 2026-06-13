@@ -1,0 +1,23 @@
+---
+title: Offline Search With Pagefind
+description: A fully client-side index that works after the first load — no server, no API keys.
+pubDate: 2025-12-02
+category: Engineering
+tags: [search, pagefind, performance]
+cover: "🔎"
+---
+
+import { Callout } from '@grihasetu/blog-core/components/mdx';
+
+Pagefind builds a static index at the end of the build and loads only the
+fragments it needs as the user types.
+
+<Callout type="tip">
+  The index is generated from the built HTML, so it always matches what the
+  reader actually sees.
+</Callout>
+
+## How it fits in
+
+The engine ships the search page; the build script runs Pagefind over `dist`
+and writes the index into `public/pagefind`. The result works offline.

@@ -1,0 +1,23 @@
+---
+title: Dark Mode Without the Flash
+description: Resolving the theme before first paint avoids the dreaded flash of the wrong colour scheme.
+pubDate: 2025-12-15
+category: Design
+tags: [design, theming, accessibility]
+cover: "🌗"
+---
+
+import { Callout } from '@grihasetu/blog-core/components/mdx';
+
+The flash of an incorrect theme happens when the page paints before the stored
+preference is read.
+
+<Callout type="warning">
+  Any theme script that runs after first paint will flash. It must be inline and
+  synchronous in the document head.
+</Callout>
+
+## The fix
+
+A tiny inline script sets `data-theme` from `localStorage` (or the system
+preference) before the body renders — no flash, no layout shift.

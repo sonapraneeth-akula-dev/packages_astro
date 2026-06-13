@@ -1,0 +1,26 @@
+---
+title: A Performance Budget That Actually Sticks
+description: Treating Lighthouse scores as a build gate keeps a site fast for years, not weeks.
+pubDate: 2026-01-05
+updatedDate: 2026-01-20
+category: Engineering
+tags: [performance, lighthouse, web-vitals]
+cover: "⚡"
+---
+
+import { Callout } from '@grihasetu/blog-core/components/mdx';
+
+A fast site is a series of small decisions enforced automatically.
+
+<Callout type="note">
+  Self-hosted fonts, no client JS by default, and an offline search index keep
+  the critical path tiny.
+</Callout>
+
+## The three rules
+
+- Ship zero JavaScript unless a component needs it.
+- Inline critical CSS, defer the rest.
+- Budget every third-party origin — most are removable.
+
+Measuring is half the work; gating the build on the result is the other half.
