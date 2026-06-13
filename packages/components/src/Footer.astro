@@ -1,10 +1,10 @@
 ---
-import type { DocsConfig } from '../config';
-import { activeSocials } from '../config';
+import type { SiteChrome } from './chrome';
+import { activeSocials } from './chrome';
 import ScreenSizeIndicator from './ScreenSizeIndicator.astro';
 
 interface Props {
-  config: DocsConfig;
+  config: SiteChrome;
 }
 const { config } = Astro.props;
 

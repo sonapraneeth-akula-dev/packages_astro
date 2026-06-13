@@ -1,0 +1,19 @@
+{
+  "name": "@grihasetu/components",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared prop/config-driven Astro UI components used by the notes and blog engines.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./chrome": "./src/chrome.ts",
+    "./icons": "./src/icons.ts",
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "astro": "^6.4.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "typescript": "^6.0.3"
+  }
+}
