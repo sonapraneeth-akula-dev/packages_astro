@@ -27,14 +27,11 @@
       "name": "@grihasetu/notes-core",
       "version": "0.1.0",
       "dependencies": {
-        "@astrojs/markdown-remark": "^7.2.0",
-        "@astrojs/mdx": "^6.0.3",
         "@astrojs/sitemap": "^3.7.3",
         "@expressive-code/plugin-line-numbers": "^0.43.1",
+        "@grihasetu/rehype-satteri-autolink-headings": "workspace:*",
         "astro": "^6.4.6",
         "astro-expressive-code": "^0.43.1",
-        "rehype-autolink-headings": "^7.1.0",
-        "rehype-slug": "^6.0.0",
       },
       "devDependencies": {
         "@types/node": "^25.9.3",
@@ -59,12 +56,18 @@
       "name": "@grihasetu/rehype-satteri-autolink-headings",
       "version": "0.1.0",
       "dependencies": {
+        "@astrojs/markdown-remark": "^7.2.0",
+        "@astrojs/mdx": "^6.0.3",
+        "rehype-slug": "^6.0.0",
         "unist-util-visit": "^5.0.0",
       },
       "devDependencies": {
         "@types/hast": "^3.0.4",
         "@types/node": "^25.9.3",
         "typescript": "^6.0.3",
+      },
+      "peerDependencies": {
+        "astro": "^6.4.6",
       },
     },
   },
@@ -824,8 +827,6 @@
     "regex-utilities": ["regex-utilities@2.3.0", "", {}, "sha512-8VhliFJAWRaUiVvREIiW2NXXTmHs4vMNnSzuJVhscgmGav3g9VDxLrQndI3dZZVVdp0ZO/5v0xmX516/7M9cng=="],
 
     "rehype": ["rehype@13.0.2", "", { "dependencies": { "@types/hast": "^3.0.0", "rehype-parse": "^9.0.0", "rehype-stringify": "^10.0.0", "unified": "^11.0.0" } }, "sha512-j31mdaRFrwFRUIlxGeuPXXKWQxet52RBQRvCmzl5eCefn/KGbomK5GMHNMsOJf55fgo3qw5tST5neDuarDYR2A=="],
-
-    "rehype-autolink-headings": ["rehype-autolink-headings@7.1.0", "", { "dependencies": { "@types/hast": "^3.0.0", "@ungap/structured-clone": "^1.0.0", "hast-util-heading-rank": "^3.0.0", "hast-util-is-element": "^3.0.0", "unified": "^11.0.0", "unist-util-visit": "^5.0.0" } }, "sha512-rItO/pSdvnvsP4QRB1pmPiNHUskikqtPojZKJPPPAVx9Hj8i8TwMBhofrrAYRhYOOBZH9tgmG5lPqDLuIWPWmw=="],
 
     "rehype-expressive-code": ["rehype-expressive-code@0.43.1", "", { "dependencies": { "expressive-code": "^0.43.1" } }, "sha512-CUOGQVlUcSMSXZgpcq9xL6B+dZqnI3w1R6EZj932XpGgj2Hmy7H6oMqa9W/Z7X2HOILWLWhqu1b9kuYcD+nd6w=="],
 

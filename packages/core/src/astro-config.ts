@@ -1,12 +1,12 @@
 import { defineConfig, fontProviders } from 'astro/config';
 import type { AstroIntegration } from 'astro';
-import { unified } from '@astrojs/markdown-remark';
-import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import expressiveCode from 'astro-expressive-code';
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
-import rehypeSlug from 'rehype-slug';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import {
+  satteriMdx,
+  satteriMarkdownProcessor,
+} from '@grihasetu/rehype-satteri-autolink-headings/astro';
 import { execSync } from 'node:child_process';
 import { notesRoutes } from './routes-integration';
 import type { DocsConfig } from './config';
@@ -85,7 +85,7 @@ export function defineDocsAstroConfig(options: DocsAstroConfigOptions) {
           },
         },
       }),
-      mdx(),
+      satteriMdx(),
       sitemap(),
       // The engine owns all page routing/search: this injects `/`, `/[...slug]`,
       // `/search` and `/404` so sites need no `src/pages/` of their own.
@@ -98,48 +98,10 @@ export function defineDocsAstroConfig(options: DocsAstroConfigOptions) {
     ],
     compressHTML: true,
     markdown: {
-      // Astro 6 moved remark/rehype config under `processor`. `unified()` builds
-      // the default pipeline; we add heading ids + clickable anchor links.
-      processor: unified({
-        rehypePlugins: [
-          rehypeSlug,
-          [
-            rehypeAutolinkHeadings,
-            {
-              behavior: 'append',
-              properties: { className: ['heading-anchor'], ariaHidden: 'true', tabIndex: -1 },
-              content: {
-                type: 'element',
-                tagName: 'svg',
-                properties: {
-                  width: 15,
-                  height: 15,
-                  viewBox: '0 0 24 24',
-                  fill: 'none',
-                  stroke: 'currentColor',
-                  strokeWidth: 2,
-                  strokeLinecap: 'round',
-                  strokeLinejoin: 'round',
-                },
-                children: [
-                  {
-                    type: 'element',
-                    tagName: 'path',
-                    properties: { d: 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71' },
-                    children: [],
-                  },
-                  {
-                    type: 'element',
-                    tagName: 'path',
-                    properties: { d: 'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71' },
-                    children: [],
-                  },
-                ],
-              },
-            },
-          ],
-        ],
-      }),
+      // The whole Markdown/MDX rehype pipeline lives in the satteri plugin
+      // package: heading ids (rehype-slug) + a clickable anchor beside each
+      // heading (the satteri autolink plugin).
+      processor: satteriMarkdownProcessor(),
     },
     // Self-host Google Fonts at build time: removes external font origins from
     // the critical path and ships metric-matched fallbacks (no layout shift).
