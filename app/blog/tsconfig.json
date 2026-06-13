@@ -1,0 +1,11 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "types": [
+      "node"
+    ]
+  }
+  // `include`/`exclude` are inherited from astro/tsconfigs/strict, which already
+  // globs the project (`${configDir}/**/*`), pulls in `.astro/types.d.ts` and
+  // excludes `dist`. Re-declaring them here only narrowed that coverage.
+}

@@ -1,0 +1,141 @@
+# Docker Compose for the Grihasetu blog.
+#
+# Environments:
+#   dev   → dev.blog.sonapraneeth.in   (live watching + hot reload, source bind-mounted)
+#   test  → test.blog.sonapraneeth.in  (built output, used for Lighthouse + screenshots)
+#   ppe   → ppe.blog.sonapraneeth.in   (built output, pre-production gate)
+#   prod  → blog.sonapraneeth.in       (built output, production)
+#
+# Routing is handled by Caddy using the hostnames above. For local testing,
+# add the hostnames to your hosts file pointing at 127.0.1.2 (bun run hosts:setup).
+#
+# Pagefind search:
+#   The built environments (test/ppe/prod) run `bun run build`
+#   (astro build && pagefind --site dist), so the search index ships inside the
+#   image and search works out of the box. The dev container generates the index
+#   into public/pagefind on startup and re-runs it automatically whenever
+#   content changes (via the watch:content script), so dev search stays in sync.
+#
+# Usage:
+#   docker compose up dev --build         # development with hot reload
+#   docker compose up test --build -d     # test environment
+#   docker compose up ppe --build -d      # pre-production
+#   docker compose up prod --build -d     # production
+
+name: blog
+
+services:
+  # ─── Reverse proxy (Caddy) ─────────────────────────────────────────────────
+  # Caddy reads ./Caddyfile and routes each hostname to its container. On a
+  # public server it can also provision HTTPS automatically (see the Caddyfile).
+  caddy:
+    image: caddy:2.10-alpine
+    container_name: blog-caddy
+    restart: unless-stopped
+    ports:
+      - "127.0.1.2:80:80"
+      - "127.0.1.2:443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - web
+
+  # ─── Development (hot reload) ──────────────────────────────────────────────
+  dev:
+    build:
+      context: .
+      target: dev
+    container_name: blog-dev
+    restart: unless-stopped
+    environment:
+      - PUBLIC_APP_ENV=dev
+      - PUBLIC_SITE_URL=https://dev.blog.sonapraneeth.in
+      # Bind-mounted host files don't forward inotify events into the container
+      # on Windows/macOS, so use polling to make HMR pick up live edits.
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      # Bind-mount source for live watching; keep container's node_modules.
+      - ./:/app
+      - /app/node_modules
+    depends_on:
+      - caddy
+    networks:
+      - web
+    expose:
+      - "4322"
+
+  # ─── Test (built output) ───────────────────────────────────────────────────
+  test:
+    build:
+      context: .
+      target: runtime
+      args:
+        PUBLIC_APP_ENV: test
+        PUBLIC_SITE_URL: https://test.blog.sonapraneeth.in
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
+        GIT_BRANCH: ${GIT_BRANCH:-unknown}
+    container_name: blog-test
+    restart: unless-stopped
+    environment:
+      - PUBLIC_APP_ENV=test
+      - PUBLIC_SITE_URL=https://test.blog.sonapraneeth.in
+    depends_on:
+      - caddy
+    networks:
+      - web
+    expose:
+      - "4322"
+
+  # ─── PPE / Pre-production (built output) ───────────────────────────────────
+  ppe:
+    build:
+      context: .
+      target: runtime
+      args:
+        PUBLIC_APP_ENV: ppe
+        PUBLIC_SITE_URL: https://ppe.blog.sonapraneeth.in
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
+        GIT_BRANCH: ${GIT_BRANCH:-unknown}
+    container_name: blog-ppe
+    restart: unless-stopped
+    environment:
+      - PUBLIC_APP_ENV=ppe
+      - PUBLIC_SITE_URL=https://ppe.blog.sonapraneeth.in
+    depends_on:
+      - caddy
+    networks:
+      - web
+    expose:
+      - "4322"
+
+  # ─── Production (built output) ─────────────────────────────────────────────
+  prod:
+    build:
+      context: .
+      target: runtime
+      args:
+        PUBLIC_APP_ENV: prod
+        PUBLIC_SITE_URL: https://blog.sonapraneeth.in
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
+        GIT_BRANCH: ${GIT_BRANCH:-unknown}
+    container_name: blog-prod
+    restart: unless-stopped
+    environment:
+      - PUBLIC_APP_ENV=prod
+      - PUBLIC_SITE_URL=https://blog.sonapraneeth.in
+    depends_on:
+      - caddy
+    networks:
+      - web
+    expose:
+      - "4322"
+
+networks:
+  web:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

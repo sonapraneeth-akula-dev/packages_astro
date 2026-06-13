@@ -28,6 +28,7 @@
     "deploy": "bun run scripts/docker-compose.ts up prod caddy --build -d"
   },
   "dependencies": {
+    "@grihasetu/components": "workspace:*",
     "@grihasetu/notes-core": "workspace:*",
     "astro": "^6.4.6"
   },

@@ -1,0 +1,129 @@
+---
+title: 'Building a Fast MDX Blog with Astro'
+description: 'A tour of the code-block superpowers, synced tabs and custom components that power this very blog — with line numbers, line highlighting and language detection.'
+pubDate: 2026-06-08
+updatedDate: 2026-06-10
+category: 'Engineering'
+tags: ['astro', 'mdx', 'code', 'dx']
+cover: '⚡'
+---
+
+import { Callout, Tabs, TabItem } from '@grihasetu/blog-core/components/mdx';
+
+This post is a living demo of everything the blog's MDX pipeline can do — from
+syntax highlighting to **synced, multi-tab code groups**. Everything you see
+here is authored in plain MDX.
+
+<Callout type="tip" title="Author once, render everywhere">
+  Components like this `Callout` are auto-injected into every post, so you never
+  need to import them unless you want explicit control.
+</Callout>
+
+## Syntax highlighting & language detection
+
+Fenced code blocks are highlighted at build time with a high-contrast theme that
+clears WCAG AA — even comments. The language is detected from the fence info
+string and shown in the frame header.
+
+```ts title="greet.ts"
+// Language is detected from `ts` and rendered with a file-name frame.
+export function greet(name: string): string {
+  return `Hello, ${name}!`;
+}
+```
+
+## Line numbers
+
+Opt into line numbers per block with `showLineNumbers`:
+
+```py showLineNumbers
+def fib(n: int) -> int:
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a
+```
+
+## Highlighting a block of lines
+
+Mark specific lines (or ranges) to draw the eye to what matters:
+
+```js {2-4} showLineNumbers
+const config = {
+  cache: true,        // highlighted
+  retries: 3,         // highlighted
+  timeout: 5_000,     // highlighted
+  verbose: false,
+};
+```
+
+You can also mark individual lines and ranges together, e.g. `{1, 4-5}`, and use
+`ins`/`del` markers for diffs:
+
+```diff
+- const slow = await fetchSequential();
++ const fast = await Promise.all(requests);
+```
+
+## Synced code tabs
+
+Pick your package manager once and **every** tab group on the page follows. Try
+switching the tabs below — both groups stay in sync (the choice is also
+remembered on your next visit).
+
+<Tabs syncKey="pkg">
+  <TabItem label="bun">
+    ```sh
+    bun add astro @astrojs/mdx
+    ```
+  </TabItem>
+  <TabItem label="npm">
+    ```sh
+    npm install astro @astrojs/mdx
+    ```
+  </TabItem>
+  <TabItem label="pnpm">
+    ```sh
+    pnpm add astro @astrojs/mdx
+    ```
+  </TabItem>
+</Tabs>
+
+And again, further down — these stay in lock-step with the group above:
+
+<Tabs syncKey="pkg">
+  <TabItem label="bun">
+    ```sh
+    bun run dev
+    ```
+  </TabItem>
+  <TabItem label="npm">
+    ```sh
+    npm run dev
+    ```
+  </TabItem>
+  <TabItem label="pnpm">
+    ```sh
+    pnpm dev
+    ```
+  </TabItem>
+</Tabs>
+
+## Custom components
+
+Drop in your own components anywhere. Callouts come in several flavours:
+
+<Callout type="warning" title="Measure against production">
+  Dev servers disable compression and minification. Always audit the built
+  output behind your real proxy.
+</Callout>
+
+<Callout type="danger" title="Never regress a passing score">
+  Re-audit performance, accessibility, best-practices and SEO after every change.
+</Callout>
+
+## Wrapping up
+
+That's the whole toolkit: detected-and-highlighted code, line numbers, line
+ranges, diffs, synced tabs and custom MDX components — all statically rendered
+for a perfect Lighthouse run.

@@ -1,0 +1,270 @@
+---
+title: 'The MDX Component Library'
+description: 'A complete reference for every built-in MDX component on this blog — callouts, cards, link cards, badges, link buttons, steps, file trees and synced code tabs — with copy-paste examples.'
+pubDate: 2026-06-12
+category: 'Tutorials'
+tags: ['mdx', 'components', 'reference', 'dx']
+cover: '🧩'
+---
+
+import {
+  Callout,
+  Card,
+  CardGrid,
+  LinkCard,
+  Badge,
+  LinkButton,
+  Steps,
+  FileTree,
+  Tabs,
+  TabItem,
+} from '@grihasetu/blog-core/components/mdx';
+
+This blog ships a small library of content components inspired by
+[Starlight's built-ins](https://starlight.astro.build/components/using-components/).
+Every component listed here is **auto-injected into each post**, so you can use
+it without an import — though you can still import them explicitly for editor
+autocomplete:
+
+```mdx
+import { Card, Steps, Badge } from '@grihasetu/blog-core/components/mdx';
+```
+
+Under the hood, the post page renders `<Content components={mdxComponents} />`,
+mapping each name to its `.astro` implementation. Add a component to
+`src/components/mdx.ts` to make it available everywhere.
+
+## Callouts
+
+Use `<Callout>` to highlight supplementary information. The `type` controls the
+colour, icon and default title; pass `title` to override it.
+
+<Callout type="note">The default note aside — handy for asides and context.</Callout>
+
+<Callout type="tip" title="Pro tip">Tips use a green accent.</Callout>
+
+<Callout type="caution" title="Watch out">Caution and warning share the amber triangle.</Callout>
+
+<Callout type="danger" title="Careful">Danger asides flag destructive or irreversible actions.</Callout>
+
+```mdx
+<Callout type="tip" title="Pro tip">Tips use a green accent.</Callout>
+```
+
+Available types: `note`, `tip`, `important`, `caution`, `warning`, `danger`.
+
+## Cards & card grids
+
+`<Card>` renders titled content in a box; wrap several in a `<CardGrid>` to flow
+them into responsive columns. `icon` accepts an emoji or inline SVG.
+
+<CardGrid>
+  <Card title="Fast by default" icon="⚡">
+    Statically rendered with Astro's islands — ship zero JS unless a component needs it.
+  </Card>
+  <Card title="Type-safe content" icon="🛡️">
+    Content collections validate every post's frontmatter with Zod at build time.
+  </Card>
+</CardGrid>
+
+```mdx
+<CardGrid>
+  <Card title="Fast by default" icon="⚡">…</Card>
+  <Card title="Type-safe content" icon="🛡️">…</Card>
+</CardGrid>
+```
+
+Pass `stagger` to `<CardGrid>` to offset alternating cards on wide screens.
+
+## Link cards
+
+`<LinkCard>` turns a whole card into a prominent navigation link, with an
+optional `description`.
+
+<CardGrid>
+  <LinkCard
+    title="Theming with CSS custom properties"
+    href="/blog/theming-with-css-custom-properties/"
+    description="How the design tokens fit together for light and dark mode."
+  />
+  <LinkCard title="Offline search with Pagefind" href="/blog/offline-search-pagefind/" />
+</CardGrid>
+
+```mdx
+<LinkCard
+  title="Theming with CSS custom properties"
+  href="/blog/theming-with-css-custom-properties/"
+  description="How the design tokens fit together."
+/>
+```
+
+## Badges
+
+`<Badge>` shows a small inline label — a status, category or version. Choose a
+`variant` and an optional `size`.
+
+### Variants
+
+- <Badge text="Note" variant="note" />
+- <Badge text="Tip" variant="tip" />
+- <Badge text="Success" variant="success" />
+- <Badge text="Caution" variant="caution" />
+- <Badge text="Danger" variant="danger" />
+- <Badge text="Default" />
+
+Variants: `note`, `tip`, `caution`, `danger`, `success`, `default`.
+
+### Sizes
+
+- <Badge text="Small" variant="success" size="small" />
+- <Badge text="Medium" variant="success" size="medium" />
+- <Badge text="Large" variant="success" size="large" />
+
+```mdx
+<Badge text="Success" variant="success" />
+<Badge text="Large" variant="success" size="large" />
+```
+
+Sizes: `small` (default), `medium`, `large`. Note how these `###` sub-headings
+nest under **Badges** in the "On this page" outline on the right.
+
+## Link buttons
+
+`<LinkButton>` is a call-to-action link styled as a button. Use `variant` for
+prominence and `icon` (with optional `iconPlacement`) for a leading or trailing
+glyph. `icon` takes either a named icon (e.g. `external`, `github`) or an emoji.
+External links open in a new tab automatically.
+
+<LinkButton href="/blog/">Read the blog</LinkButton>
+<LinkButton href="https://astro.build" variant="secondary" icon="external" iconPlacement="end">Astro docs</LinkButton>
+<LinkButton href="https://github.com" variant="secondary" icon="github" iconPlacement="start">Star on GitHub</LinkButton>
+<LinkButton href="/" variant="minimal">Back home</LinkButton>
+
+```mdx
+<LinkButton href="/blog/">Read the blog</LinkButton>
+<LinkButton href="https://astro.build" variant="secondary" icon="external" iconPlacement="end">
+  Astro docs
+</LinkButton>
+<LinkButton href="https://github.com" variant="secondary" icon="github" iconPlacement="start">
+  Star on GitHub
+</LinkButton>
+```
+
+Variants: `primary` (default), `secondary`, `minimal`.
+
+## Icons
+
+`<Icon>` renders a named icon from the curated set. The same names work in any
+`icon` prop (e.g. on `<LinkButton>` and `<Card>`). Pass a `label` for a
+meaningful standalone icon, or leave it decorative.
+
+<p style="display: flex; flex-wrap: wrap; gap: 0.9rem; align-items: center;">
+  <Icon name="external" /> <Icon name="link" /> <Icon name="arrow-right" />
+  <Icon name="github" /> <Icon name="rss" /> <Icon name="mail" />
+  <Icon name="book" /> <Icon name="rocket" /> <Icon name="star" />
+  <Icon name="heart" /> <Icon name="info" /> <Icon name="check" />
+  <Icon name="pencil" />
+</p>
+
+```mdx
+<Icon name="rocket" />
+<Icon name="github" label="GitHub" size="1.5rem" />
+```
+
+Available: `external`, `link`, `arrow-right`, `arrow-left`, `arrow-up`,
+`arrow-down`, `github`, `rss`, `mail`, `book`, `rocket`, `star`, `heart`,
+`info`, `check`, `pencil`.
+
+## Steps
+
+Wrap a Markdown ordered list in `<Steps>` to render a numbered, rail-connected
+walkthrough. All the usual Markdown — including code blocks — works inside each
+step.
+
+<Steps>
+
+1. Import the component into your MDX file (or rely on the auto-injection):
+
+   ```mdx
+   import { Steps } from '@grihasetu/blog-core/components/mdx';
+   ```
+
+2. Wrap `<Steps>` around a standard ordered list.
+
+3. Write each step as a list item — nested code, callouts and lists all work.
+
+</Steps>
+
+## File trees
+
+`<FileTree>` renders a directory structure from a Markdown list. An item is a
+directory if it has nested items or ends with `/`. **Bold** an entry to
+highlight it, and use `…` (or `...`) as a placeholder.
+
+<FileTree>
+
+- src
+  - components
+    - **mdx.ts**
+    - Card.astro
+    - FileTree.astro
+  - content
+    - blog/
+  - pages/
+  - …
+- astro.config.ts
+- package.json
+
+</FileTree>
+
+```mdx
+<FileTree>
+
+- src
+  - components
+    - **mdx.ts**
+    - Card.astro
+  - pages/
+  - …
+- astro.config.ts
+
+</FileTree>
+```
+
+## Synced code tabs
+
+`<Tabs>` with `<TabItem>` children renders tabbed panels. Give related groups
+the same `syncKey` and they switch together — and remember the choice across
+visits.
+
+<Tabs syncKey="pkg">
+  <TabItem label="bun">
+    ```sh
+    bun add astro
+    ```
+  </TabItem>
+  <TabItem label="npm">
+    ```sh
+    npm install astro
+    ```
+  </TabItem>
+  <TabItem label="pnpm">
+    ```sh
+    pnpm add astro
+    ```
+  </TabItem>
+</Tabs>
+
+```mdx
+<Tabs syncKey="pkg">
+  <TabItem label="bun">```sh\nbun add astro\n```</TabItem>
+  <TabItem label="npm">```sh\nnpm install astro\n```</TabItem>
+</Tabs>
+```
+
+## Wrapping up
+
+That's the full component toolkit — callouts, cards, link cards, badges, link
+buttons, steps, file trees and synced tabs — all statically rendered and ready
+to drop into any post. To extend the set, build a new `.astro` component and
+register it in `src/components/mdx.ts`.

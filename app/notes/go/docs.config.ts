@@ -15,7 +15,7 @@ export const docsConfig = defineDocsConfig({
   author: 'Grihasetu',
   subject: 'The Go Programming Language',
   editUrlBase:
-    'https://github.com/grihasetu/notes/edit/main/packages/app/src/content/docs',
+    'https://github.com/grihasetu/notes/edit/main/app/notes/go/src/content/docs',
   nav: [
     { href: '/', label: 'Home', icon: ICON_HOME },
     { href: '/basics/hello-world', label: 'Notes', icon: ICON_BOOK },
