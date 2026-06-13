@@ -11,7 +11,6 @@
     "./astro": "./src/astro-config.ts",
     "./styles/global.css": "./src/styles/global.css",
     "./components/mdx": "./src/components/mdx.ts",
-    "./components/icons": "./src/components/icons.ts",
     "./components/*": "./src/components/*",
     "./layouts/*": "./src/layouts/*",
     "./routes/*": "./src/routes/*",
@@ -20,6 +19,7 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
     "@expressive-code/plugin-line-numbers": "^0.43.1",
+    "@grihasetu/components": "workspace:*",
     "@grihasetu/rehype-satteri-autolink-headings": "workspace:*",
     "astro": "^6.4.6",
     "astro-expressive-code": "^0.43.1"

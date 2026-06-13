@@ -49,7 +49,7 @@ function git(command: string, fallback: string): string {
  * Shared Astro config for every docs/notes site. Each site calls this from its
  * own `astro.config.ts` and may pass a port, site URL, or extra integrations.
  *
- *   // packages/demo/astro.config.ts
+ *   // demo/notes/astro.config.ts
  *   import { defineDocsAstroConfig } from '@grihasetu/notes-core/astro';
  *   export default defineDocsAstroConfig({ port: 4310 });
  */

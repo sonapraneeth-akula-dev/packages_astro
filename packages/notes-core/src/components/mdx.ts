@@ -13,17 +13,17 @@
  *
  * Sites can extend the map per-site with {@link mergeMdxComponents}.
  */
-import Callout from './Callout.astro';
-import Tabs from './Tabs.astro';
-import TabItem from './TabItem.astro';
-import Card from './Card.astro';
-import CardGrid from './CardGrid.astro';
-import LinkCard from './LinkCard.astro';
-import Badge from './Badge.astro';
-import LinkButton from './LinkButton.astro';
-import Steps from './Steps.astro';
-import FileTree from './FileTree.astro';
-import Icon from './Icon.astro';
+import Callout from '@grihasetu/components/Callout.astro';
+import Tabs from '@grihasetu/components/Tabs.astro';
+import TabItem from '@grihasetu/components/TabItem.astro';
+import Card from '@grihasetu/components/Card.astro';
+import CardGrid from '@grihasetu/components/CardGrid.astro';
+import LinkCard from '@grihasetu/components/LinkCard.astro';
+import Badge from '@grihasetu/components/Badge.astro';
+import LinkButton from '@grihasetu/components/LinkButton.astro';
+import Steps from '@grihasetu/components/Steps.astro';
+import FileTree from '@grihasetu/components/FileTree.astro';
+import Icon from '@grihasetu/components/Icon.astro';
 import DocImage from './DocImage.astro';
 import MdImage from './MdImage.astro';
 import { Code } from 'astro-expressive-code/components';

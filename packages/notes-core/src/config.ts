@@ -4,43 +4,23 @@
  * fall back to these sensible defaults.
  */
 
-export interface NavLink {
-  href: string;
-  label: string;
-  /** Inner SVG markup (24×24, stroke-based) for the mobile tab bar. */
-  icon: string;
-}
+import type { SiteChrome } from '@grihasetu/components/chrome';
 
-export interface SocialProfile {
-  id: string;
-  href: string;
-  label: string;
-  /** Inner SVG markup (24×24, stroke-based). */
-  icon: string;
-}
+export type { NavLink, SocialProfile } from '@grihasetu/components/chrome';
+export { activeSocials } from '@grihasetu/components/chrome';
 
-export interface DocsConfig {
-  /** Short brand shown in the header. */
-  brand: string;
+export interface DocsConfig extends SiteChrome {
   /** Full site name used in <title> and metadata. */
   title: string;
-  /** Default meta description / tagline. */
-  description: string;
-  /** Author shown in the footer. */
-  author: string;
   /** Posts/notes subject, shown on the landing page. */
   subject: string;
   /** IANA time zone used to render timestamps. */
   timeZone: string;
   /** Human-readable abbreviation appended after timestamps (e.g. IST, UTC). */
   timeZoneLabel: string;
-  /** Header / mobile-tab navigation links. */
-  nav: NavLink[];
-  /** Footer social links. Entries with an empty href are hidden. */
-  socials: SocialProfile[];
   /**
    * Optional base URL for "Edit this page" links, e.g.
-   * `https://github.com/org/repo/edit/main/packages/app/src/content/docs`.
+   * `https://github.com/org/repo/edit/main/app/notes/go/src/content/docs`.
    * The doc id + extension is appended.
    */
   editUrlBase?: string;
@@ -84,9 +64,4 @@ export { ICON_BOOK };
 /** Merge a partial site config onto the defaults. */
 export function defineDocsConfig(config: Partial<DocsConfig>): DocsConfig {
   return { ...defaultDocsConfig, ...config };
-}
-
-/** Active socials (href set) — used by the footer. */
-export function activeSocials(config: DocsConfig): SocialProfile[] {
-  return config.socials.filter((s) => s.href !== '');
 }
