@@ -8,7 +8,7 @@
     "dev": "bun ../../node_modules/astro/bin/astro.mjs dev",
     "start": "bun ../../node_modules/astro/bin/astro.mjs dev",
     "build": "bun ../../node_modules/astro/bin/astro.mjs build && bun ../../node_modules/pagefind/lib/runner/bin.cjs --site dist",
-    "search:index": "bun ../../node_modules/pagefind/lib/runner/bin.cjs --site dist --output-path public/pagefind",
+    "search:index": "bun ../../node_modules/astro/bin/astro.mjs build && bun ../../node_modules/pagefind/lib/runner/bin.cjs --site dist --output-path public/pagefind",
     "preview": "bun ../../node_modules/astro/bin/astro.mjs preview",
     "check": "bun ../../node_modules/astro/bin/astro.mjs check"
   },
