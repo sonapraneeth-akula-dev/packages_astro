@@ -24,8 +24,8 @@ import LinkButton from '@grihasetu/components/LinkButton.astro';
 import Steps from '@grihasetu/components/Steps.astro';
 import FileTree from '@grihasetu/components/FileTree.astro';
 import Icon from '@grihasetu/components/Icon.astro';
-import DocImage from './DocImage.astro';
-import MdImage from './MdImage.astro';
+import DocImage from '@grihasetu/components/DocImage.astro';
+import MdImage from '@grihasetu/components/MdImage.astro';
 import { Code } from 'astro-expressive-code/components';
 
 export {

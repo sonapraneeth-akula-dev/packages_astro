@@ -23,6 +23,8 @@ import LinkButton from '@grihasetu/components/LinkButton.astro';
 import Steps from '@grihasetu/components/Steps.astro';
 import FileTree from '@grihasetu/components/FileTree.astro';
 import Icon from '@grihasetu/components/Icon.astro';
+import DocImage from '@grihasetu/components/DocImage.astro';
+import MdImage from '@grihasetu/components/MdImage.astro';
 import { Code } from 'astro-expressive-code/components';
 
 export {
@@ -37,6 +39,7 @@ export {
   Steps,
   FileTree,
   Icon,
+  DocImage,
   Code,
 };
 
@@ -53,7 +56,10 @@ export const mdxComponents = {
   Steps,
   FileTree,
   Icon,
+  DocImage,
   Code,
+  // Upgrade plain Markdown images to lazy/async, optimized output.
+  img: MdImage,
 };
 
 /** Merge site-specific components onto the shared map (site values win). */
