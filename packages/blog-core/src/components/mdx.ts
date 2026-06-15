@@ -1,65 +1,28 @@
 /**
- * Shared MDX components.
+ * MDX components for blog posts.
  *
- * Two ways to use them in a post:
+ * Re-exports the shared UI map from @grihasetu/components and adds the
+ * engine-specific `Code` block (expressive-code). Use them in a post either:
  *
- * 1. Auto-mapped (no import needed) — these names are passed to <Content /> on
- *    the post page, so you can write <Callout>, <Tabs>, <Card>, … directly.
+ * 1. Auto-mapped (no import) — passed to <Content /> on the post page, so you
+ *    can write <Callout>, <Tabs>, <Card>, <DocImage>, … directly. Markdown
+ *    images (`![alt](src)`) are auto-upgraded to optimized lazy/async output.
  *
  * 2. Explicit import for anything custom:
- *      import { Callout, Card, Steps } from '@components/mdx';
+ *      import { Callout, Steps } from '@grihasetu/blog-core/components/mdx';
  *
- * To register your OWN component for auto-mapping, add it to `mdxComponents`
- * below and it becomes available in every post without an import.
+ * Sites can extend the map per-site with {@link mergeMdxComponents}.
  */
-import Callout from '@grihasetu/components/Callout.astro';
-import Tabs from '@grihasetu/components/Tabs.astro';
-import TabItem from '@grihasetu/components/TabItem.astro';
-import Card from '@grihasetu/components/Card.astro';
-import CardGrid from '@grihasetu/components/CardGrid.astro';
-import LinkCard from '@grihasetu/components/LinkCard.astro';
-import Badge from '@grihasetu/components/Badge.astro';
-import LinkButton from '@grihasetu/components/LinkButton.astro';
-import Steps from '@grihasetu/components/Steps.astro';
-import FileTree from '@grihasetu/components/FileTree.astro';
-import Icon from '@grihasetu/components/Icon.astro';
-import DocImage from '@grihasetu/components/DocImage.astro';
-import MdImage from '@grihasetu/components/MdImage.astro';
+import { baseMdxComponents } from '@grihasetu/components/mdx';
 import { Code } from 'astro-expressive-code/components';
 
-export {
-  Callout,
-  Tabs,
-  TabItem,
-  Card,
-  CardGrid,
-  LinkCard,
-  Badge,
-  LinkButton,
-  Steps,
-  FileTree,
-  Icon,
-  DocImage,
-  Code,
-};
+export * from '@grihasetu/components/mdx';
+export { Code };
 
 /** Components auto-injected into every MDX post via <Content components={...} />. */
 export const mdxComponents = {
-  Callout,
-  Tabs,
-  TabItem,
-  Card,
-  CardGrid,
-  LinkCard,
-  Badge,
-  LinkButton,
-  Steps,
-  FileTree,
-  Icon,
-  DocImage,
+  ...baseMdxComponents,
   Code,
-  // Upgrade plain Markdown images to lazy/async, optimized output.
-  img: MdImage,
 };
 
 /** Merge site-specific components onto the shared map (site values win). */
@@ -68,3 +31,4 @@ export function mergeMdxComponents(
 ): Record<string, unknown> {
   return { ...mdxComponents, ...extra };
 }
+
