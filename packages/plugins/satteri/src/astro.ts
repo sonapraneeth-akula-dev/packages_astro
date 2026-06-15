@@ -9,6 +9,17 @@ import mdx from '@astrojs/mdx';
 import { unified } from '@astrojs/markdown-remark';
 import rehypeSlug from 'rehype-slug';
 import rehypeSatteriAutolinkHeadings from './index';
+import { remarkCodeSource, type CodeSourceOptions } from './remark-code-source';
+
+/** Options shared by the satteri Markdown/MDX preset functions. */
+export interface SatteriPresetOptions {
+  /**
+   * Options for the code-source remark plugin, which fills fenced code blocks
+   * from a local `file="…"` or remote `url="…"`. Use this to widen the remote
+   * host allowlist or tune fetch limits.
+   */
+  codeSource?: CodeSourceOptions;
+}
 
 /**
  * The `@astrojs/mdx` integration. Spread the result into `integrations` (after
@@ -16,6 +27,10 @@ import rehypeSatteriAutolinkHeadings from './index';
  * first so it can process fenced code inside `.mdx`).
  *
  *   integrations: [expressiveCode(...), satteriMdx(), ...]
+ *
+ * MDX inherits its remark/rehype plugins from the `markdown.processor` built by
+ * {@link satteriMarkdownProcessor}, so fenced blocks in `.mdx` can import their
+ * contents from a file or URL too \u2014 see {@link remarkCodeSource}.
  */
 export function satteriMdx() {
   return mdx();
@@ -30,8 +45,9 @@ export function satteriMdx() {
  *
  *   markdown: { processor: satteriMarkdownProcessor() }
  */
-export function satteriMarkdownProcessor() {
+export function satteriMarkdownProcessor(options: SatteriPresetOptions = {}) {
   return unified({
+    remarkPlugins: [[remarkCodeSource, options.codeSource ?? {}]],
     rehypePlugins: [rehypeSlug, rehypeSatteriAutolinkHeadings],
   });
 }
