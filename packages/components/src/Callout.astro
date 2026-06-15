@@ -68,7 +68,15 @@ const labels: Record<CalloutType, string> = {
     font-family: var(--font-heading);
     font-weight: 700;
     font-size: 0.95rem;
+    /* Blend the accent toward the page text so the label clears WCAG AA
+       (4.5:1) on the tinted callout background — darkens in light mode and
+       lightens in dark mode. The icon below keeps the vibrant accent. */
+    color: color-mix(in srgb, var(--c) 50%, var(--text));
+  }
+  .callout-head svg {
+    /* Icons are graphical (contrast-exempt), so keep them fully accented. */
     color: var(--c);
+    flex: none;
   }
   .callout-body :global(p:last-child) { margin-bottom: 0; }
   .callout-body :global(p:first-child) { margin-top: 0; }
