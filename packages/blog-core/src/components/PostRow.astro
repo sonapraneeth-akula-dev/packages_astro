@@ -7,8 +7,16 @@ import TagIcon from './TagIcon.astro';
 interface Props {
   post: Post;
   readingTime: string;
+  /**
+   * Heading level for the post title. Defaults to 3 (the home feed nests rows
+   * under an <h2> section). Taxonomy pages place rows directly under the page
+   * <h1>, so they pass 2 to keep the heading order sequential (no skipped
+   * level), which Lighthouse's `heading-order` audit requires.
+   */
+  headingLevel?: 2 | 3 | 4;
 }
-const { post, readingTime } = Astro.props;
+const { post, readingTime, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
 const { title, description, pubDate, category, tags, cover } = post.data;
 const href = `/blog/${post.id}`;
 ---
@@ -18,7 +26,7 @@ const href = `/blog/${post.id}`;
   <span class="row-glyph" aria-hidden="true">{cover ?? '›'}</span>
   <div class="row-body">
     <div class="row-head">
-      <h3 class="row-title">{title}</h3>
+      <Heading class="row-title">{title}</Heading>
       <a class="chip" href={`/categories/${slugify(category)}`}><CategoryIcon />{category}</a>
     </div>
     <p class="row-desc">{description}</p>

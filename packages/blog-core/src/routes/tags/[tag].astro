@@ -31,7 +31,7 @@ const { name, posts } = Astro.props as { name: string; posts: Post[] };
 
   <div class="container rows">
     {posts.map((post) => (
-      <PostRow post={post} readingTime={readingTime(post.body)} />
+      <PostRow post={post} readingTime={readingTime(post.body)} headingLevel={2} />
     ))}
   </div>
 </BaseLayout>
