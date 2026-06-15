@@ -12,9 +12,11 @@ interface Props {
   currentPath: string;
   /** Heading shown above the tree (defaults to the site subject). */
   label?: string;
+  /** Optional link back to the notebook hub (notebooks mode). */
+  backLink?: { label: string; href: string };
 }
 
-const { tree, currentPath, label = 'Contents' } = Astro.props;
+const { tree, currentPath, label = 'Contents', backLink } = Astro.props;
 ---
 
 <nav class="docs-sidebar" aria-label="Documentation navigation" data-pagefind-ignore>
@@ -27,6 +29,11 @@ const { tree, currentPath, label = 'Contents' } = Astro.props;
     <span>{label}</span>
   </button>
   <div class="docs-sidebar-panel" id="docs-sidebar-panel">
+    {backLink && (
+      <a class="docs-sidebar-back" href={backLink.href}>
+        <span aria-hidden="true">←</span> {backLink.label}
+      </a>
+    )}
     <p class="docs-sidebar-label">{label}</p>
     <div class="docs-sidebar-scroll">
       <SidebarTree items={tree} currentPath={currentPath} />
@@ -55,6 +62,17 @@ const { tree, currentPath, label = 'Contents' } = Astro.props;
   .docs-sidebar {
     font-size: 0.9rem;
   }
+  .docs-sidebar-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0 0 0.85rem;
+    padding-left: 0.5rem;
+  }
+  .docs-sidebar-back:hover { color: var(--accent-text); }
   .docs-sidebar-label {
     font-family: var(--font-mono);
     font-size: 0.72rem;

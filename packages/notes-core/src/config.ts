@@ -26,6 +26,15 @@ export interface DocsConfig extends SiteChrome {
   editUrlBase?: string;
   /** Enable the Pagefind-powered offline search page. */
   search: boolean;
+  /**
+   * Treat each top-level content folder as a self-contained "notebook"
+   * (sub-note). The home page becomes a hub of notebook cards, and each notebook
+   * gets its own scoped sidebar, landing page and prev/next navigation — so a
+   * single site can host several independent handbooks (e.g. C++, Go, C#).
+   * Defaults to `false` (one flat handbook). Ignored when a curated
+   * `sidebar.json` is supplied.
+   */
+  notebooks: boolean;
 }
 
 const ICON_HOME =
@@ -57,6 +66,7 @@ export const defaultDocsConfig: DocsConfig = {
     },
   ],
   search: true,
+  notebooks: false,
 };
 
 export { ICON_BOOK };

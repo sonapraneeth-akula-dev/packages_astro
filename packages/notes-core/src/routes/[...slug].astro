@@ -16,11 +16,15 @@ import { sidebar } from 'virtual:notes-core/sidebar';
 export async function getStaticPaths() {
   const entries = await getCollection('docs');
   // A curated sidebar.json (when present) overrides the auto-generated tree, so
-  // the sidebar, prev/next and breadcrumbs all follow the curated order.
-  return buildDocRoutes(entries, sidebar ? { sidebarConfig: sidebar } : {});
+  // the sidebar, prev/next and breadcrumbs all follow the curated order. When
+  // notebooks mode is on, each top-level folder gets its own scoped sidebar.
+  return buildDocRoutes(
+    entries,
+    sidebar ? { sidebarConfig: sidebar } : { notebooks: docsConfig.notebooks },
+  );
 }
 
-const { entry, tree, prev, next, breadcrumbs } = Astro.props;
+const { entry, tree, prev, next, breadcrumbs, notebook, backLink } = Astro.props;
 const { Content, headings } = await render(entry);
 ---
 
@@ -38,6 +42,8 @@ const { Content, headings } = await render(entry);
   editUrl={editUrl(entry, docsConfig.editUrlBase)}
   cover={entry.data.cover}
   tableOfContents={entry.data.tableOfContents}
+  notebookLabel={notebook?.label}
+  backLink={backLink ?? undefined}
 >
   <Content components={components} />
 </DocLayout>

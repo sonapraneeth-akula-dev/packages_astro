@@ -23,6 +23,10 @@ interface Props {
   editUrl?: string;
   cover?: string;
   tableOfContents?: boolean;
+  /** Notebook label (notebooks mode) — used as the Pagefind filter + sidebar heading. */
+  notebookLabel?: string;
+  /** Link back to the notebook hub (notebooks mode). */
+  backLink?: DocLink;
 }
 
 const {
@@ -39,6 +43,8 @@ const {
   editUrl,
   cover,
   tableOfContents = true,
+  notebookLabel,
+  backLink,
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
@@ -48,9 +54,18 @@ const showToc = tableOfContents && headings.length > 0;
 <BaseLayout config={config} title={title} description={description} article>
   <ProgressBar />
   <div class="docs container">
-    <DocsSidebar tree={tree} currentPath={currentPath} label={config.subject} />
+    <DocsSidebar
+      tree={tree}
+      currentPath={currentPath}
+      label={notebookLabel ?? config.subject}
+      backLink={backLink}
+    />
 
-    <article class="doc" data-pagefind-body>
+    <article
+      class="doc"
+      data-pagefind-body
+      data-pagefind-filter={notebookLabel ? `notebook:${notebookLabel}` : undefined}
+    >
       <header class="doc-head">
         <nav class="crumbs" aria-label="Breadcrumb">
           {breadcrumbs.map((crumb, i) => (

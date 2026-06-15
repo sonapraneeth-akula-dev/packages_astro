@@ -24,6 +24,10 @@ import { docsConfig } from 'virtual:notes-core/config';
   </div>
 
   <div class="container search-wrap">
+    <p id="search-scope" class="search-scope" hidden>
+      Searching within <strong id="search-scope-name"></strong>.
+      <a href="/search">Search everything →</a>
+    </p>
     <div id="search" data-pagefind-ui></div>
     <p id="search-fallback" class="search-fallback" hidden>
       The search index is generated at build time. To try it on the dev server,
@@ -44,6 +48,11 @@ import { docsConfig } from 'virtual:notes-core/config';
     const showFallback = () => {
       if (fallback) fallback.hidden = false;
     };
+
+    // Optional per-notebook scope: `/search?notebook=Go` pre-applies the
+    // notebook filter so a sub-note can offer a search box scoped to itself.
+    const params = new URLSearchParams(window.location.search);
+    const scope = params.get('notebook');
 
     const css = document.createElement('link');
     css.rel = 'stylesheet';
@@ -66,11 +75,50 @@ import { docsConfig } from 'virtual:notes-core/config';
         showImages: false,
         pageSize: 8,
         resetStyles: false,
+        openFilters: ['notebook', 'Notebook'],
       });
+      if (scope) applyScope(scope);
     };
     script.onerror = showFallback;
     document.body.appendChild(script);
   }
+
+  // Tick the notebook filter checkbox whose label matches `value` once Pagefind
+  // has rendered the filter panel, then announce the active scope.
+  function applyScope(value: string) {
+    const root = document.getElementById('search');
+    if (!root) return;
+    const banner = document.getElementById('search-scope');
+    const name = document.getElementById('search-scope-name');
+    if (banner && name) {
+      name.textContent = value;
+      banner.hidden = false;
+    }
+
+    let done = false;
+    const tryCheck = () => {
+      if (done) return true;
+      const inputs = root.querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
+      for (const input of inputs) {
+        const text = (input.closest('label')?.textContent ?? '').trim();
+        if (text === value || text.startsWith(value)) {
+          if (!input.checked) input.click();
+          done = true;
+          return true;
+        }
+      }
+      return false;
+    };
+
+    if (tryCheck()) return;
+    const observer = new MutationObserver(() => {
+      if (tryCheck()) observer.disconnect();
+    });
+    observer.observe(root, { childList: true, subtree: true });
+    // Stop observing after a few seconds in case the filter never appears.
+    setTimeout(() => observer.disconnect(), 5000);
+  }
+
   initSearch();
 </script>
 
@@ -134,6 +182,16 @@ import { docsConfig } from 'virtual:notes-core/config';
 
 <style>
   .search-wrap { padding-bottom: 3rem; max-width: 48rem; }
+  .search-scope {
+    margin: 0 0 1rem;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .search-scope a { font-weight: 600; }
   .search-fallback {
     margin-top: 1rem;
     padding: 1rem 1.25rem;

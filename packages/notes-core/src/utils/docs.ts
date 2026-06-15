@@ -38,6 +38,21 @@ export interface Breadcrumb {
   href?: string;
 }
 
+/** A sub-note ("notebook"): a self-contained top-level handbook. */
+export interface Notebook {
+  /** Top-level folder segment (e.g. `cpp`). */
+  id: string;
+  /** Display label (from the folder index frontmatter, else a humanized id). */
+  label: string;
+  description?: string;
+  cover?: string;
+  badge?: string;
+  /** Landing route, `/<id>`. */
+  href: string;
+  /** Sort order from the folder index `sidebar.order` (Infinity when unset). */
+  order: number;
+}
+
 // ─── Path helpers ────────────────────────────────────────────────────────────
 
 /** Normalise to a leading-slash, no-trailing-slash path. */
@@ -211,7 +226,98 @@ function groupToNodes(group: BuildGroup): SidebarNode[] {
     .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label))
     .map((x) => x.node);
 }
+// ─── Notebooks (sub-notes) ───────────────────────────────────────
 
+/** The notebook (top-level folder) an entry belongs to, or null for root. */
+export function notebookSegment(entry: DocEntry): string | null {
+  if (isRootIndex(entry)) return null;
+  const id = entry.id.replace(/\.(mdx?|markdown)$/i, '');
+  return id.split('/')[0] || null;
+}
+
+/** True for a notebook's own landing note (`<id>/index` or a top-level `<id>`). */
+function isNotebookLanding(entry: DocEntry, id: string): boolean {
+  const eid = entry.id.replace(/\.(mdx?|markdown)$/i, '');
+  return eid === `${id}/index` || eid === id;
+}
+
+/** Discover the notebooks present in a set of entries, ordered for the hub. */
+export function getNotebooks(entries: DocEntry[]): Notebook[] {
+  const map = new Map<string, { landing?: DocEntry }>();
+  for (const entry of entries) {
+    if (!visible(entry) || isRootIndex(entry)) continue;
+    const id = notebookSegment(entry);
+    if (!id) continue;
+    const rec = map.get(id) ?? {};
+    if (isNotebookLanding(entry, id)) rec.landing = entry;
+    map.set(id, rec);
+  }
+  return [...map.entries()]
+    .map(([id, rec]) => ({
+      id,
+      label: rec.landing ? entryLabel(rec.landing) : humanize(id),
+      description: rec.landing?.data.description || undefined,
+      cover: rec.landing?.data.cover,
+      badge: rec.landing?.data.sidebar?.badge,
+      href: normalizePath(`/${id}`),
+      order: rec.landing ? entryOrder(rec.landing) : Number.POSITIVE_INFINITY,
+    }))
+    .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+}
+
+/** Build a sidebar tree scoped to a single notebook. */
+function buildNotebookSidebar(
+  entries: DocEntry[],
+  notebook: Notebook,
+): SidebarNode[] {
+  const scoped = entries.filter(
+    (e) => notebookSegment(e) === notebook.id && visible(e),
+  );
+  const root = emptyGroup('');
+
+  for (const entry of scoped) {
+    if (isNotebookLanding(entry, notebook.id)) continue;
+    // Drop the notebook segment so the tree is rooted inside the notebook.
+    const segs = folderSegments(entry).slice(1);
+    let group = root;
+    for (const seg of segs) {
+      let child = group.children.get(seg);
+      if (!child) {
+        child = emptyGroup(seg);
+        group.children.set(seg, child);
+      }
+      group = child;
+    }
+
+    if (isFolderIndex(entry)) {
+      group.label = entryLabel(entry);
+      group.hasExplicitLabel = true;
+      group.href = entrySlug(entry);
+      group.badge = entry.data.sidebar?.badge;
+      group.order = entryOrder(entry);
+    } else {
+      group.leaves.push({
+        label: entryLabel(entry),
+        href: entrySlug(entry),
+        id: entry.id,
+        badge: entry.data.sidebar?.badge,
+        order: entryOrder(entry),
+      });
+    }
+  }
+
+  const nodes = groupToNodes(root);
+
+  // The notebook's landing note becomes its "Overview" stop.
+  const landing = scoped.find((e) => isNotebookLanding(e, notebook.id));
+  nodes.unshift({
+    type: 'doc',
+    label: landing ? entryLabel(landing) : 'Overview',
+    href: notebook.href,
+    id: landing?.id,
+  });
+  return nodes;
+}
 // ─── Manual sidebar (sidebar.json) ───────────────────────────────────────────
 
 function buildConfigSidebar(
@@ -322,6 +428,10 @@ export interface DocRouteProps {
   prev: DocLink | null;
   next: DocLink | null;
   breadcrumbs: Breadcrumb[];
+  /** Present in notebooks mode: the notebook this doc belongs to. */
+  notebook?: { id: string; label: string };
+  /** Present in notebooks mode: a link back to the notebook hub. */
+  backLink?: DocLink;
 }
 
 export interface DocRoute {
@@ -329,47 +439,93 @@ export interface DocRoute {
   props: DocRouteProps;
 }
 
+/** Assemble a single route's params + props from its (scoped) sidebar tree. */
+function makeRoute(
+  entry: DocEntry,
+  tree: SidebarNode[],
+  breadcrumbs: Breadcrumb[],
+  notebook?: { id: string; label: string },
+): DocRoute {
+  const flat = flattenSidebar(tree);
+  const href = entrySlug(entry);
+  const i = flat.findIndex((l) => l.href === href);
+  const props: DocRouteProps = {
+    entry,
+    tree,
+    prev: i > 0 ? flat[i - 1] : null,
+    next: i >= 0 && i < flat.length - 1 ? flat[i + 1] : null,
+    breadcrumbs,
+  };
+  if (notebook) {
+    props.notebook = notebook;
+    props.backLink = { label: 'All notebooks', href: '/' };
+  }
+  return { params: { slug: entryParam(entry) }, props };
+}
+
 /**
  * Compute every `[...slug]` route (all notes except the root landing page),
- * attaching the shared sidebar tree, prev/next links and breadcrumbs.
+ * attaching the sidebar tree, prev/next links and breadcrumbs.
+ *
+ * In notebooks mode each top-level folder is a self-contained handbook, so each
+ * doc gets a sidebar scoped to its own notebook plus a link back to the hub. A
+ * curated `sidebar.json` always takes precedence and keeps the single tree.
  */
 export function buildDocRoutes(
   entries: DocEntry[],
-  options: { sidebarConfig?: SidebarConfig } = {},
+  options: { sidebarConfig?: SidebarConfig; notebooks?: boolean } = {},
 ): DocRoute[] {
   const live = entries.filter((e) => !e.data.draft || includeDrafts);
-  const tree = buildSidebar(live, options.sidebarConfig);
-  const flat = flattenSidebar(tree);
-  const indexByHref = new Map(flat.map((l, i) => [l.href, i]));
+  const docs = live.filter((e) => !isRootIndex(e));
 
-  return live
-    .filter((e) => !isRootIndex(e))
-    .map((entry) => {
-      const href = entrySlug(entry);
-      const i = indexByHref.get(href) ?? -1;
-      return {
-        params: { slug: entryParam(entry) },
-        props: {
-          entry,
-          tree,
-          prev: i > 0 ? flat[i - 1] : null,
-          next: i >= 0 && i < flat.length - 1 ? flat[i + 1] : null,
-          breadcrumbs: breadcrumbsFor(tree, href),
-        },
-      };
+  if (options.notebooks && !options.sidebarConfig) {
+    const byId = new Map(getNotebooks(live).map((n) => [n.id, n]));
+    const treeCache = new Map<string, SidebarNode[]>();
+
+    return docs.map((entry) => {
+      const id = notebookSegment(entry);
+      const notebook = id ? byId.get(id) : undefined;
+      if (!notebook) {
+        // Stray top-level file with no notebook: route it with a self-only tree.
+        const lone: SidebarNode[] = [
+          { type: 'doc', label: entryLabel(entry), href: entrySlug(entry), id: entry.id },
+        ];
+        return makeRoute(entry, lone, []);
+      }
+      let tree = treeCache.get(notebook.id);
+      if (!tree) {
+        tree = buildNotebookSidebar(live, notebook);
+        treeCache.set(notebook.id, tree);
+      }
+      const breadcrumbs: Breadcrumb[] = [
+        { label: 'Home', href: '/' },
+        ...breadcrumbsFor(tree, entrySlug(entry)),
+      ];
+      return makeRoute(entry, tree, breadcrumbs, {
+        id: notebook.id,
+        label: notebook.label,
+      });
     });
+  }
+
+  const tree = buildSidebar(live, options.sidebarConfig);
+  return docs.map((entry) =>
+    makeRoute(entry, tree, breadcrumbsFor(tree, entrySlug(entry))),
+  );
 }
 
 export interface HomeData {
   rootEntry: DocEntry | null;
   tree: SidebarNode[];
   next: DocLink | null;
+  /** Notebook cards for the hub (empty unless notebooks mode is on). */
+  notebooks: Notebook[];
 }
 
 /** Data for the landing page (`index.astro`). */
 export function buildHomeData(
   entries: DocEntry[],
-  options: { sidebarConfig?: SidebarConfig } = {},
+  options: { sidebarConfig?: SidebarConfig; notebooks?: boolean } = {},
 ): HomeData {
   const live = entries.filter((e) => !e.data.draft || includeDrafts);
   const tree = buildSidebar(live, options.sidebarConfig);
@@ -379,7 +535,9 @@ export function buildHomeData(
   const rootIdx = flat.findIndex((l) => l.href === '/');
   const next =
     rootIdx >= 0 ? flat[rootIdx + 1] ?? null : flat[0] ?? null;
-  return { rootEntry, tree, next };
+  const notebooks =
+    options.notebooks && !options.sidebarConfig ? getNotebooks(live) : [];
+  return { rootEntry, tree, next, notebooks };
 }
 
 /** Edit-this-page URL for an entry, if an edit base is configured. */
