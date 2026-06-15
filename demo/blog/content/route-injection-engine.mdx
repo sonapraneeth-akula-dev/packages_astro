@@ -36,3 +36,29 @@ import { blogConfig } from './blog.config';
 
 export default defineBlogAstroConfig({ port: 4312, blogConfig });
 ```
+
+## Import code from a file
+
+Fenced blocks can pull their contents from a file with `file="…"`, so the prose
+and the real source never drift apart. Append `#L20-L25` to import only a range
+of lines, and use the usual `{6}` meta to highlight a line within that slice:
+
+```ts file="./snippets/inject-routes.ts#L20-L25" {6} title="inject-routes.ts"
+```
+
+The path is resolved relative to this post. The block above shows the six
+`injectRoute` calls, with the prerendered RSS route highlighted.
+
+## Import code from a remote URL
+
+Blocks can also read from an allow-listed remote `url="…"`. Pin the URL to a
+commit SHA so the snippet is immutable and the build is reproducible:
+
+```ts url="https://raw.githubusercontent.com/withastro/astro/refs/tags/astro%406.4.6/packages/astro/src/core/constants.ts#L1-L8"
+```
+
+<Callout type="caution">
+  Remote imports fetch at build time, so a page that uses one needs network
+  access to build. Only hosts on the allow-list (`raw.githubusercontent.com`,
+  `gist.githubusercontent.com` by default) are permitted.
+</Callout>
