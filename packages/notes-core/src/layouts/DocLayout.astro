@@ -104,7 +104,7 @@ const showToc = tableOfContents && headings.length > 0;
       </header>
 
       <div class="doc-grid">
-        <div class="doc-body">
+        <div class:list={['doc-body', { 'has-toc': showToc }]}>
           <slot />
         </div>
         {showToc && (
@@ -315,6 +315,9 @@ const showToc = tableOfContents && headings.length > 0;
   .doc-body :global(h2:hover .heading-anchor),
   .doc-body :global(h3:hover .heading-anchor),
   .doc-body :global(h4:hover .heading-anchor) { opacity: 1; }
+  /* No "On this page" rail → the deep-link anchors have no companion, so hide
+     them (landing pages, pages with tableOfContents: false or no headings). */
+  .doc-body:not(.has-toc) :global(.heading-anchor) { display: none; }
 
   /* Previous / next navigation */
   .doc-nav {

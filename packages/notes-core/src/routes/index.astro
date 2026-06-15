@@ -70,6 +70,9 @@ const Rendered = rootEntry ? (await render(rootEntry)).Content : null;
   .home { padding-block: 3rem 4rem; max-width: 52rem; }
   .home-prose :global(h1) { margin-bottom: 0.75rem; }
   .home-prose :global(h2) { margin-top: 2.5rem; }
+  /* The hub/landing page has no table of contents, so the heading deep-link
+     anchors serve no purpose here. */
+  .home-prose :global(.heading-anchor) { display: none; }
   .home-prose :global(p),
   .home-prose :global(ul),
   .home-prose :global(ol) { margin-block: 1rem; }
