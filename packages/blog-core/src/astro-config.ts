@@ -95,6 +95,13 @@ export function defineBlogAstroConfig(options: BlogAstroConfigOptions) {
       ...(options.integrations ?? []),
     ],
     compressHTML: true,
+    build: {
+      // Inline every stylesheet into the document head so the critical CSS
+      // ships with the HTML and no external <link> blocks first paint. The
+      // engine's per-page CSS is small, so this removes render-blocking
+      // requests and improves FCP/LCP without bloating the payload.
+      inlineStylesheets: 'always',
+    },
     markdown: {
       // The whole Markdown/MDX rehype pipeline lives in the satteri plugin
       // package: heading ids (rehype-slug) + a clickable anchor beside each
