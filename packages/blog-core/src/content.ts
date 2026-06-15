@@ -11,10 +11,14 @@ import { postFrontmatterSchema } from './schema';
  * export const collections = { blog: postsCollection() };
  * ```
  *
+ * Content lives in a top-level `content/` directory (outside `src/`) so authors
+ * keep prose separate from application code. The path is configurable per site
+ * via the `base` argument.
+ *
  * @param base Directory (relative to the site root) holding the posts.
- *             Defaults to `./src/content/blog`.
+ *             Defaults to `./content`.
  */
-export function postsCollection(base = './src/content/blog') {
+export function postsCollection(base = './content') {
   return defineCollection({
     loader: glob({ pattern: '**/*.{md,mdx}', base }),
     schema: postFrontmatterSchema,
