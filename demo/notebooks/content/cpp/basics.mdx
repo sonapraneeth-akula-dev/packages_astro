@@ -1,0 +1,34 @@
+---
+title: Basics
+description: Values, references and type deduction in modern C++.
+sidebar:
+  order: 1
+---
+
+# C++ Basics
+
+Modern C++ favours **value semantics** with cheap moves, so prefer passing and
+returning by value unless profiling says otherwise.
+
+## Type deduction with `auto`
+
+`auto` deduces the type from the initialiser, which keeps declarations terse and
+correct as types evolve.
+
+```cpp
+auto count = 42;          // int
+auto ratio = 3.14;        // double
+auto name = std::string{"notes"};
+
+for (const auto& ch : name) {
+    // ch is const char&
+}
+```
+
+## References vs. pointers
+
+- A **reference** is an alias that must be bound on creation and never rebinds.
+- A **pointer** can be null and reassigned; reach for it only when you need
+  those abilities.
+
+Next, see how C++ manages lifetimes without a garbage collector.

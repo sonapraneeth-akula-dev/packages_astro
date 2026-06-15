@@ -1,0 +1,40 @@
+---
+title: C++
+description: A compact handbook for modern C++ — values, memory and the tools that make it fast and safe.
+cover: 🧩
+sidebar:
+  order: 1
+  label: C++
+---
+
+import banner from '../images/sample.jpeg';
+
+# C++ Handbook
+
+<DocImage
+  src={banner}
+  alt="Abstract gradient banner for the C++ notebook"
+  caption="Local images are optimised at build time — modern formats, a responsive srcset and intrinsic dimensions to avoid layout shift."
+/>
+
+A self-contained notebook covering modern C++ (C++17 and later). Each notebook
+on this site is independent: the sidebar to your left lists only the C++ pages,
+and **← All notebooks** takes you back to the hub.
+
+<Callout type="tip" title="Search just this notebook">
+  Use the global <a href="/search">Search</a> to look across every notebook, or
+  jump to <a href="/search?notebook=C%2B%2B">search scoped to C++</a> only.
+</Callout>
+
+## In this notebook
+
+- **Basics** — values, references and `auto`.
+- **Memory management** — RAII and smart pointers.
+
+```cpp title="hello.cpp"
+#include <print>
+
+int main() {
+    std::println("Hello from the C++ notebook!");
+}
+```

@@ -1,0 +1,40 @@
+---
+title: Concurrency
+description: Goroutines and channels — Go's lightweight, communicating concurrency.
+sidebar:
+  order: 1
+---
+
+# Concurrency
+
+Go's concurrency is built on **goroutines** (cheap, runtime-scheduled functions)
+that communicate over **channels** rather than sharing memory.
+
+```go
+func worker(jobs <-chan int, results chan<- int) {
+    for n := range jobs {
+        results <- n * n
+    }
+}
+
+func main() {
+    jobs := make(chan int, 3)
+    results := make(chan int, 3)
+
+    go worker(jobs, results) // a goroutine
+
+    for i := 1; i <= 3; i++ {
+        jobs <- i
+    }
+    close(jobs)
+
+    for i := 0; i < 3; i++ {
+        fmt.Println(<-results)
+    }
+}
+```
+
+<Callout type="tip" title="Share by communicating">
+  The Go proverb: *don't communicate by sharing memory; share memory by
+  communicating.* Channels move ownership of data between goroutines safely.
+</Callout>

@@ -1,0 +1,27 @@
+---
+title: Basics
+description: Top-level programs, records and value-based equality in C#.
+sidebar:
+  order: 1
+---
+
+# C# Basics
+
+Modern C# trims ceremony. A whole program can be written at the top level — no
+explicit `Main` required.
+
+## Records
+
+`record` types give you immutable data with value-based equality and a concise
+declaration.
+
+```csharp
+public record Note(string Title, DateOnly Created);
+
+var a = new Note("Intro", new DateOnly(2026, 1, 1));
+var b = a with { Title = "Overview" }; // non-destructive copy
+
+Console.WriteLine(a == b); // False — compared by value
+```
+
+`with` expressions create a modified copy while leaving the original untouched.

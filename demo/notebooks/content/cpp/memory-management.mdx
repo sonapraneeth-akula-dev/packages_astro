@@ -1,0 +1,30 @@
+---
+title: Memory management
+description: RAII and smart pointers — deterministic cleanup without a garbage collector.
+sidebar:
+  order: 2
+---
+
+# Memory Management
+
+C++ has no garbage collector. Instead it offers **RAII** (Resource Acquisition
+Is Initialisation): a resource is owned by an object, and its destructor frees
+the resource when the object goes out of scope.
+
+## Smart pointers
+
+```cpp
+#include <memory>
+
+auto owner = std::make_unique<Widget>();   // sole ownership
+auto shared = std::make_shared<Widget>();  // reference-counted
+```
+
+- `std::unique_ptr` — exclusive ownership, zero overhead, moves but never copies.
+- `std::shared_ptr` — shared ownership via an atomic reference count.
+- `std::weak_ptr` — a non-owning observer that breaks reference cycles.
+
+<Callout type="caution" title="Prefer unique by default">
+  Reach for `unique_ptr` first. Only promote to `shared_ptr` when ownership is
+  genuinely shared — the reference count is not free.
+</Callout>

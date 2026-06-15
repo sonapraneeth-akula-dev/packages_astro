@@ -1,0 +1,27 @@
+---
+title: LINQ
+description: Querying collections declaratively with Language-Integrated Query.
+sidebar:
+  order: 2
+---
+
+# LINQ
+
+**LINQ** (Language-Integrated Query) lets you query in-memory collections,
+databases and XML with the same declarative syntax.
+
+```csharp
+var titles = notes
+    .Where(n => n.Created.Year == 2026)
+    .OrderBy(n => n.Title)
+    .Select(n => n.Title)
+    .ToList();
+```
+
+LINQ operators are **lazy**: the query above does no work until `ToList()`
+enumerates it. This lets you compose pipelines cheaply and execute them once.
+
+<Callout type="tip" title="Method vs. query syntax">
+  The fluent method syntax above has an equivalent `from … where … select` query
+  syntax. They compile to the same thing — pick whichever reads better.
+</Callout>
