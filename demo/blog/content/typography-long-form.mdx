@@ -7,6 +7,20 @@ tags: [typography, design, accessibility]
 cover: "✍️"
 ---
 
+import { Image } from 'astro:assets';
+import hero from './images/typography-hero.jpg';
+
+{/* Astro optimises this at build time: it emits resized, modern-format
+    (WebP/AVIF) variants and a srcset, and the width/height are inferred from
+    the import so there is no layout shift. */}
+<Image
+  src={hero}
+  alt="Indigo-to-sky gradient hero artwork for the long-form typography post"
+  widths={[640, 960, 1280]}
+  sizes="(min-width: 768px) 720px, 100vw"
+  loading="eager"
+/>
+
 Good reading typography is invisible. The reader simply keeps going.
 
 ## A starting scale
