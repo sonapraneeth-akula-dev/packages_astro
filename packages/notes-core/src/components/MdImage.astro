@@ -1,19 +1,30 @@
 ---
 /**
- * Default replacement for the Markdown `![alt](src)` image element. Astro has
- * already optimised relative images (modern format + intrinsic width/height) by
- * the time they reach here; this wrapper just adds `loading="lazy"` and
- * `decoding="async"` so off-screen images never block rendering, keeping
- * Lighthouse performance scores high. It is auto-mapped to `img` via mdx.ts.
+ * Default replacement for the Markdown `![alt](src)` image element.
+ *
+ * For a **local** image Astro passes `src` as an `ImageMetadata` object, so we
+ * render it through `<Image>` to emit a modern format, a responsive `srcset`
+ * and intrinsic width/height (no layout shift). For a **remote** image `src` is
+ * a plain string, rendered as a lazy `<img>`. Both default to `loading="lazy"`
+ * and `decoding="async"` so off-screen images never block rendering, keeping
+ * Lighthouse performance scores high. Auto-mapped to `img` via mdx.ts.
  */
-import type { HTMLAttributes } from 'astro/types';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 
-interface Props extends HTMLAttributes<'img'> {
-  src: string;
+interface Props {
+  src: string | ImageMetadata;
   alt?: string;
 }
 
-const { src, alt = '', loading = 'lazy', decoding = 'async', ...rest } = Astro.props;
+const { src, alt = '', ...rest } = Astro.props;
+const isRemote = typeof src === 'string';
 ---
 
-<img src={src} alt={alt} loading={loading} decoding={decoding} {...rest} />
+{
+  isRemote ? (
+    <img src={src as string} alt={alt} loading="lazy" decoding="async" {...rest} />
+  ) : (
+    <Image src={src as ImageMetadata} alt={alt} loading="lazy" decoding="async" {...rest} />
+  )
+}
