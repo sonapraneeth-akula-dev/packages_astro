@@ -97,6 +97,11 @@ export function defineDocsAstroConfig(options: DocsAstroConfigOptions) {
       ...(options.integrations ?? []),
     ],
     compressHTML: true,
+    build: {
+      // Inline page CSS into the document <head> so the first paint never waits
+      // on a separate render-blocking stylesheet request, improving FCP/LCP.
+      inlineStylesheets: 'always',
+    },
     markdown: {
       // The whole Markdown/MDX rehype pipeline lives in the satteri plugin
       // package: heading ids (rehype-slug) + a clickable anchor beside each
