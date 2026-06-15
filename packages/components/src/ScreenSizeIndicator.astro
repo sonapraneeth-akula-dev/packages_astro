@@ -57,7 +57,10 @@ const show = appEnv !== 'prod';
           `${active.name} · ${range}` + (container ? ` · ${container}` : '');
     }
 
-    update();
+    // Defer the first measurement past the initial layout/paint so the
+    // synchronous getComputedStyle read does not force a reflow during the
+    // critical page-load window (hurts FCP/LCP in Lighthouse).
+    requestAnimationFrame(update);
     window.addEventListener('resize', update, { passive: true });
   </script>
 )}
