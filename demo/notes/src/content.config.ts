@@ -1,5 +1,6 @@
 import { docsCollection } from '@grihasetu/notes-core/content';
 
 export const collections = {
-  docs: docsCollection('./src/content/docs'),
+  // Notes live in the top-level `content/` directory (outside `src/`).
+  docs: docsCollection('./content'),
 };

@@ -28,4 +28,7 @@ export const docsConfig = defineDocsConfig({
     },
   ],
   search: true,
+  // Single-handbook demo: every note shares one auto-generated sidebar. See the
+  // companion `demo/notebooks` site for the multi-sub-note (notebooks) mode.
+  notebooks: false,
 });

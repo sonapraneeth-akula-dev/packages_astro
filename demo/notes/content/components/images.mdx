@@ -5,7 +5,7 @@ sidebar:
   order: 4
 ---
 
-import sample from '../../../assets/sample.jpeg';
+import sample from '../images/sample.jpeg';
 
 # Images
 
@@ -31,10 +31,10 @@ intrinsic dimensions to avoid layout shift) and then upgraded to
 `loading="lazy"` + `decoding="async"` automatically:
 
 ```md
-![A scenic landscape](../../../assets/sample.jpeg)
+![A scenic landscape](../images/sample.jpeg)
 ```
 
-![A scenic landscape](../../../assets/sample.jpeg)
+![A scenic landscape](../images/sample.jpeg)
 
 ## `<DocImage>` (responsive)
 
@@ -42,7 +42,7 @@ For full control, use `<DocImage>`. Local images get a responsive `srcset` and a
 `sizes` hint, so the browser downloads only the resolution it needs:
 
 ```mdx
-import sample from '../../../assets/sample.jpeg';
+import sample from '../images/sample.jpeg';
 
 <DocImage
   src={sample}
