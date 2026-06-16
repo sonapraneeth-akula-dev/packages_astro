@@ -4,9 +4,11 @@ import { Font } from 'astro:assets';
 import Header from '@grihasetu/components/Header.astro';
 import Footer from '@grihasetu/components/Footer.astro';
 import EnvBanner from '@grihasetu/components/EnvBanner.astro';
+import ThemeSwitcher from '@grihasetu/components/ThemeSwitcher.astro';
 import {
   resolveTheme,
   renderThemeStyle,
+  renderThemeInitScript,
   themeFontVars,
 } from '@grihasetu/components/theme';
 import { blogConfig } from 'virtual:blog-core/config';
@@ -36,9 +38,10 @@ const appEnv = __APP_ENV__;
 
 // Resolve the site's theme: accent palette + radius inline below, fonts loaded
 // per the selected combo (only those families are registered in the config).
+// With `theme.switcher`, every preset ships and the ThemeSwitcher panel renders.
 const theme = resolveTheme(blogConfig.theme);
 const themeStyle = renderThemeStyle(theme);
-const fontVars = themeFontVars(theme.fonts);
+const fontVars = themeFontVars(theme);
 ---
 
 <!doctype html>
@@ -80,6 +83,9 @@ const fontVars = themeFontVars(theme.fonts);
         }
       })();
     </script>
+
+    {/* Apply stored switcher selections (palette/font/radius) before paint. */}
+    {theme.switcher && <script is:inline set:html={renderThemeInitScript()} />}
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -89,5 +95,6 @@ const fontVars = themeFontVars(theme.fonts);
       <slot />
     </main>
     <Footer config={blogConfig} />
+    {theme.switcher && <ThemeSwitcher theme={theme} />}
   </body>
 </html>

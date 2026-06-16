@@ -65,7 +65,7 @@ export function defineDocsAstroConfig(options: DocsAstroConfigOptions) {
 
   // Self-host only the fonts the selected combo needs (see the theme system).
   const theme = resolveTheme(options.docsConfig.theme);
-  const fonts = themeFontEntries(theme.fonts).map((entry) => ({
+  const fonts = themeFontEntries(theme).map((entry) => ({
     provider: fontProviders.google(),
     ...entry,
   }));

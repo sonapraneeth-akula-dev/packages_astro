@@ -30,6 +30,7 @@ export const docsConfig = defineDocsConfig({
   // scoped sidebar, landing page and prev/next navigation.
   notebooks: true,
   // Showcase the theme system: indigo accent, the Poppins "geometric" font
-  // combo and fully-rounded (pill) corners.
-  theme: { palette: 'indigo', fonts: 'geometric', radius: 'full' },
+  // combo and fully-rounded (pill) corners. `switcher` renders the live theme
+  // switcher so you can preview palette/font/radius combinations.
+  theme: { palette: 'indigo', fonts: 'geometric', radius: 'full', switcher: true },
 });

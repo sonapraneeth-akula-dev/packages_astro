@@ -20,10 +20,9 @@ export const blogConfig = defineBlogConfig({
   timeZoneLabel: 'IST',
   search: true,
   // Showcase the theme system: violet accent, the Inter "modern" font combo
-  // and large corner radius. Only these selections ship (fonts register per
-  // combo; accents + radius inline per page). Omit `theme` for the defaults
-  // (indigo / Plus Jakarta Sans / default radius).
-  theme: { palette: 'violet', fonts: 'modern', radius: 'large' },
+  // and large corner radius. `switcher` ships every preset and renders the live
+  // theme switcher so you can preview palette/font/radius combinations.
+  theme: { palette: 'violet', fonts: 'modern', radius: 'large', switcher: true },
   nav: [
     { href: '/', label: 'Home', icon: ICON_HOME },
     { href: '/categories', label: 'Categories', icon: ICON_CATEGORIES },

@@ -1,0 +1,331 @@
+---
+/**
+ * Live theme switcher — a floating panel to preview accent palette, font combo
+ * and corner radius (plus light/dark) at runtime. Rendered only when a site
+ * sets `theme.switcher = true`; in that mode the layout ships every preset as a
+ * `data-*` rule (see @grihasetu/components/theme) so these controls just flip
+ * attributes on <html> and persist the choice to localStorage.
+ *
+ * Framework-free: a small inline island, matching the engines' other islands.
+ */
+import {
+  PALETTE_OPTIONS,
+  FONT_OPTIONS,
+  RADIUS_OPTIONS,
+  type ResolvedTheme,
+} from './theme';
+
+interface Props {
+  theme: ResolvedTheme;
+}
+const { theme } = Astro.props;
+
+const APPEARANCE_OPTIONS = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
+---
+
+<div
+  class="theme-switcher"
+  data-default-palette={theme.palette}
+  data-default-font={theme.fonts}
+  data-default-radius={theme.radius}
+>
+  <button
+    type="button"
+    class="ts-toggle"
+    aria-label="Customize theme"
+    aria-expanded="false"
+    aria-controls="ts-panel"
+  >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="13.5" cy="6.5" r="2.5"></circle>
+      <circle cx="6.5" cy="11.5" r="2.5"></circle>
+      <circle cx="17" cy="13" r="2.5"></circle>
+      <circle cx="10" cy="18" r="2.5"></circle>
+      <path d="M3 21 21 3"></path>
+    </svg>
+  </button>
+
+  <div id="ts-panel" class="ts-panel" role="dialog" aria-label="Theme settings" hidden>
+    <div class="ts-head">
+      <span class="ts-title">Theme</span>
+      <button type="button" class="ts-reset" data-reset>Reset</button>
+    </div>
+
+    <fieldset class="ts-group" data-axis="theme">
+      <legend>Appearance</legend>
+      <div class="ts-seg">
+        {APPEARANCE_OPTIONS.map((o) => (
+          <button type="button" class="ts-opt" data-value={o.value}>{o.label}</button>
+        ))}
+      </div>
+    </fieldset>
+
+    <fieldset class="ts-group" data-axis="palette">
+      <legend>Colour</legend>
+      <div class="ts-seg">
+        {PALETTE_OPTIONS.map((o) => (
+          <button type="button" class="ts-opt ts-swatch-opt" data-value={o.value}>
+            <span class="ts-swatch" style={`background:${o.swatch}`}></span>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+
+    <fieldset class="ts-group" data-axis="font">
+      <legend>Font</legend>
+      <div class="ts-seg ts-seg-wrap">
+        {FONT_OPTIONS.map((o) => (
+          <button type="button" class="ts-opt" data-value={o.value}>{o.label}</button>
+        ))}
+      </div>
+    </fieldset>
+
+    <fieldset class="ts-group" data-axis="radius">
+      <legend>Radius</legend>
+      <div class="ts-seg ts-seg-wrap">
+        {RADIUS_OPTIONS.map((o) => (
+          <button type="button" class="ts-opt" data-value={o.value}>{o.label}</button>
+        ))}
+      </div>
+    </fieldset>
+  </div>
+</div>
+
+<script>
+  // Each axis maps to an <html> attribute + a localStorage key. `theme`
+  // (appearance) reuses the layout's existing key/attribute; the rest are
+  // applied pre-paint by the theme init script.
+  type Axis = 'theme' | 'palette' | 'font' | 'radius';
+  const ATTR: Record<Axis, string> = {
+    theme: 'data-theme',
+    palette: 'data-palette',
+    font: 'data-font',
+    radius: 'data-radius',
+  };
+  const STORE: Record<Axis, string> = {
+    theme: 'theme',
+    palette: 'theme-palette',
+    font: 'theme-font',
+    radius: 'theme-radius',
+  };
+
+  const root = document.querySelector<HTMLElement>('.theme-switcher');
+  if (root) {
+    const html = document.documentElement;
+    const toggle = root.querySelector<HTMLButtonElement>('.ts-toggle')!;
+    const panel = root.querySelector<HTMLElement>('#ts-panel')!;
+
+    const defaults: Record<Axis, string> = {
+      theme: 'system',
+      palette: root.dataset.defaultPalette ?? 'indigo',
+      font: root.dataset.defaultFont ?? 'jakarta',
+      radius: root.dataset.defaultRadius ?? 'default',
+    };
+
+    // Current value of an axis: the live <html> attribute, else the default.
+    function current(axis: Axis): string {
+      return html.getAttribute(ATTR[axis]) ?? defaults[axis];
+    }
+
+    function syncActive(axis: Axis) {
+      const value = current(axis);
+      root!
+        .querySelectorAll<HTMLButtonElement>(`[data-axis="${axis}"] .ts-opt`)
+        .forEach((btn) => {
+          const on = btn.dataset.value === value;
+          btn.classList.toggle('active', on);
+          btn.setAttribute('aria-pressed', String(on));
+        });
+    }
+
+    function apply(axis: Axis, value: string) {
+      // `system` appearance clears the attribute (falls back to OS preference).
+      if (axis === 'theme' && value === 'system') {
+        html.removeAttribute(ATTR[axis]);
+        localStorage.removeItem(STORE[axis]);
+      } else {
+        html.setAttribute(ATTR[axis], value);
+        localStorage.setItem(STORE[axis], value);
+      }
+      syncActive(axis);
+    }
+
+    (['theme', 'palette', 'font', 'radius'] as Axis[]).forEach((axis) => {
+      syncActive(axis);
+      root
+        .querySelectorAll<HTMLButtonElement>(`[data-axis="${axis}"] .ts-opt`)
+        .forEach((btn) => {
+          btn.addEventListener('click', () => apply(axis, btn.dataset.value!));
+        });
+    });
+
+    root.querySelector<HTMLButtonElement>('[data-reset]')?.addEventListener('click', () => {
+      (['palette', 'font', 'radius'] as Axis[]).forEach((axis) => {
+        html.removeAttribute(ATTR[axis]);
+        localStorage.removeItem(STORE[axis]);
+        syncActive(axis);
+      });
+      apply('theme', 'system');
+    });
+
+    function setOpen(open: boolean) {
+      panel.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+      root!.classList.toggle('open', open);
+    }
+    toggle.addEventListener('click', () => setOpen(panel.hidden));
+    document.addEventListener('click', (e) => {
+      if (!root.contains(e.target as Node)) setOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    });
+  }
+</script>
+
+<style>
+  .theme-switcher {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 200;
+  }
+  @media (max-width: 40rem) {
+    /* Clear the mobile bottom tab bar. */
+    .theme-switcher {
+      bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  .ts-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    box-shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.35);
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+  .ts-toggle:hover {
+    color: var(--accent-text);
+    border-color: var(--border-hover);
+  }
+  .theme-switcher.open .ts-toggle {
+    color: var(--accent-text);
+    border-color: var(--accent);
+    transform: rotate(90deg);
+  }
+
+  .ts-panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 0.6rem);
+    width: 17rem;
+    max-width: calc(100vw - 2rem);
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+  /* The author `display: flex` above overrides the UA `[hidden]` rule, so the
+     attribute alone won't hide the panel. Re-assert display:none when hidden. */
+  .ts-panel[hidden] {
+    display: none;
+  }
+
+  .ts-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ts-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  .ts-reset {
+    border: none;
+    background: none;
+    padding: 0.15rem 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+  }
+  .ts-reset:hover {
+    color: var(--accent-text);
+    background: var(--accent-soft);
+  }
+
+  .ts-group {
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ts-group legend {
+    padding: 0;
+    margin-bottom: 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .ts-seg {
+    display: flex;
+    gap: 0.3rem;
+  }
+  .ts-seg-wrap {
+    flex-wrap: wrap;
+  }
+
+  .ts-opt {
+    flex: 1 1 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+  .ts-opt:hover {
+    color: var(--text);
+    border-color: var(--border-hover);
+  }
+  .ts-opt.active {
+    color: var(--accent-text);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .ts-swatch {
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+  }
+</style>

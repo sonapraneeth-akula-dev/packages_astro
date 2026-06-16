@@ -16,7 +16,7 @@ export const docsConfig = defineDocsConfig({
   subject: 'Demo Handbook',
   nav: [
     { href: '/', label: 'Home', icon: ICON_HOME },
-    { href: '/getting-started/installation', label: 'Docs', icon: ICON_BOOK },
+    { href: '/getting-started/installation', label: 'Notes', icon: ICON_BOOK },
     { href: '/search', label: 'Search', icon: ICON_SEARCH },
   ],
   socials: [
@@ -32,6 +32,7 @@ export const docsConfig = defineDocsConfig({
   // companion `demo/notebooks` site for the multi-sub-note (notebooks) mode.
   notebooks: false,
   // Showcase the theme system: emerald accent, the Playfair + Merriweather
-  // "classical" font combo and small corner radius.
-  theme: { palette: 'emerald', fonts: 'classical', radius: 'small' },
+  // "classical" font combo and small corner radius. `switcher` renders the live
+  // theme switcher so you can preview palette/font/radius combinations.
+  theme: { palette: 'emerald', fonts: 'classical', radius: 'small', switcher: true },
 });
