@@ -1,5 +1,6 @@
 ---
 import type { MarkdownHeading } from 'astro';
+import { Image } from 'astro:assets';
 import type { Post } from '../utils/posts';
 import { formatDateTime, slugify } from '../utils/posts';
 import BaseLayout from './BaseLayout.astro';
@@ -18,7 +19,8 @@ interface Props {
 }
 
 const { post, headings, readingTime, newerPost, olderPost } = Astro.props;
-const { title, description, pubDate, updatedDate, category, tags, cover } = post.data;
+const { title, description, pubDate, updatedDate, category, tags, cover, coverImage, coverAlt } =
+  post.data;
 ---
 
 <BaseLayout title={title} description={description} article>
@@ -68,6 +70,19 @@ const { title, description, pubDate, updatedDate, category, tags, cover } = post
         </button>
       </div>
     </header>
+
+    {coverImage && (
+      <figure class="post-hero">
+        <Image
+          src={coverImage}
+          alt={coverAlt ?? title}
+          widths={[640, 960, 1280, 1600]}
+          sizes="(min-width: 64rem) 60rem, 100vw"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </figure>
+    )}
 
     <div class="post-grid">
       <div class="post-body">
@@ -157,6 +172,18 @@ const { title, description, pubDate, updatedDate, category, tags, cover } = post
   .post-meta time { font-family: var(--font-mono); }
   .post-cover { font-size: 1.25rem; }
   .dot { opacity: 0.5; }
+
+  /* Optimized hero/cover image. Spans the full article column above the body. */
+  .post-hero {
+    margin: 2.5rem 0 0;
+  }
+  .post-hero :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+  }
   .meta-item { display: inline-flex; align-items: center; gap: 0.4rem; }
   .meta-label {
     font-size: 0.7rem;

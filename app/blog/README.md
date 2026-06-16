@@ -61,6 +61,8 @@ pubDate: 2026-06-08
 category: 'Engineering'
 tags: ['astro', 'mdx']
 cover: '⚡'        # optional emoji/glyph for cards
+coverImage: ./images/hero.jpg   # optional hero image, optimized at build time
+coverAlt: 'Hero image description'  # alt text (falls back to title)
 draft: false       # drafts are hidden in production
 ---
 
