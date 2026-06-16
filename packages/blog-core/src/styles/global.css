@@ -5,10 +5,11 @@
      The --font-*-files variables carry the self-hosted family plus optimized fallbacks.
      The remaining chain falls back to the user's native OS font across platforms so
      text always renders, even before the web font loads or if it fails. */
-  --font-system: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+  --font-system: -apple-system, BlinkMacSystemFont,
     "Segoe UI Variable Display", "Segoe UI", Roboto, "Helvetica Neue", Arial,
     "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol", "Noto Color Emoji";
+    "Segoe UI Symbol", "Noto Color Emoji", ui-sans-serif,
+    system-ui;
   --font-system-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", "Roboto Mono", "Courier New", monospace;
   /* The nested var() fallback covers the case where the self-hosted font

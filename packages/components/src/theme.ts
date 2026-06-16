@@ -72,6 +72,8 @@ interface AccentTokens {
   '--accent-contrast': string;
   '--accent-glow': string;
   '--accent-soft': string;
+  /** Allows passing the token map to {@link declarations} (Record<string,string>). */
+  [key: string]: string;
 }
 
 interface Palette {
@@ -162,8 +164,8 @@ const RADII: Record<RadiusName, string> = {
 interface FontFamily {
   /** Google Fonts family name. */
   name: string;
-  /** Variable-axis range or discrete weights. */
-  weights: string[];
+  /** Variable-axis range or discrete weights (non-empty). */
+  weights: [string, ...string[]];
 }
 
 /** The three logical roles a font combo can fill. */
@@ -228,8 +230,8 @@ export interface ThemeFontEntry {
   name: string;
   /** Custom property the `<Font>` component binds the self-hosted family to. */
   cssVariable: string;
-  /** Variable-axis range or discrete weights. */
-  weights: string[];
+  /** Variable-axis range or discrete weights (non-empty). */
+  weights: [string, ...string[]];
   styles: ['normal'];
   subsets: ['latin'];
 }
@@ -241,7 +243,7 @@ export interface ThemeFontVar {
   preload: boolean;
 }
 
-function fontEntry(name: string, cssVariable: string, weights: string[]): ThemeFontEntry {
+function fontEntry(name: string, cssVariable: string, weights: [string, ...string[]]): ThemeFontEntry {
   return { name, cssVariable, weights, styles: ['normal'], subsets: ['latin'] };
 }
 
