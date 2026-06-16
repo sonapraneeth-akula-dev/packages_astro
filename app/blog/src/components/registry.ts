@@ -1,4 +1,4 @@
-import { mergeMdxComponents } from '@grihasetu/blog-core/components/mdx';
+import { mergeMdxComponents } from '@sonapraneeth/blog-core/components/mdx';
 
 /**
  * The component map injected into every post via <Content components={...} />.

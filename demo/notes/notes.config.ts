@@ -1,4 +1,4 @@
-import { defineDocsConfig } from '@grihasetu/notes-core/config';
+import { defineDocsConfig } from '@sonapraneeth/notes-core/config';
 
 const ICON_HOME =
   '<path d="M3 9.5 12 3l9 6.5"></path><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"></path><path d="M9 21v-6h6v6"></path>';
@@ -11,7 +11,7 @@ export const docsConfig = defineDocsConfig({
   brand: 'Notes',
   title: 'Notes Engine — Demo',
   description:
-    'A showcase handbook demonstrating the @grihasetu/notes-core engine: a folding 6-level sidebar, custom JSON sidebar overrides, optimised images, MDX components and offline search.',
+    'A showcase handbook demonstrating the @sonapraneeth/notes-core engine: a folding 6-level sidebar, custom JSON sidebar overrides, optimised images, MDX components and offline search.',
   author: 'Sonapraneeth Akula',
   subject: 'Demo Handbook',
   nav: [

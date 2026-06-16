@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1.7
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Multi-stage build for the @grihasetu/notes-app (Go Notes) site.
+# Multi-stage build for the @sonapraneeth/notes-app (Go Notes) site.
 #
 # IMPORTANT: the build context is the MONOREPO ROOT, not app/notes/go, because
-# the app depends on the workspace packages @grihasetu/notes-core,
-# @grihasetu/components and the satteri plugin. The compose file sets
+# the app depends on the workspace packages @sonapraneeth/notes-core,
+# @sonapraneeth/components and the satteri plugin. The compose file sets
 # `context: ../../..` and `dockerfile: app/notes/go/Dockerfile`.
 #
 # We use Bun's hoisted linker (see /bunfig.toml) so a single top-level
@@ -74,8 +74,8 @@ RUN cd app/notes/go && bun run build
 # ─── Runtime ─────────────────────────────────────────────────────────────────
 # Serves the built output (including dist/pagefind) via `astro preview`. Only
 # the artifacts needed to preview are copied. The engine packages are required
-# because astro.config.ts imports @grihasetu/notes-core/astro (which in turn
-# pulls in @grihasetu/components and the satteri plugin).
+# because astro.config.ts imports @sonapraneeth/notes-core/astro (which in turn
+# pulls in @sonapraneeth/components and the satteri plugin).
 FROM base AS runtime
 ENV NODE_ENV=production
 ARG PUBLIC_APP_ENV=prod

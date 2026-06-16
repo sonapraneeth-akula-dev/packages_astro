@@ -1,4 +1,4 @@
-import { defineDocsAstroConfig } from '@grihasetu/notes-core/astro';
+import { defineDocsAstroConfig } from '@sonapraneeth/notes-core/astro';
 import { docsConfig } from './notes.config';
 
 // Demo showcase site for notebooks mode. The engine owns all page

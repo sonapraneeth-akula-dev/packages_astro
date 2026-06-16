@@ -7,7 +7,7 @@ tags: [astro, architecture, dx]
 cover: "🛠️"
 ---
 
-import { Callout, Steps } from '@grihasetu/blog-core/components/mdx';
+import { Callout, Steps } from '@sonapraneeth/blog-core/components/mdx';
 
 The engine injects all of its routes at build time, so a site only ships
 content, a config and a component registry.
@@ -31,7 +31,7 @@ app. The injected components read per-site data through a virtual module.
 </Steps>
 
 ```ts title="astro.config.ts"
-import { defineBlogAstroConfig } from '@grihasetu/blog-core/astro';
+import { defineBlogAstroConfig } from '@sonapraneeth/blog-core/astro';
 import { blogConfig } from './blog.config';
 
 export default defineBlogAstroConfig({ port: 4312, blogConfig });

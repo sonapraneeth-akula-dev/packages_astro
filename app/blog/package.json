@@ -1,10 +1,10 @@
 {
-  "name": "@grihasetu/blog-app",
+  "name": "@sonapraneeth/blog-app",
   "type": "module",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "packageManager": "bun@1.3.14",
-  "description": "Grihasetu blog site built on @grihasetu/blog-core (categories, tags, offline search, synced code tabs).",
+  "description": "Grihasetu blog site built on @sonapraneeth/blog-core (categories, tags, offline search, synced code tabs).",
   "scripts": {
     "dev": "bun ../../node_modules/astro/bin/astro.mjs dev",
     "dev:host": "bun ../../node_modules/astro/bin/astro.mjs dev --host 0.0.0.0 --port 4322",
@@ -29,7 +29,7 @@
     "deploy": "bun run scripts/docker-compose.ts up prod caddy --build -d"
   },
   "dependencies": {
-    "@grihasetu/blog-core": "workspace:*",
+    "@sonapraneeth/blog-core": "workspace:*",
     "astro": "^6.4.6"
   },
   "devDependencies": {

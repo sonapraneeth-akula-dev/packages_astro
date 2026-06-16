@@ -16,7 +16,7 @@ The engine ships a factory that pre-wires MDX, the image service, Expressive
 Code and the sitemap. You only supply the bits unique to your site:
 
 ```ts title="astro.config.ts"
-import { defineDocsAstroConfig } from '@grihasetu/notes-core/astro';
+import { defineDocsAstroConfig } from '@sonapraneeth/notes-core/astro';
 
 export default defineDocsAstroConfig({ port: 4310 });
 ```
@@ -27,7 +27,7 @@ Register the docs collection so Astro validates frontmatter against the engine's
 schema:
 
 ```ts title="src/content.config.ts"
-import { docsCollection } from '@grihasetu/notes-core/content';
+import { docsCollection } from '@sonapraneeth/notes-core/content';
 
 export const collections = {
   docs: docsCollection('./src/content/docs'),
@@ -39,7 +39,7 @@ export const collections = {
 This is your site's identity — branding, navigation and search settings:
 
 ```ts title="notes.config.ts"
-import { defineDocsConfig } from '@grihasetu/notes-core/config';
+import { defineDocsConfig } from '@sonapraneeth/notes-core/config';
 
 export const docsConfig = defineDocsConfig({
   brand: 'Notes',

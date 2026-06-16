@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1.7
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Multi-stage build for the @grihasetu/blog-app (Grihasetu blog) site.
+# Multi-stage build for the @sonapraneeth/blog-app (Grihasetu blog) site.
 #
 # IMPORTANT: the build context is the MONOREPO ROOT, not app/blog, because the
-# app depends on the workspace packages @grihasetu/blog-core,
-# @grihasetu/components and the satteri plugin. The compose file sets
+# app depends on the workspace packages @sonapraneeth/blog-core,
+# @sonapraneeth/components and the satteri plugin. The compose file sets
 # `context: ../../..` and `dockerfile: app/blog/Dockerfile`.
 #
 # We use Bun's hoisted linker (see /bunfig.toml) so a single top-level
@@ -82,8 +82,8 @@ RUN cd app/blog && bun run build
 # ─── Runtime ─────────────────────────────────────────────────────────────────
 # Serves the built output (including dist/pagefind) via Astro preview. Only the
 # artifacts needed to preview are copied. The engine packages are required
-# because astro.config.ts imports @grihasetu/blog-core/astro (which in turn
-# pulls in @grihasetu/components and the satteri plugin).
+# because astro.config.ts imports @sonapraneeth/blog-core/astro (which in turn
+# pulls in @sonapraneeth/components and the satteri plugin).
 FROM base AS runtime
 ENV NODE_ENV=production
 ARG PUBLIC_APP_ENV=prod

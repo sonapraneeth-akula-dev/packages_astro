@@ -7,7 +7,7 @@ import { postFrontmatterSchema } from './schema';
  * `src/content.config.ts`:
  *
  * ```ts
- * import { postsCollection } from '@grihasetu/blog-core/content';
+ * import { postsCollection } from '@sonapraneeth/blog-core/content';
  * export const collections = { blog: postsCollection() };
  * ```
  *

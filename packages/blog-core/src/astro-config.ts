@@ -6,9 +6,9 @@ import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
 import {
   satteriMdx,
   satteriMarkdownProcessor,
-} from '@grihasetu/rehype-satteri-autolink-headings/astro';
+} from '@sonapraneeth/rehype-satteri-autolink-headings/astro';
 import { execSync } from 'node:child_process';
-import { resolveTheme, themeFontEntries } from '@grihasetu/components/theme';
+import { resolveTheme, themeFontEntries } from '@sonapraneeth/components/theme';
 import { blogRoutes } from './routes-integration';
 import type { BlogConfig } from './config';
 
@@ -48,7 +48,7 @@ function git(command: string, fallback: string): string {
  * `astro.config.ts` and may pass a port, site URL, or extra integrations.
  *
  *   // demo/blog/astro.config.ts
- *   import { defineBlogAstroConfig } from '@grihasetu/blog-core/astro';
+ *   import { defineBlogAstroConfig } from '@sonapraneeth/blog-core/astro';
  *   import { blogConfig } from './blog.config';
  *   export default defineBlogAstroConfig({ port: 4312, blogConfig });
  */

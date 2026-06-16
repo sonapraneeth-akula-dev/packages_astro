@@ -1,6 +1,6 @@
 {
-  "name": "@grihasetu/notes-core",
-  "version": "0.1.0",
+  "name": "@sonapraneeth/notes-core",
+  "version": "1.0.0",
   "type": "module",
   "description": "Shared docs/notes engine for Astro + MDX: components, layouts, sidebar generation, config schema and an Astro config factory.",
   "exports": {
@@ -19,8 +19,8 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
     "@expressive-code/plugin-line-numbers": "^0.43.1",
-    "@grihasetu/components": "workspace:*",
-    "@grihasetu/rehype-satteri-autolink-headings": "workspace:*",
+    "@sonapraneeth/components": "workspace:*",
+    "@sonapraneeth/rehype-satteri-autolink-headings": "workspace:*",
     "astro": "^6.4.6",
     "astro-expressive-code": "^0.43.1"
   },

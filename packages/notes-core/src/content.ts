@@ -7,7 +7,7 @@ import { docFrontmatterSchema } from './schema';
  * `src/content.config.ts`:
  *
  * ```ts
- * import { docsCollection } from '@grihasetu/notes-core/content';
+ * import { docsCollection } from '@sonapraneeth/notes-core/content';
  * export const collections = { docs: docsCollection() };
  * ```
  *

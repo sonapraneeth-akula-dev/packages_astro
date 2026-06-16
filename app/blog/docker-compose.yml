@@ -10,8 +10,8 @@
 # add the hostnames to your hosts file pointing at 127.0.1.2 (bun run hosts:setup).
 #
 # The build context is the MONOREPO ROOT (../../..) because the app depends on
-# the @grihasetu/blog-core workspace package (which in turn pulls in
-# @grihasetu/components and the satteri plugin). The Dockerfile lives in this
+# the @sonapraneeth/blog-core workspace package (which in turn pulls in
+# @sonapraneeth/components and the satteri plugin). The Dockerfile lives in this
 # package.
 #
 # Pagefind search:

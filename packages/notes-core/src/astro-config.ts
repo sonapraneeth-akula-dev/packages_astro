@@ -6,9 +6,9 @@ import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
 import {
   satteriMdx,
   satteriMarkdownProcessor,
-} from '@grihasetu/rehype-satteri-autolink-headings/astro';
+} from '@sonapraneeth/rehype-satteri-autolink-headings/astro';
 import { execSync } from 'node:child_process';
-import { resolveTheme, themeFontEntries } from '@grihasetu/components/theme';
+import { resolveTheme, themeFontEntries } from '@sonapraneeth/components/theme';
 import { notesRoutes } from './routes-integration';
 import type { DocsConfig } from './config';
 import type { SidebarConfig } from './schema';
@@ -51,7 +51,7 @@ function git(command: string, fallback: string): string {
  * own `astro.config.ts` and may pass a port, site URL, or extra integrations.
  *
  *   // demo/notes/astro.config.ts
- *   import { defineDocsAstroConfig } from '@grihasetu/notes-core/astro';
+ *   import { defineDocsAstroConfig } from '@sonapraneeth/notes-core/astro';
  *   export default defineDocsAstroConfig({ port: 4310 });
  */
 export function defineDocsAstroConfig(options: DocsAstroConfigOptions) {

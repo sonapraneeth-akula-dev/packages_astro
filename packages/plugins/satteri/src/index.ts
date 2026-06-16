@@ -74,7 +74,7 @@ function defaultContent(): Element {
  * which assigns the ids.
  *
  *   import rehypeSlug from 'rehype-slug';
- *   import rehypeSatteriAutolinkHeadings from '@grihasetu/rehype-satteri-autolink-headings';
+ *   import rehypeSatteriAutolinkHeadings from '@sonapraneeth/rehype-satteri-autolink-headings';
  *
  *   unified().use(rehypeSlug).use(rehypeSatteriAutolinkHeadings);
  */

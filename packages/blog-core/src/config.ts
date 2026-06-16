@@ -3,11 +3,11 @@
  * `blog.config.ts` that calls {@link defineBlogConfig} with overrides; the rest
  * fall back to these sensible defaults.
  */
-import type { SiteChrome } from '@grihasetu/components/chrome';
-import type { ThemeConfig } from '@grihasetu/components/theme';
+import type { SiteChrome } from '@sonapraneeth/components/chrome';
+import type { ThemeConfig } from '@sonapraneeth/components/theme';
 
-export type { NavLink, SocialProfile } from '@grihasetu/components/chrome';
-export { activeSocials } from '@grihasetu/components/chrome';
+export type { NavLink, SocialProfile } from '@sonapraneeth/components/chrome';
+export { activeSocials } from '@sonapraneeth/components/chrome';
 
 export interface BlogConfig extends SiteChrome {
   /** Full site name used in <title> and metadata. */

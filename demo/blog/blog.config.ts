@@ -1,4 +1,4 @@
-import { defineBlogConfig } from '@grihasetu/blog-core/config';
+import { defineBlogConfig } from '@sonapraneeth/blog-core/config';
 
 const ICON_HOME =
   '<path d="M3 9.5 12 3l9 6.5"></path><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"></path><path d="M9 21v-6h6v6"></path>';
@@ -13,7 +13,7 @@ export const blogConfig = defineBlogConfig({
   brand: 'Blog',
   title: 'Blog Engine — Demo',
   description:
-    'A showcase journal demonstrating the @grihasetu/blog-core engine: a paginated feed, categories, tags, optimised code blocks, MDX components and offline search.',
+    'A showcase journal demonstrating the @sonapraneeth/blog-core engine: a paginated feed, categories, tags, optimised code blocks, MDX components and offline search.',
   author: 'Sonapraneeth Akula',
   pageSize: 5,
   timeZone: 'Asia/Kolkata',

@@ -1,12 +1,12 @@
-# @grihasetu/notes-app — Go Notes
+# @sonapraneeth/notes-app — Go Notes
 
-A real documentation site built on **`@grihasetu/notes-core`**: a practical
+A real documentation site built on **`@sonapraneeth/notes-core`**: a practical
 handbook of the **Go programming language**, from basics through advanced topics
 and tooling. It demonstrates the core package in "production" mode with a
 **curated `sidebar.json`** override and a complete **Docker** deployment setup
 (dev / test / ppe / prod behind Caddy).
 
-> Sibling package: [`@grihasetu/notes-demo`](../demo) is the component showcase
+> Sibling package: [`@sonapraneeth/notes-demo`](../demo) is the component showcase
 > with an **auto-generated** sidebar. This app uses a **hand-curated** sidebar
 > and ships Docker infrastructure.
 

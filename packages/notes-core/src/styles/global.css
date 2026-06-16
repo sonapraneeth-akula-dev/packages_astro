@@ -28,7 +28,7 @@
   --dot-grid: rgba(0, 0, 0, 0.04);
 
   /* Accent colours + corner roundedness are injected per-config by the theme
-     system (see @grihasetu/components/theme): the layout emits a small inline
+     system (see @sonapraneeth/components/theme): the layout emits a small inline
      <style> for the selected palette and radius. The radius scale below derives
      from the injected --radius-base (fallback keeps it valid if absent). Set the
      palette/fonts/radius via your site config's `theme` field. */

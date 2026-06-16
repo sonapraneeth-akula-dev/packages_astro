@@ -8,7 +8,7 @@ interface PuppeteerPage {
   evaluateOnNewDocument(fn: () => void): Promise<unknown>;
 }
 
-// Unlighthouse config for the demo blog. The @grihasetu/blog-core engine owns
+// Unlighthouse config for the demo blog. The @sonapraneeth/blog-core engine owns
 // all routing (no local src/pages), so URLs are discovered by crawling the
 // preview server and its generated sitemap rather than a pages directory.
 export default {

@@ -1,12 +1,12 @@
 /**
- * Public API for @grihasetu/blog-core.
+ * Public API for @sonapraneeth/blog-core.
  *
  * Astro components, layouts, routes and styles are imported via their own
  * subpaths (so `.astro`/`.css` files load through Astro's plugins), e.g.:
  *
- *   import BlogPost from '@grihasetu/blog-core/layouts/BlogPost.astro';
- *   import { mdxComponents } from '@grihasetu/blog-core/components/mdx';
- *   import '@grihasetu/blog-core/styles/global.css';
+ *   import BlogPost from '@sonapraneeth/blog-core/layouts/BlogPost.astro';
+ *   import { mdxComponents } from '@sonapraneeth/blog-core/components/mdx';
+ *   import '@sonapraneeth/blog-core/styles/global.css';
  *
  * This entry re-exports the TypeScript building blocks: config, schema, the
  * posts collection, the Astro config factory and the route integration.

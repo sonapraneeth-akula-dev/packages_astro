@@ -1,7 +1,7 @@
 /**
  * MDX components for blog posts.
  *
- * Re-exports the shared UI map from @grihasetu/components and adds the
+ * Re-exports the shared UI map from @sonapraneeth/components and adds the
  * engine-specific `Code` block (expressive-code). Use them in a post either:
  *
  * 1. Auto-mapped (no import) — passed to <Content /> on the post page, so you
@@ -9,14 +9,14 @@
  *    images (`![alt](src)`) are auto-upgraded to optimized lazy/async output.
  *
  * 2. Explicit import for anything custom:
- *      import { Callout, Steps } from '@grihasetu/blog-core/components/mdx';
+ *      import { Callout, Steps } from '@sonapraneeth/blog-core/components/mdx';
  *
  * Sites can extend the map per-site with {@link mergeMdxComponents}.
  */
-import { baseMdxComponents } from '@grihasetu/components/mdx';
+import { baseMdxComponents } from '@sonapraneeth/components/mdx';
 import { Code } from 'astro-expressive-code/components';
 
-export * from '@grihasetu/components/mdx';
+export * from '@sonapraneeth/components/mdx';
 export { Code };
 
 /** Components auto-injected into every MDX post via <Content components={...} />. */

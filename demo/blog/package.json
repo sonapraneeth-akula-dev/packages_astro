@@ -1,9 +1,9 @@
 {
-  "name": "@grihasetu/blog-demo",
-  "version": "0.1.0",
+  "name": "@sonapraneeth/blog-demo",
+  "version": "1.0.0",
   "type": "module",
   "private": true,
-  "description": "Showcase blog site demonstrating every @grihasetu/blog-core feature.",
+  "description": "Showcase blog site demonstrating every @sonapraneeth/blog-core feature.",
   "scripts": {
     "dev": "bun ../../node_modules/astro/bin/astro.mjs dev",
     "start": "bun ../../node_modules/astro/bin/astro.mjs dev",
@@ -13,7 +13,7 @@
     "check": "bun ../../node_modules/astro/bin/astro.mjs check"
   },
   "dependencies": {
-    "@grihasetu/blog-core": "workspace:*",
+    "@sonapraneeth/blog-core": "workspace:*",
     "astro": "^6.4.6"
   },
   "devDependencies": {

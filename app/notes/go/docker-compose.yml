@@ -1,7 +1,7 @@
-# Docker Compose for the Go Notes app (@grihasetu/notes-app).
+# Docker Compose for the Go Notes app (@sonapraneeth/notes-app).
 #
 # The build context is the MONOREPO ROOT (../../..) because the app depends on
-# the @grihasetu/notes-core workspace package. The Dockerfile lives in this
+# the @sonapraneeth/notes-core workspace package. The Dockerfile lives in this
 # package.
 #
 # Environments:

@@ -1,6 +1,6 @@
 # Lighthouse Audit Report — Demo Blog
 
-**Project:** `@grihasetu/blog-demo` (`demo/blog`)
+**Project:** `@sonapraneeth/blog-demo` (`demo/blog`)
 **Audited URL:** `http://localhost:4312/` (production build via `astro preview`)
 **Tool:** Unlighthouse CI (`unlighthouse-ci`) + bundled `lighthouse-audit.ts`
 **Mode:** Light · Desktop · throttle off · 3 samples/page averaged

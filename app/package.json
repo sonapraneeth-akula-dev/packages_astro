@@ -1,6 +1,6 @@
 {
-  "name": "@grihasetu/notes-app",
-  "version": "0.1.0",
+  "name": "@sonapraneeth/notes-app",
+  "version": "1.0.0",
   "type": "module",
   "private": true,
   "description": "Real notes site: a handbook of the Go programming language (basics → advanced), with a custom sidebar.json and a Docker deployment setup.",
@@ -28,8 +28,8 @@
     "deploy": "bun run scripts/docker-compose.ts up prod caddy --build -d"
   },
   "dependencies": {
-    "@grihasetu/components": "workspace:*",
-    "@grihasetu/notes-core": "workspace:*",
+    "@sonapraneeth/components": "workspace:*",
+    "@sonapraneeth/notes-core": "workspace:*",
     "astro": "^6.4.6"
   },
   "devDependencies": {

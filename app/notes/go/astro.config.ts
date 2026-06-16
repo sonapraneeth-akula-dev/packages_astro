@@ -1,5 +1,5 @@
-import { defineDocsAstroConfig } from '@grihasetu/notes-core/astro';
-import type { SidebarConfig } from '@grihasetu/notes-core';
+import { defineDocsAstroConfig } from '@sonapraneeth/notes-core/astro';
+import type { SidebarConfig } from '@sonapraneeth/notes-core';
 import { docsConfig } from './notes.config';
 import sidebar from './sidebar.json';
 

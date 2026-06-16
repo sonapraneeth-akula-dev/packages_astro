@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import type { Element, Root } from 'hast';
-import rehypeSatteriAutolinkHeadings from '@grihasetu/rehype-satteri-autolink-headings';
+import rehypeSatteriAutolinkHeadings from '@sonapraneeth/rehype-satteri-autolink-headings';
 
 /** Build a minimal hast document tree wrapping the given heading nodes. */
 function tree(...nodes: Element[]): Root {

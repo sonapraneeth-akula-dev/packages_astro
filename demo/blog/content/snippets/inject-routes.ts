@@ -4,12 +4,12 @@
 import type { AstroIntegration } from 'astro';
 
 const ROUTES = {
-  home: '@grihasetu/blog-core/routes/index.astro',
-  post: '@grihasetu/blog-core/routes/post.astro',
-  categories: '@grihasetu/blog-core/routes/categories.astro',
-  tags: '@grihasetu/blog-core/routes/tags.astro',
-  search: '@grihasetu/blog-core/routes/search.astro',
-  rss: '@grihasetu/blog-core/routes/rss.xml.ts',
+  home: '@sonapraneeth/blog-core/routes/index.astro',
+  post: '@sonapraneeth/blog-core/routes/post.astro',
+  categories: '@sonapraneeth/blog-core/routes/categories.astro',
+  tags: '@sonapraneeth/blog-core/routes/tags.astro',
+  search: '@sonapraneeth/blog-core/routes/search.astro',
+  rss: '@sonapraneeth/blog-core/routes/rss.xml.ts',
 } as const;
 
 export function routesIntegration(): AstroIntegration {

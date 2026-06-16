@@ -1,9 +1,9 @@
 {
-  "name": "@grihasetu/notes-demo",
-  "version": "0.1.0",
+  "name": "@sonapraneeth/notes-demo",
+  "version": "1.0.0",
   "type": "module",
   "private": true,
-  "description": "Showcase docs/notes site demonstrating every @grihasetu/notes-core feature.",
+  "description": "Showcase docs/notes site demonstrating every @sonapraneeth/notes-core feature.",
   "scripts": {
     "dev": "bun ../../node_modules/astro/bin/astro.mjs dev",
     "start": "bun ../../node_modules/astro/bin/astro.mjs dev",
@@ -13,7 +13,7 @@
     "check": "bun ../../node_modules/astro/bin/astro.mjs check"
   },
   "dependencies": {
-    "@grihasetu/notes-core": "workspace:*",
+    "@sonapraneeth/notes-core": "workspace:*",
     "astro": "^6.4.6"
   },
   "devDependencies": {

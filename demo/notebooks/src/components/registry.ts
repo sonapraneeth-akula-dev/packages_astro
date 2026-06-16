@@ -1,4 +1,4 @@
-import { mergeMdxComponents } from '@grihasetu/notes-core/components/mdx';
+import { mergeMdxComponents } from '@sonapraneeth/notes-core/components/mdx';
 
 /**
  * The component map injected into every note via <Content components={...} />.

@@ -31,10 +31,10 @@ const ID = {
 
 /** The package-relative entrypoints of the injected route components. */
 const ROUTES = {
-  home: '@grihasetu/notes-core/routes/index.astro',
-  doc: '@grihasetu/notes-core/routes/[...slug].astro',
-  search: '@grihasetu/notes-core/routes/search.astro',
-  notFound: '@grihasetu/notes-core/routes/404.astro',
+  home: '@sonapraneeth/notes-core/routes/index.astro',
+  doc: '@sonapraneeth/notes-core/routes/[...slug].astro',
+  search: '@sonapraneeth/notes-core/routes/search.astro',
+  notFound: '@sonapraneeth/notes-core/routes/404.astro',
 } as const;
 
 /**
@@ -44,7 +44,7 @@ const ROUTES = {
  */
 export function notesRoutes(options: NotesRoutesOptions): AstroIntegration {
   return {
-    name: '@grihasetu/notes-core/routes',
+    name: '@sonapraneeth/notes-core/routes',
     hooks: {
       'astro:config:setup': ({ config, injectRoute, updateConfig }) => {
         const root = fileURLToPath(config.root);

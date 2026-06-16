@@ -1,12 +1,12 @@
 /**
- * Public API for @grihasetu/notes-core.
+ * Public API for @sonapraneeth/notes-core.
  *
  * Astro components, layouts and styles are imported via their own subpaths
  * (so `.astro`/`.css` files load through Astro's plugins), e.g.:
  *
- *   import DocLayout from '@grihasetu/notes-core/layouts/DocLayout.astro';
- *   import { mdxComponents } from '@grihasetu/notes-core/components/mdx';
- *   import '@grihasetu/notes-core/styles/global.css';
+ *   import DocLayout from '@sonapraneeth/notes-core/layouts/DocLayout.astro';
+ *   import { mdxComponents } from '@sonapraneeth/notes-core/components/mdx';
+ *   import '@sonapraneeth/notes-core/styles/global.css';
  *
  * This entry re-exports the TypeScript building blocks: config, schema,
  * content collection, the Astro config factory and the sidebar/route helpers.

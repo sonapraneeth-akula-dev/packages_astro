@@ -1,4 +1,4 @@
-import { defineDocsConfig } from '@grihasetu/notes-core/config';
+import { defineDocsConfig } from '@sonapraneeth/notes-core/config';
 
 const ICON_HOME =
   '<path d="M3 9.5 12 3l9 6.5"></path><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"></path><path d="M9 21v-6h6v6"></path>';
@@ -9,7 +9,7 @@ export const docsConfig = defineDocsConfig({
   brand: 'Notebooks',
   title: 'Notebooks — Demo',
   description:
-    'A showcase site demonstrating @grihasetu/notes-core notebooks mode: multiple self-contained sub-notes (C++, Go, C#) under one site, each with its own scoped sidebar, landing page and offline search.',
+    'A showcase site demonstrating @sonapraneeth/notes-core notebooks mode: multiple self-contained sub-notes (C++, Go, C#) under one site, each with its own scoped sidebar, landing page and offline search.',
   author: 'Sonapraneeth Akula',
   subject: 'Notebooks',
   nav: [

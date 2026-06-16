@@ -28,15 +28,15 @@ const ID = {
 
 /** The package-relative entrypoints of the injected route components. */
 const ROUTES = {
-  home: '@grihasetu/blog-core/routes/[...page].astro',
-  post: '@grihasetu/blog-core/routes/blog/[...id].astro',
-  categories: '@grihasetu/blog-core/routes/categories/index.astro',
-  category: '@grihasetu/blog-core/routes/categories/[category].astro',
-  tags: '@grihasetu/blog-core/routes/tags/index.astro',
-  tag: '@grihasetu/blog-core/routes/tags/[tag].astro',
-  rss: '@grihasetu/blog-core/routes/rss.xml.ts',
-  search: '@grihasetu/blog-core/routes/search.astro',
-  notFound: '@grihasetu/blog-core/routes/404.astro',
+  home: '@sonapraneeth/blog-core/routes/[...page].astro',
+  post: '@sonapraneeth/blog-core/routes/blog/[...id].astro',
+  categories: '@sonapraneeth/blog-core/routes/categories/index.astro',
+  category: '@sonapraneeth/blog-core/routes/categories/[category].astro',
+  tags: '@sonapraneeth/blog-core/routes/tags/index.astro',
+  tag: '@sonapraneeth/blog-core/routes/tags/[tag].astro',
+  rss: '@sonapraneeth/blog-core/routes/rss.xml.ts',
+  search: '@sonapraneeth/blog-core/routes/search.astro',
+  notFound: '@sonapraneeth/blog-core/routes/404.astro',
 } as const;
 
 /**
@@ -46,7 +46,7 @@ const ROUTES = {
  */
 export function blogRoutes(options: BlogRoutesOptions): AstroIntegration {
   return {
-    name: '@grihasetu/blog-core/routes',
+    name: '@sonapraneeth/blog-core/routes',
     hooks: {
       'astro:config:setup': ({ config, injectRoute, updateConfig }) => {
         const root = fileURLToPath(config.root);

@@ -9,10 +9,10 @@
       },
     },
     "app/blog": {
-      "name": "@grihasetu/blog-app",
-      "version": "0.1.0",
+      "name": "@sonapraneeth/blog-app",
+      "version": "1.0.0",
       "dependencies": {
-        "@grihasetu/blog-core": "workspace:*",
+        "@sonapraneeth/blog-core": "workspace:*",
         "astro": "^6.4.6",
       },
       "devDependencies": {
@@ -24,11 +24,11 @@
       },
     },
     "app/notes/go": {
-      "name": "@grihasetu/notes-app",
-      "version": "0.1.0",
+      "name": "@sonapraneeth/notes-app",
+      "version": "1.0.0",
       "dependencies": {
-        "@grihasetu/components": "workspace:*",
-        "@grihasetu/notes-core": "workspace:*",
+        "@sonapraneeth/components": "workspace:*",
+        "@sonapraneeth/notes-core": "workspace:*",
         "astro": "^6.4.6",
       },
       "devDependencies": {
@@ -40,10 +40,10 @@
       },
     },
     "demo/blog": {
-      "name": "@grihasetu/blog-demo",
-      "version": "0.1.0",
+      "name": "@sonapraneeth/blog-demo",
+      "version": "1.0.0",
       "dependencies": {
-        "@grihasetu/blog-core": "workspace:*",
+        "@sonapraneeth/blog-core": "workspace:*",
         "astro": "^6.4.6",
       },
       "devDependencies": {
@@ -54,10 +54,10 @@
       },
     },
     "demo/notebooks": {
-      "name": "@grihasetu/notebooks-demo",
-      "version": "0.1.0",
+      "name": "@sonapraneeth/notebooks-demo",
+      "version": "1.0.0",
       "dependencies": {
-        "@grihasetu/notes-core": "workspace:*",
+        "@sonapraneeth/notes-core": "workspace:*",
         "astro": "^6.4.6",
       },
       "devDependencies": {
@@ -68,10 +68,10 @@
       },
     },
     "demo/notes": {
-      "name": "@grihasetu/notes-demo",
-      "version": "0.1.0",
+      "name": "@sonapraneeth/notes-demo",
+      "version": "1.0.0",
       "dependencies": {
-        "@grihasetu/notes-core": "workspace:*",
+        "@sonapraneeth/notes-core": "workspace:*",
         "astro": "^6.4.6",
       },
       "devDependencies": {
@@ -82,14 +82,14 @@
       },
     },
     "packages/blog-core": {
-      "name": "@grihasetu/blog-core",
-      "version": "0.1.0",
+      "name": "@sonapraneeth/blog-core",
+      "version": "1.0.0",
       "dependencies": {
         "@astrojs/rss": "^4.0.12",
         "@astrojs/sitemap": "^3.7.3",
         "@expressive-code/plugin-line-numbers": "^0.43.1",
-        "@grihasetu/components": "workspace:*",
-        "@grihasetu/rehype-satteri-autolink-headings": "workspace:*",
+        "@sonapraneeth/components": "workspace:*",
+        "@sonapraneeth/rehype-satteri-autolink-headings": "workspace:*",
         "astro": "^6.4.6",
         "astro-expressive-code": "^0.43.1",
       },
@@ -99,8 +99,8 @@
       },
     },
     "packages/components": {
-      "name": "@grihasetu/components",
-      "version": "0.1.0",
+      "name": "@sonapraneeth/components",
+      "version": "1.0.0",
       "dependencies": {
         "astro": "^6.4.6",
       },
@@ -110,13 +110,13 @@
       },
     },
     "packages/notes-core": {
-      "name": "@grihasetu/notes-core",
-      "version": "0.1.0",
+      "name": "@sonapraneeth/notes-core",
+      "version": "1.0.0",
       "dependencies": {
         "@astrojs/sitemap": "^3.7.3",
         "@expressive-code/plugin-line-numbers": "^0.43.1",
-        "@grihasetu/components": "workspace:*",
-        "@grihasetu/rehype-satteri-autolink-headings": "workspace:*",
+        "@sonapraneeth/components": "workspace:*",
+        "@sonapraneeth/rehype-satteri-autolink-headings": "workspace:*",
         "astro": "^6.4.6",
         "astro-expressive-code": "^0.43.1",
       },
@@ -126,8 +126,8 @@
       },
     },
     "packages/plugins/satteri": {
-      "name": "@grihasetu/rehype-satteri-autolink-headings",
-      "version": "0.1.0",
+      "name": "@sonapraneeth/rehype-satteri-autolink-headings",
+      "version": "1.0.0",
       "dependencies": {
         "@astrojs/markdown-remark": "^7.2.0",
         "@astrojs/mdx": "^6.0.3",
@@ -260,24 +260,6 @@
     "@expressive-code/plugin-shiki": ["@expressive-code/plugin-shiki@0.43.1", "", { "dependencies": { "@expressive-code/core": "^0.43.1", "shiki": "^4.0.2" } }, "sha512-NdceinYEROXODNgB/ix+7oCdIg+nGyok+E+p2lU9YlWd1xKshXdXpmmptKfkuU27MJ5jjnfhMCI78YYBGi9GtQ=="],
 
     "@expressive-code/plugin-text-markers": ["@expressive-code/plugin-text-markers@0.43.1", "", { "dependencies": { "@expressive-code/core": "^0.43.1" } }, "sha512-JWf8wdbZSNoGY4TFv3lmt3/NNDaCP7iYL6rRYD05g8YYjKL62hKUHLl5+B47+v0+bqbuMhXDN7qz2wywFUvMkg=="],
-
-    "@grihasetu/blog-app": ["@grihasetu/blog-app@workspace:app/blog"],
-
-    "@grihasetu/blog-core": ["@grihasetu/blog-core@workspace:packages/blog-core"],
-
-    "@grihasetu/blog-demo": ["@grihasetu/blog-demo@workspace:demo/blog"],
-
-    "@grihasetu/components": ["@grihasetu/components@workspace:packages/components"],
-
-    "@grihasetu/notebooks-demo": ["@grihasetu/notebooks-demo@workspace:demo/notebooks"],
-
-    "@grihasetu/notes-app": ["@grihasetu/notes-app@workspace:app/notes/go"],
-
-    "@grihasetu/notes-core": ["@grihasetu/notes-core@workspace:packages/notes-core"],
-
-    "@grihasetu/notes-demo": ["@grihasetu/notes-demo@workspace:demo/notes"],
-
-    "@grihasetu/rehype-satteri-autolink-headings": ["@grihasetu/rehype-satteri-autolink-headings@workspace:packages/plugins/satteri"],
 
     "@img/colour": ["@img/colour@1.1.0", "", {}, "sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ=="],
 
@@ -418,6 +400,24 @@
     "@shikijs/types": ["@shikijs/types@4.2.0", "", { "dependencies": { "@shikijs/vscode-textmate": "^10.0.2", "@types/hast": "^3.0.4" } }, "sha512-VT/MKtlpOhEPZloSH3Pb9WCZEBDoQVMa9jedp5UAwmJOar1DVc9DRODAxmYPW9M93IK4ryuqRejFfmlvlVDemw=="],
 
     "@shikijs/vscode-textmate": ["@shikijs/vscode-textmate@10.0.2", "", {}, "sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg=="],
+
+    "@sonapraneeth/blog-app": ["@sonapraneeth/blog-app@workspace:app/blog"],
+
+    "@sonapraneeth/blog-core": ["@sonapraneeth/blog-core@workspace:packages/blog-core"],
+
+    "@sonapraneeth/blog-demo": ["@sonapraneeth/blog-demo@workspace:demo/blog"],
+
+    "@sonapraneeth/components": ["@sonapraneeth/components@workspace:packages/components"],
+
+    "@sonapraneeth/notebooks-demo": ["@sonapraneeth/notebooks-demo@workspace:demo/notebooks"],
+
+    "@sonapraneeth/notes-app": ["@sonapraneeth/notes-app@workspace:app/notes/go"],
+
+    "@sonapraneeth/notes-core": ["@sonapraneeth/notes-core@workspace:packages/notes-core"],
+
+    "@sonapraneeth/notes-demo": ["@sonapraneeth/notes-demo@workspace:demo/notes"],
+
+    "@sonapraneeth/rehype-satteri-autolink-headings": ["@sonapraneeth/rehype-satteri-autolink-headings@workspace:packages/plugins/satteri"],
 
     "@types/bun": ["@types/bun@1.3.14", "", { "dependencies": { "bun-types": "1.3.14" } }, "sha512-h1hFqFVcvAvD9j9K7ZW7vd82aSA+rTdznZa+5bwvCwqSB1jmmfLcbIWhOLx1/+boy/xmjgCs/OMUL8hRJSmnPw=="],
 
