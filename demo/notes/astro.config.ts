@@ -1,5 +1,5 @@
 import { defineDocsAstroConfig } from '@grihasetu/notes-core/astro';
-import { docsConfig } from './docs.config';
+import { docsConfig } from './notes.config';
 
 // Demo showcase site. The engine owns all page routing/search; the sidebar is
 // auto-generated from the folder structure (no sidebar.json passed).
