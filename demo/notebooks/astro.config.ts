@@ -1,5 +1,5 @@
 import { defineDocsAstroConfig } from '@grihasetu/notes-core/astro';
-import { docsConfig } from './docs.config';
+import { docsConfig } from './notes.config';
 
 // Demo showcase site for notebooks mode. The engine owns all page
 // routing/search; the home page is a hub of notebooks, each with a scoped

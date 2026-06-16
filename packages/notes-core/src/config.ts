@@ -1,6 +1,6 @@
 /**
  * Site-level configuration for a docs/notes site. Each site provides its own
- * `docs.config.ts` that calls {@link defineDocsConfig} with overrides; the rest
+ * `notes.config.ts` that calls {@link defineDocsConfig} with overrides; the rest
  * fall back to these sensible defaults.
  */
 

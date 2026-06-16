@@ -1,6 +1,6 @@
 import { defineDocsAstroConfig } from '@grihasetu/notes-core/astro';
 import type { SidebarConfig } from '@grihasetu/notes-core';
-import { docsConfig } from './docs.config';
+import { docsConfig } from './notes.config';
 import sidebar from './sidebar.json';
 
 // Real Go notes site. The engine owns all page routing/search; this site only
