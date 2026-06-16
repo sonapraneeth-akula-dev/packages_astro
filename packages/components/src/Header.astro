@@ -29,7 +29,10 @@ function isActive(href: string) {
                 aria-current={isActive(link.href) ? 'page' : undefined}
                 class:list={['nav-link', { active: isActive(link.href) }]}
               >
-                {link.label}
+                <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <Fragment set:html={link.icon} />
+                </svg>
+                <span>{link.label}</span>
               </a>
             </li>
           ))}
@@ -144,7 +147,9 @@ function isActive(href: string) {
     padding: 0;
   }
   .nav-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     padding: 0.45rem 0.8rem;
     border-radius: var(--radius-sm);
     font-size: 0.92rem;
@@ -152,6 +157,7 @@ function isActive(href: string) {
     color: var(--text-muted);
     transition: all 0.15s ease;
   }
+  .nav-icon { flex-shrink: 0; }
   .nav-link:hover { color: var(--text); background: var(--bg-subtle); }
   .nav-link.active { color: var(--accent-text); background: var(--accent-soft); }
 
