@@ -22,6 +22,45 @@ export function readingTime(body: string | undefined): string {
   return `${minutes} min read`;
 }
 
+/**
+ * Truncate text to the first `max` words, appending an ellipsis when the text
+ * was actually shortened. Returns the original (trimmed) text when it already
+ * fits within the word budget.
+ */
+export function truncateWords(text: string | undefined, max = 100): string {
+  const words = (text ?? '').trim().split(/\s+/).filter(Boolean);
+  if (words.length <= max) return words.join(' ');
+  return `${words.slice(0, max).join(' ')}…`;
+}
+
+/**
+ * Up to two initials for a label, used to generate a default cover when no
+ * image is supplied. Multi-word labels take each word's first character
+ * (e.g. "Go language" → "GL"); single tokens take their first two non-space
+ * characters (e.g. "C++" → "C+", "C#" → "C#").
+ */
+export function coverInitials(label: string): string {
+  const cleaned = (label ?? '').trim();
+  if (!cleaned) return '?';
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  if (words.length >= 2) {
+    return (words[0]![0]! + words[1]![0]!).toUpperCase();
+  }
+  return cleaned.slice(0, 2).toUpperCase();
+}
+
+/**
+ * A stable hue (0–359) derived from a label, so each generated cover gets a
+ * consistent accent colour across builds.
+ */
+export function coverHue(label: string): number {
+  let hash = 0;
+  for (const ch of label ?? '') {
+    hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  }
+  return hash % 360;
+}
+
 const dateFormatterCache = new Map<string, Intl.DateTimeFormat>();
 
 /** Date + time in the site's configured time zone, with a readable label. */

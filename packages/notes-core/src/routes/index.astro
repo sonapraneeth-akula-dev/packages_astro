@@ -9,8 +9,11 @@
  * carry no `src/pages/` of their own.
  */
 import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { buildHomeData } from '../utils/docs';
+import { truncateWords, coverInitials, coverHue } from '../utils/format';
 import { docsConfig } from 'virtual:notes-core/config';
 import { components } from 'virtual:notes-core/components';
 import { sidebar } from 'virtual:notes-core/sidebar';
@@ -44,15 +47,42 @@ const Rendered = rootEntry ? (await render(rootEntry)).Content : null;
       <nav class="notebook-grid" aria-label="Notebooks">
         {notebooks.map((nb) => (
           <a class="notebook-card" href={nb.href} data-pagefind-ignore>
-            {nb.cover && <span class="notebook-cover" aria-hidden="true">{nb.cover}</span>}
+            <span class="notebook-cover" aria-hidden="true">
+              {nb.coverImage ? (
+                typeof nb.coverImage === 'string' ? (
+                  <img class="notebook-cover-img" src={nb.coverImage} alt="" loading="lazy" decoding="async" />
+                ) : (
+                  <Image
+                    class="notebook-cover-img"
+                    src={nb.coverImage as ImageMetadata}
+                    alt=""
+                    widths={[320, 480, 640]}
+                    sizes="(max-width: 50rem) 100vw, 22rem"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )
+              ) : (
+                <span class="notebook-cover-initials" style={`--cover-hue:${coverHue(nb.label)}`}>
+                  {nb.cover ? (
+                    <span class="notebook-cover-emoji">{nb.cover}</span>
+                  ) : (
+                    coverInitials(nb.label)
+                  )}
+                </span>
+              )}
+            </span>
             <span class="notebook-body">
               <span class="notebook-title">
                 {nb.label}
                 {nb.badge && <span class="notebook-badge">{nb.badge}</span>}
+                <span class="notebook-arrow" aria-hidden="true">→</span>
               </span>
-              {nb.description && <span class="notebook-desc">{nb.description}</span>}
+              {nb.author && <span class="notebook-author">{nb.author}</span>}
+              {nb.description && (
+                <span class="notebook-desc">{truncateWords(nb.description, 100)}</span>
+              )}
             </span>
-            <span class="notebook-arrow" aria-hidden="true">→</span>
           </a>
         ))}
       </nav>
@@ -85,15 +115,14 @@ const Rendered = rootEntry ? (await render(rootEntry)).Content : null;
 
   .notebook-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: 1.25rem;
     margin-top: 2.5rem;
   }
   .notebook-card {
     display: flex;
-    align-items: flex-start;
-    gap: 0.9rem;
-    padding: 1.1rem 1.25rem;
+    flex-direction: column;
+    overflow: hidden;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--surface);
@@ -105,8 +134,58 @@ const Rendered = rootEntry ? (await render(rootEntry)).Content : null;
     transform: translateY(-2px);
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.07);
   }
-  .notebook-cover { font-size: 1.6rem; line-height: 1.2; }
-  .notebook-body { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; flex: 1; }
+  /* Cover sits on top, spanning the full card width with a fixed aspect ratio.
+     Children are absolutely positioned so the (variable) image/emoji size never
+     overrides the 16:9 box. */
+  .notebook-cover {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9;
+    background: var(--bg-subtle);
+    border-bottom: 1px solid var(--border);
+  }
+  .notebook-cover-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* Generated default cover: a stable gradient (hue derived from the title)
+     carrying the notebook's initials, or its accent emoji when one is set. */
+  .notebook-cover-initials {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 2.75rem;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background:
+      linear-gradient(
+        135deg,
+        hsl(var(--cover-hue, 220) 65% 52%),
+        hsl(calc(var(--cover-hue, 220) + 38) 68% 42%)
+      );
+  }
+  .notebook-cover-emoji {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    line-height: 1;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+  }
+  .notebook-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.1rem 1.25rem 1.25rem;
+    min-width: 0;
+  }
   .notebook-title {
     display: inline-flex;
     align-items: center;
@@ -125,7 +204,8 @@ const Rendered = rootEntry ? (await render(rootEntry)).Content : null;
     background: var(--bg-subtle);
     color: var(--accent-text);
   }
-  .notebook-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.45; }
-  .notebook-arrow { color: var(--text-muted); font-size: 1.1rem; }
+  .notebook-author { color: var(--text-muted); font-size: 0.78rem; font-weight: 600; }
+  .notebook-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+  .notebook-arrow { margin-left: auto; color: var(--text-muted); font-size: 1.1rem; }
   .notebook-card:hover .notebook-arrow { color: var(--accent-text); }
 </style>

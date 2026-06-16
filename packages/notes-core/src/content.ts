@@ -17,7 +17,7 @@ import { docFrontmatterSchema } from './schema';
 export function docsCollection(base = './src/content/docs') {
   return defineCollection({
     loader: glob({ pattern: '**/*.{md,mdx}', base }),
-    schema: docFrontmatterSchema,
+    schema: ({ image }) => docFrontmatterSchema(image),
   });
 }
 

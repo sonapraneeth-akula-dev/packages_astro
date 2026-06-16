@@ -20,31 +20,52 @@ export const docSidebarMetaSchema = z.object({
   badge: z.string().optional(),
 });
 
-/** Frontmatter accepted on every note. */
-export const docFrontmatterSchema = z.object({
-  /** Page + sidebar title. Required. */
-  title: z.string(),
-  /** Short summary used in metadata and the page lede. */
-  description: z.string().default(''),
-  /**
-   * Custom rendering slug. When omitted, the route defaults to the file's path
-   * slug (e.g. `advanced/concurrency` for `advanced/concurrency.mdx`).
-   * Accepts values with or without a leading slash.
-   */
-  slug: z.string().optional(),
-  /** Per-doc sidebar metadata. */
-  sidebar: docSidebarMetaSchema.optional(),
-  /** Hide from listings / sidebar while drafting (only shown in dev). */
-  draft: z.boolean().default(false),
-  /** Optional last-updated date shown in the page header. */
-  lastUpdated: z.coerce.date().optional(),
-  /** Optional accent emoji/glyph shown in the page header. */
-  cover: z.string().optional(),
-  /** Hide the right-hand "On this page" table of contents. */
-  tableOfContents: z.boolean().default(true),
-});
+/**
+ * Astro's content-collection `image()` helper. When a collection passes it,
+ * `coverImage` resolves a local path to optimised {@link ImageMetadata};
+ * otherwise it falls back to a plain string (e.g. a remote URL).
+ */
+type ImageHelper = () => z.ZodTypeAny;
 
-export type DocFrontmatter = z.infer<typeof docFrontmatterSchema>;
+/**
+ * Frontmatter accepted on every note. A factory so the content collection can
+ * pass Astro's `image()` helper (see {@link docsCollection}); call with no
+ * argument for a plain, image-less schema.
+ */
+export function docFrontmatterSchema(image?: ImageHelper) {
+  return z.object({
+    /** Page + sidebar title. Required. */
+    title: z.string(),
+    /** Short summary used in metadata and the page lede. */
+    description: z.string().default(''),
+    /** Optional author shown on the notebook hub card. */
+    author: z.string().optional(),
+    /**
+     * Custom rendering slug. When omitted, the route defaults to the file's path
+     * slug (e.g. `advanced/concurrency` for `advanced/concurrency.mdx`).
+     * Accepts values with or without a leading slash.
+     */
+    slug: z.string().optional(),
+    /** Per-doc sidebar metadata. */
+    sidebar: docSidebarMetaSchema.optional(),
+    /** Hide from listings / sidebar while drafting (only shown in dev). */
+    draft: z.boolean().default(false),
+    /** Optional last-updated date shown in the page header. */
+    lastUpdated: z.coerce.date().optional(),
+    /** Optional accent emoji/glyph shown in the page header. */
+    cover: z.string().optional(),
+    /**
+     * Optional cover image for the notebook hub card. Local paths are optimised
+     * at build time; a string (remote URL) is used as-is when no `image()`
+     * helper is available.
+     */
+    coverImage: (image ? image() : z.string()).optional(),
+    /** Hide the right-hand "On this page" table of contents. */
+    tableOfContents: z.boolean().default(true),
+  });
+}
+
+export type DocFrontmatter = z.infer<ReturnType<typeof docFrontmatterSchema>>;
 
 // ─── sidebar.json schema ─────────────────────────────────────────────────────
 

@@ -72,5 +72,8 @@ export {
   slugify,
   humanize,
   readingTime,
+  truncateWords,
+  coverInitials,
+  coverHue,
   formatDateTime,
 } from './utils/format';

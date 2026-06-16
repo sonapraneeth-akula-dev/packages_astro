@@ -1,3 +1,4 @@
+import type { ImageMetadata } from 'astro';
 import type { DocEntry } from '../content';
 import type { SidebarConfig } from '../schema';
 import { humanize, slugify } from './format';
@@ -45,7 +46,12 @@ export interface Notebook {
   /** Display label (from the folder index frontmatter, else a humanized id). */
   label: string;
   description?: string;
+  /** Optional author shown on the hub card. */
+  author?: string;
+  /** Accent emoji/glyph (used when no `coverImage` is set). */
   cover?: string;
+  /** Optional optimised cover image (local) or URL string (remote). */
+  coverImage?: ImageMetadata | string;
   badge?: string;
   /** Landing route, `/<id>`. */
   href: string;
@@ -257,7 +263,9 @@ export function getNotebooks(entries: DocEntry[]): Notebook[] {
       id,
       label: rec.landing ? entryLabel(rec.landing) : humanize(id),
       description: rec.landing?.data.description || undefined,
+      author: rec.landing?.data.author,
       cover: rec.landing?.data.cover,
+      coverImage: rec.landing?.data.coverImage,
       badge: rec.landing?.data.sidebar?.badge,
       href: normalizePath(`/${id}`),
       order: rec.landing ? entryOrder(rec.landing) : Number.POSITIVE_INFINITY,
