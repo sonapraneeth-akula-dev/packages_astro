@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./chrome": "./src/chrome.ts",
+    "./theme": "./src/theme.ts",
     "./icons": "./src/icons.ts",
     "./mdx": "./src/mdx.ts",
     "./*": "./src/*"

@@ -5,6 +5,7 @@
  */
 
 import type { SiteChrome } from '@grihasetu/components/chrome';
+import type { ThemeConfig } from '@grihasetu/components/theme';
 
 export type { NavLink, SocialProfile } from '@grihasetu/components/chrome';
 export { activeSocials } from '@grihasetu/components/chrome';
@@ -35,6 +36,12 @@ export interface DocsConfig extends SiteChrome {
    * `sidebar.json` is supplied.
    */
   notebooks: boolean;
+  /**
+   * Visual theme — accent palette, font combination and corner roundedness.
+   * Only the selected options ship (fonts register per combo; accents + radius
+   * inline per page). Omit any axis to keep the engine's default look.
+   */
+  theme: ThemeConfig;
 }
 
 const ICON_HOME =
@@ -67,6 +74,7 @@ export const defaultDocsConfig: DocsConfig = {
   ],
   search: true,
   notebooks: false,
+  theme: {},
 };
 
 export { ICON_BOOK };

@@ -4,6 +4,11 @@ import { Font } from 'astro:assets';
 import Header from '@grihasetu/components/Header.astro';
 import Footer from '@grihasetu/components/Footer.astro';
 import EnvBanner from '@grihasetu/components/EnvBanner.astro';
+import {
+  resolveTheme,
+  renderThemeStyle,
+  themeFontVars,
+} from '@grihasetu/components/theme';
 import { blogConfig } from 'virtual:blog-core/config';
 
 interface Props {
@@ -28,6 +33,12 @@ const fullTitle = !title || title === blogConfig.title
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImageUrl = ogImage ? new URL(ogImage, Astro.site) : undefined;
 const appEnv = __APP_ENV__;
+
+// Resolve the site's theme: accent palette + radius inline below, fonts loaded
+// per the selected combo (only those families are registered in the config).
+const theme = resolveTheme(blogConfig.theme);
+const themeStyle = renderThemeStyle(theme);
+const fontVars = themeFontVars(theme.fonts);
 ---
 
 <!doctype html>
@@ -50,11 +61,14 @@ const appEnv = __APP_ENV__;
     <meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
     <meta name="generator" content={Astro.generator} />
 
-    {/* Self-hosted fonts. Body + heading preload (above the fold); mono is
-        deferred since it only appears inside code blocks. */}
-    <Font cssVariable="--font-sans-files" preload />
-    <Font cssVariable="--font-heading-files" preload />
-    <Font cssVariable="--font-mono-files" />
+    {/* Per-config accent palette + corner radius. Only the selected palette's
+        tokens ship; neutral surface tokens live in global.css. */}
+    <style is:inline set:html={themeStyle}></style>
+
+    {/* Self-hosted fonts for the selected combo. Body + heading preload (above
+        the fold); mono is deferred since it only appears inside code blocks.
+        The `system` combo registers nothing and uses the native OS stack. */}
+    {fontVars.map((f) => <Font cssVariable={f.cssVariable} preload={f.preload} />)}
 
     {/* Theme-flash preventer: set data-theme before paint. Intentionally tiny
         and synchronous (the only blocking script in <head>). */}

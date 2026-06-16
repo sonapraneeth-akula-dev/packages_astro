@@ -8,6 +8,7 @@ import {
   satteriMarkdownProcessor,
 } from '@grihasetu/rehype-satteri-autolink-headings/astro';
 import { execSync } from 'node:child_process';
+import { resolveTheme, themeFontEntries } from '@grihasetu/components/theme';
 import { blogRoutes } from './routes-integration';
 import type { BlogConfig } from './config';
 
@@ -60,6 +61,13 @@ export function defineBlogAstroConfig(options: BlogAstroConfigOptions) {
   const gitBranch =
     process.env.GIT_BRANCH ?? git('git rev-parse --abbrev-ref HEAD', 'unknown');
 
+  // Self-host only the fonts the selected combo needs (see the theme system).
+  const theme = resolveTheme(options.blogConfig.theme);
+  const fonts = themeFontEntries(theme.fonts).map((entry) => ({
+    provider: fontProviders.google(),
+    ...entry,
+  }));
+
   return defineConfig({
     site,
     // Expressive Code must be registered BEFORE MDX so it processes fenced code
@@ -110,32 +118,9 @@ export function defineBlogAstroConfig(options: BlogAstroConfigOptions) {
     },
     // Self-host Google Fonts at build time: removes external font origins from
     // the critical path and ships metric-matched fallbacks (no layout shift).
-    fonts: [
-      {
-        provider: fontProviders.google(),
-        name: 'Plus Jakarta Sans',
-        cssVariable: '--font-sans-files',
-        weights: ['300 800'],
-        styles: ['normal'],
-        subsets: ['latin'],
-      },
-      {
-        provider: fontProviders.google(),
-        name: 'Space Grotesk',
-        cssVariable: '--font-heading-files',
-        weights: ['300 700'],
-        styles: ['normal'],
-        subsets: ['latin'],
-      },
-      {
-        provider: fontProviders.google(),
-        name: 'JetBrains Mono',
-        cssVariable: '--font-mono-files',
-        weights: ['400 700'],
-        styles: ['normal'],
-        subsets: ['latin'],
-      },
-    ],
+    // The family list is derived from the site's theme combo, so a build
+    // downloads only the selected fonts.
+    fonts,
     server: {
       host: '0.0.0.0',
       port,

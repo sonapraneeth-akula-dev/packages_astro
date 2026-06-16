@@ -29,23 +29,16 @@
   --text: #09090b;
   --text-muted: #52525b;
 
-  --accent: #4f46e5;
-  --accent-gradient-end: #7c3aed;
-  --accent-text: #4f46e5;
-  /* tuned for small text (WCAG AA) */
-  --accent-contrast: #ffffff;
-  --accent-glow: rgba(79, 70, 229, 0.12);
-  --accent-soft: rgba(79, 70, 229, 0.08);
   --dot-grid: rgba(0, 0, 0, 0.04);
 
-  /* Corner roundedness. Change --radius-base alone to restyle every component
-     (cards, chips, buttons, inputs, code blocks). Set it to 0 for sharp
-     corners, or raise it (e.g. 20px) for a softer, rounder look. The sm/lg
-     steps scale with it automatically. */
-  --radius-base: 0.5rem;
-  --radius-sm: calc(var(--radius-base) * 0.55);
-  --radius: var(--radius-base);
-  --radius-lg: calc(var(--radius-base) * 1.7);
+  /* Accent colours + corner roundedness are injected per-config by the theme
+     system (see @grihasetu/components/theme): the layout emits a small inline
+     <style> for the selected palette and radius. The radius scale below derives
+     from the injected --radius-base (fallback keeps it valid if absent). Set the
+     palette/fonts/radius via your site config's `theme` field. */
+  --radius-sm: calc(var(--radius-base, 0.5rem) * 0.55);
+  --radius: var(--radius-base, 0.5rem);
+  --radius-lg: calc(var(--radius-base, 0.5rem) * 1.7);
   --container: 70rem;
 }
 
@@ -113,12 +106,6 @@
     --text: #f4f4f5;
     --text-muted: #a1a1aa;
 
-    --accent: #818cf8;
-    --accent-gradient-end: #c084fc;
-    --accent-text: #a5b4fc;
-    --accent-contrast: #0d0f12;
-    --accent-glow: rgba(129, 140, 248, 0.25);
-    --accent-soft: rgba(129, 140, 248, 0.12);
     --dot-grid: rgba(255, 255, 255, 0.05);
   }
 }
@@ -133,12 +120,6 @@ html[data-theme="light"] {
   --border-hover: #cbd5e1;
   --text: #09090b;
   --text-muted: #52525b;
-  --accent: #4f46e5;
-  --accent-gradient-end: #7c3aed;
-  --accent-text: #4f46e5;
-  --accent-contrast: #ffffff;
-  --accent-glow: rgba(79, 70, 229, 0.12);
-  --accent-soft: rgba(79, 70, 229, 0.08);
   --dot-grid: rgba(0, 0, 0, 0.04);
 }
 
@@ -151,12 +132,6 @@ html[data-theme="dark"] {
   --border-hover: #2e2e35;
   --text: #f4f4f5;
   --text-muted: #a1a1aa;
-  --accent: #818cf8;
-  --accent-gradient-end: #c084fc;
-  --accent-text: #a5b4fc;
-  --accent-contrast: #0d0f12;
-  --accent-glow: rgba(129, 140, 248, 0.25);
-  --accent-soft: rgba(129, 140, 248, 0.12);
   --dot-grid: rgba(255, 255, 255, 0.05);
 }
 

@@ -4,6 +4,7 @@
  * fall back to these sensible defaults.
  */
 import type { SiteChrome } from '@grihasetu/components/chrome';
+import type { ThemeConfig } from '@grihasetu/components/theme';
 
 export type { NavLink, SocialProfile } from '@grihasetu/components/chrome';
 export { activeSocials } from '@grihasetu/components/chrome';
@@ -19,6 +20,12 @@ export interface BlogConfig extends SiteChrome {
   timeZoneLabel: string;
   /** Enable the Pagefind-powered offline search page. */
   search: boolean;
+  /**
+   * Visual theme — accent palette, font combination and corner roundedness.
+   * Only the selected options ship (fonts register per combo; accents + radius
+   * inline per page). Omit any axis to keep the engine's default look.
+   */
+  theme: ThemeConfig;
 }
 
 const ICON_HOME =
@@ -40,6 +47,7 @@ export const defaultBlogConfig: BlogConfig = {
   timeZone: 'Asia/Kolkata',
   timeZoneLabel: 'IST',
   search: true,
+  theme: {},
   nav: [
     { href: '/', label: 'Home', icon: ICON_HOME },
     { href: '/categories', label: 'Categories', icon: ICON_CATEGORIES },

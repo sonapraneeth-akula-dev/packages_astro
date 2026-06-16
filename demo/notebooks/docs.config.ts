@@ -29,4 +29,7 @@ export const docsConfig = defineDocsConfig({
   // The home page is a hub of notebook cards, and every notebook gets its own
   // scoped sidebar, landing page and prev/next navigation.
   notebooks: true,
+  // Showcase the theme system: indigo accent, the Poppins "geometric" font
+  // combo and fully-rounded (pill) corners.
+  theme: { palette: 'indigo', fonts: 'geometric', radius: 'full' },
 });

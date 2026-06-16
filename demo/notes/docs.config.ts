@@ -31,4 +31,7 @@ export const docsConfig = defineDocsConfig({
   // Single-handbook demo: every note shares one auto-generated sidebar. See the
   // companion `demo/notebooks` site for the multi-sub-note (notebooks) mode.
   notebooks: false,
+  // Showcase the theme system: emerald accent, the Playfair + Merriweather
+  // "classical" font combo and small corner radius.
+  theme: { palette: 'emerald', fonts: 'classical', radius: 'small' },
 });
