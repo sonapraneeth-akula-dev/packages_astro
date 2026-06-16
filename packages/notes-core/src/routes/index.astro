@@ -67,7 +67,10 @@ const Rendered = rootEntry ? (await render(rootEntry)).Content : null;
 </BaseLayout>
 
 <style>
-  .home { padding-block: 3rem 4rem; max-width: 52rem; }
+  /* Fill the full --container like article pages do (it grows with the
+     viewport), so wide screens aren't wasted. The prose, notebook grid and CTA
+     all span the full width. */
+  .home { padding-block: 3rem 4rem; }
   .home-prose :global(h1) { margin-bottom: 0.75rem; }
   .home-prose :global(h2) { margin-top: 2.5rem; }
   /* The hub/landing page has no table of contents, so the heading deep-link
