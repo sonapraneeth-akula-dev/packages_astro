@@ -10,7 +10,7 @@ export const docsConfig = defineDocsConfig({
   title: 'Notebooks — Demo',
   description:
     'A showcase site demonstrating @grihasetu/notes-core notebooks mode: multiple self-contained sub-notes (C++, Go, C#) under one site, each with its own scoped sidebar, landing page and offline search.',
-  author: 'Grihasetu',
+  author: 'Sonapraneeth Akula',
   subject: 'Notebooks',
   nav: [
     { href: '/', label: 'Home', icon: ICON_HOME },

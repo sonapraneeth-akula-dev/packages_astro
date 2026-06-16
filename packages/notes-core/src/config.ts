@@ -56,7 +56,7 @@ export const defaultDocsConfig: DocsConfig = {
   title: 'Grihasetu Notes',
   description:
     'A fast, accessible documentation site built with Astro + MDX — folding sidebar, offline search and optimised images.',
-  author: 'Grihasetu',
+  author: 'Sonapraneeth Akula',
   subject: 'Documentation',
   timeZone: 'Asia/Kolkata',
   timeZoneLabel: 'IST',
