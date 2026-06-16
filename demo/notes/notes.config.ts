@@ -12,7 +12,7 @@ export const docsConfig = defineDocsConfig({
   title: 'Notes Engine — Demo',
   description:
     'A showcase handbook demonstrating the @sonapraneeth/notes-core engine: a folding 6-level sidebar, custom JSON sidebar overrides, optimised images, MDX components and offline search.',
-  author: 'Sonapraneeth Akula',
+  author: 'Sona Praneeth Akula',
   subject: 'Demo Handbook',
   nav: [
     { href: '/', label: 'Home', icon: ICON_HOME },

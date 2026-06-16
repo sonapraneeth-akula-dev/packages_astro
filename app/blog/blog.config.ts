@@ -14,7 +14,7 @@ export const blogConfig = defineBlogConfig({
   title: 'Grihasetu Blog',
   description:
     'Engineering notes, deep dives and field reports — built with Astro, MDX and a lot of care for performance.',
-  author: 'Sonapraneeth Akula',
+  author: 'Sona Praneeth Akula',
   pageSize: 7,
   timeZone: 'Asia/Kolkata',
   timeZoneLabel: 'IST',

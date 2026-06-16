@@ -12,7 +12,7 @@ export const docsConfig = defineDocsConfig({
   title: 'Go Notes — A Practical Handbook',
   description:
     'A working handbook of the Go programming language, from the fundamentals (types, control flow, functions) to advanced topics (interfaces, goroutines, channels, generics).',
-  author: 'Sonapraneeth Akula',
+  author: 'Sona Praneeth Akula',
   subject: 'The Go Programming Language',
   editUrlBase:
     'https://github.com/grihasetu/notes/edit/main/app/notes/go/src/content/docs',

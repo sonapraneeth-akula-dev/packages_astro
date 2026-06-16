@@ -14,7 +14,7 @@ export const blogConfig = defineBlogConfig({
   title: 'Blog Engine — Demo',
   description:
     'A showcase journal demonstrating the @sonapraneeth/blog-core engine: a paginated feed, categories, tags, optimised code blocks, MDX components and offline search.',
-  author: 'Sonapraneeth Akula',
+  author: 'Sona Praneeth Akula',
   pageSize: 5,
   timeZone: 'Asia/Kolkata',
   timeZoneLabel: 'IST',
