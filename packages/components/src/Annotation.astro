@@ -1,0 +1,283 @@
+---
+/**
+ * Highlighter annotation for MDX prose — Adobe-PDF-style "sticky note".
+ *
+ * The default slot is the run of text painted with a marker highlight; clicking
+ * (or pressing Enter/Space on) it opens a sticky note whose body is authored in
+ * Markdown via the `note` slot:
+ *
+ *   <Annotation color="yellow" label="Editor's note">highlighted phrase<Fragment slot="note">
+ *
+ *   The note body in **Markdown** — links, `code` and lists all work.
+ *
+ *   </Fragment></Annotation>
+ *
+ * The note renders in the top layer through the native Popover API, so it is
+ * never clipped by `overflow` ancestors and gets light-dismiss (outside click +
+ * Escape) for free; a small script anchors it under the highlighted text.
+ */
+type Color = 'yellow' | 'green' | 'blue' | 'pink' | 'purple';
+
+interface Props {
+  /** Marker colour. Defaults to the classic yellow highlighter. */
+  color?: Color;
+  /** Optional heading shown at the top of the sticky note. */
+  label?: string;
+}
+
+const { color = 'yellow', label } = Astro.props;
+
+// A stable per-instance id wires the trigger to its popover at build time.
+const id = `annotation-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<docs-annotation class="annotation" data-color={color}>
+  <button
+    type="button"
+    class="annotation-mark"
+    popovertarget={id}
+    aria-haspopup="dialog"
+  >
+    <slot />
+    <svg
+      class="annotation-pin"
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+  </button>
+
+  <span id={id} class="annotation-note" role="dialog" aria-label={label ?? 'Note'} popover="auto">
+    {label && <span class="annotation-note-title">{label}</span>}
+    <span class="annotation-note-body"><slot name="note" /></span>
+  </span>
+</docs-annotation>
+
+<style>
+  .annotation {
+    /* Per-colour marker + sticky-note palette. Sticky notes keep their warm
+       paper look (dark ink on a bright pad) in both themes, just like a real
+       PDF annotation, while the marker is a translucent overlay that reads on
+       any background. */
+    --marker: rgba(250, 204, 21, 0.45);
+    --marker-strong: rgba(202, 138, 4, 0.9);
+    --pad: #fff7cf;
+    --pad-edge: #f3e08f;
+    --ink: #3a2f00;
+  }
+  .annotation[data-color='green'] {
+    --marker: rgba(34, 197, 94, 0.38);
+    --marker-strong: rgba(21, 128, 61, 0.9);
+    --pad: #e6f8ea;
+    --pad-edge: #b7e7c2;
+    --ink: #0f3d23;
+  }
+  .annotation[data-color='blue'] {
+    --marker: rgba(59, 130, 246, 0.34);
+    --marker-strong: rgba(29, 78, 216, 0.9);
+    --pad: #e6f0ff;
+    --pad-edge: #b6d2f7;
+    --ink: #0d2a57;
+  }
+  .annotation[data-color='pink'] {
+    --marker: rgba(236, 72, 153, 0.34);
+    --marker-strong: rgba(190, 24, 93, 0.9);
+    --pad: #ffe9f3;
+    --pad-edge: #f7c0db;
+    --ink: #5a0f37;
+  }
+  .annotation[data-color='purple'] {
+    --marker: rgba(139, 92, 246, 0.34);
+    --marker-strong: rgba(109, 40, 217, 0.9);
+    --pad: #f0e9ff;
+    --pad-edge: #d4c2f7;
+    --ink: #34155a;
+  }
+
+  /* The highlighted trigger: an inline marker stroke, reset from button UA
+     styles so it flows with the prose. */
+  .annotation-mark {
+    appearance: none;
+    border: 0;
+    margin: 0;
+    padding: 0 0.05em;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    /* A slightly uneven highlighter sweep that sits behind the text. */
+    background-image: linear-gradient(var(--marker), var(--marker));
+    background-repeat: no-repeat;
+    background-position: 0 0.05em;
+    background-size: 100% 88%;
+    border-radius: 0.15em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    transition: background-size 0.18s ease, box-shadow 0.18s ease;
+  }
+  .annotation-mark:hover,
+  .annotation-mark:focus-visible {
+    background-size: 100% 100%;
+    outline: none;
+    box-shadow: inset 0 -1.5px 0 0 var(--marker-strong);
+  }
+  .annotation-mark:focus-visible {
+    outline: 2px solid var(--marker-strong);
+    outline-offset: 1px;
+  }
+  /* A small dog-eared note glyph after the text signals it's clickable. */
+  .annotation-pin {
+    display: inline-block;
+    margin-left: 0.18em;
+    vertical-align: -0.12em;
+    color: var(--marker-strong);
+    opacity: 0.85;
+  }
+
+  /* The sticky note (native popover, top layer). It's a <span> (so the HTML
+     parser keeps it nested inside the inline annotation) promoted to a block;
+     JS sets top/left and we reset the UA centring so anchoring takes effect. */
+  .annotation-note {
+    display: block;
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    width: min(22rem, calc(100vw - 1.5rem));
+    padding: 0.85rem 1rem 0.95rem;
+    border: 0;
+    border-radius: 4px;
+    background: var(--pad);
+    color: var(--ink);
+    box-shadow:
+      0 1px 0 0 var(--pad-edge),
+      0 12px 28px -10px rgba(0, 0, 0, 0.45),
+      0 2px 6px -2px rgba(0, 0, 0, 0.25);
+    /* A faint paper crease toward the corner for the sticky-note feel. */
+    background-image: linear-gradient(
+      135deg,
+      transparent 0,
+      transparent calc(100% - 1.4rem),
+      var(--pad-edge) calc(100% - 1.4rem),
+      transparent calc(100% - 1.35rem)
+    );
+  }
+  /* Open/close transition via the top-layer-aware properties. */
+  .annotation-note {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+    transition:
+      opacity 0.16s ease,
+      transform 0.16s ease,
+      overlay 0.16s allow-discrete,
+      display 0.16s allow-discrete;
+  }
+  .annotation-note:popover-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  @starting-style {
+    .annotation-note:popover-open {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.98);
+    }
+  }
+
+  .annotation-note-title {
+    display: block;
+    margin: 0 0 0.4rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--pad-edge);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.01em;
+  }
+
+  /* Markdown body — scoped prose styles for the slotted content. */
+  .annotation-note-body {
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+  .annotation-note-body :global(> :first-child) { margin-top: 0; }
+  .annotation-note-body :global(> :last-child) { margin-bottom: 0; }
+  .annotation-note-body :global(p) { margin: 0 0 0.6rem; }
+  .annotation-note-body :global(ul),
+  .annotation-note-body :global(ol) { margin: 0 0 0.6rem; padding-left: 1.2rem; }
+  .annotation-note-body :global(li) { margin: 0.15rem 0; }
+  .annotation-note-body :global(a) {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 600;
+  }
+  .annotation-note-body :global(code) {
+    padding: 0.05rem 0.3rem;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.08);
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+  }
+  .annotation-note-body :global(strong) { font-weight: 700; }
+</style>
+
+<script>
+  class DocsAnnotation extends HTMLElement {
+    connectedCallback() {
+      const trigger = this.querySelector<HTMLButtonElement>('.annotation-mark');
+      const note = this.querySelector<HTMLElement>('.annotation-note');
+      if (!trigger || !note) return;
+
+      const place = () => this.position(trigger, note);
+
+      // Anchor the popover under the trigger each time it opens, and keep it
+      // anchored while open if the page scrolls or resizes.
+      note.addEventListener('beforetoggle', (event) => {
+        const e = event as ToggleEvent;
+        if (e.newState === 'open') {
+          place();
+          window.addEventListener('scroll', place, { passive: true, capture: true });
+          window.addEventListener('resize', place);
+        } else {
+          window.removeEventListener('scroll', place, { capture: true } as EventListenerOptions);
+          window.removeEventListener('resize', place);
+        }
+      });
+    }
+
+    position(trigger: HTMLElement, note: HTMLElement) {
+      const gap = 8;
+      const r = trigger.getBoundingClientRect();
+      const nw = note.offsetWidth;
+      const nh = note.offsetHeight;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      // Prefer below the highlight; flip above when it would overflow the
+      // viewport bottom and there is more room up top.
+      let top = r.bottom + gap;
+      if (top + nh > vh - gap && r.top - gap - nh > gap) {
+        top = r.top - gap - nh;
+      }
+      top = Math.max(gap, Math.min(top, vh - nh - gap));
+
+      // Left-align with the highlight, clamped within the viewport.
+      let left = r.left;
+      left = Math.max(gap, Math.min(left, vw - nw - gap));
+
+      note.style.top = `${top}px`;
+      note.style.left = `${left}px`;
+    }
+  }
+
+  if (!customElements.get('docs-annotation')) {
+    customElements.define('docs-annotation', DocsAnnotation);
+  }
+</script>

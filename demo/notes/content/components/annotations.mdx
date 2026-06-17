@@ -1,0 +1,85 @@
+---
+title: Annotations
+description: Marker highlights that open an Adobe-PDF-style sticky note on click.
+sidebar:
+  order: 1.5
+---
+
+# Annotations
+
+Use `<Annotation>` to paint a run of text with a highlighter marker. Clicking the
+highlight opens a **sticky note** — just like an annotation in a PDF reader —
+whose body is authored in plain Markdown. They're perfect for margin notes,
+reviewer comments, or hiding an aside until the reader wants it.
+
+## Inline highlights
+
+Annotations flow inline, so you can mark a phrase mid-sentence. The C++ Core
+Guidelines recommend you <Annotation color="yellow" label="Why value semantics?">prefer passing by value<Fragment slot="note">Cheap moves make this nearly free for most types, and it keeps call sites free of aliasing surprises. Reach for `const&` only when profiling says so.</Fragment></Annotation> for small types, while larger objects are <Annotation color="blue">passed by reference<Fragment slot="note">A `const&` binds without copying and never rebinds — see the [references vs. pointers](https://en.cppreference.com/w/cpp/language/reference) rules.</Fragment></Annotation> to avoid copies.
+
+Click either highlight above to read the note; click outside it (or press
+**Escape**) to dismiss.
+
+## Marker colours
+
+Five highlighter colours ship out of the box — each pairs the marker with a
+matching sticky-note pad.
+
+- <Annotation color="yellow">Yellow<Fragment slot="note">The classic highlighter — use it for the **default** emphasis.</Fragment></Annotation> — the default.
+- <Annotation color="green">Green<Fragment slot="note">Good for **approvals** or "done" notes.</Fragment></Annotation> — approvals and confirmations.
+- <Annotation color="blue">Blue<Fragment slot="note">Handy for neutral **references** and links.</Fragment></Annotation> — references and links.
+- <Annotation color="pink">Pink<Fragment slot="note">Draws the eye to **questions** or open items.</Fragment></Annotation> — questions and open items.
+- <Annotation color="purple">Purple<Fragment slot="note">Reserve for **editorial** asides and meta-commentary.</Fragment></Annotation> — editorial asides.
+
+## Rich Markdown notes
+
+The note body is full Markdown, so a sticky note can carry lists, links and
+inline `code`. Leave a blank line inside the `note` slot to opt into block
+Markdown — keep the annotation on its own lines:
+
+<Annotation color="green" label="Release checklist">
+Ship the release
+<Fragment slot="note">
+
+Before tagging, confirm:
+
+1. `bun run build` passes
+2. The changelog is updated
+3. Version bumped in `package.json`
+
+See the [release guide](https://keepachangelog.com) for the full flow.
+
+</Fragment>
+</Annotation>
+
+## Usage
+
+The default slot is the highlighted text; the `note` slot is the sticky-note
+body. Keep everything on flowing lines for an **inline** note:
+
+```mdx
+The team should <Annotation color="yellow" label="Editor's note">review this carefully<Fragment slot="note">A short note with **bold**, `code` and a [link](https://example.com).</Fragment></Annotation> before merging.
+```
+
+For a note with **block** Markdown (lists, paragraphs), leave a blank line
+inside the `note` slot:
+
+```mdx
+<Annotation color="green" label="Steps">highlighted text<Fragment slot="note">
+
+1. First step
+2. Second step
+
+</Fragment></Annotation>
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `color` | `yellow \| green \| blue \| pink \| purple` | `yellow` | Marker + sticky-note palette. |
+| `label` | `string` | — | Optional heading shown at the top of the note. |
+
+The note renders in the browser's top layer via the native Popover API, so it's
+never clipped by surrounding content and gets outside-click / **Escape** dismiss
+for free.

@@ -10,6 +10,7 @@
  * output through the `img` mapping for high Lighthouse scores.
  */
 import Callout from './Callout.astro';
+import Annotation from './Annotation.astro';
 import Tabs from './Tabs.astro';
 import TabItem from './TabItem.astro';
 import Card from './Card.astro';
@@ -25,6 +26,7 @@ import MdImage from './MdImage.astro';
 
 export {
   Callout,
+  Annotation,
   Tabs,
   TabItem,
   Card,
@@ -41,6 +43,7 @@ export {
 /** Dependency-free UI components auto-injected into every note/post. */
 export const baseMdxComponents = {
   Callout,
+  Annotation,
   Tabs,
   TabItem,
   Card,
