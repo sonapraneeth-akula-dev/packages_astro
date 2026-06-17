@@ -22,7 +22,7 @@
     "@expressive-code/plugin-line-numbers": "^0.43.1",
     "@sonapraneeth/components": "workspace:*",
     "@sonapraneeth/rehype-satteri-autolink-headings": "workspace:*",
-    "astro": "^6.4.6",
+    "astro": "^6.4.7",
     "astro-expressive-code": "^0.43.1"
   },
   "devDependencies": {
