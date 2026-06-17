@@ -63,6 +63,13 @@ export function docFrontmatterSchema(image?: ImageHelper) {
     /** Optional accent emoji/glyph shown in the page header. */
     cover: z.string().optional(),
     /**
+     * Hub card style for this notebook. `'standard'` (default) shows the cover
+     * with the title, author and description below it. `'book'` shows a
+     * cover-only card that animates open like a book on hover and reveals the
+     * description when clicked. Set on the notebook's landing note.
+     */
+    card: z.enum(['standard', 'book']).default('standard'),
+    /**
      * Optional cover image for the notebook hub card. Local paths are optimised
      * at build time; a string (remote URL) is used as-is when no `image()`
      * helper is available.

@@ -54,6 +54,8 @@ export interface Notebook {
   cover?: string;
   /** Optional optimised cover image (local) or URL string (remote). */
   coverImage?: ImageMetadata | string;
+  /** Hub card style: `'standard'` (default) or cover-only `'book'`. */
+  card: 'standard' | 'book';
   badge?: string;
   /** Landing route, `/<id>`. */
   href: string;
@@ -279,6 +281,7 @@ export function getNotebooks(entries: DocEntry[]): Notebook[] {
       group: rec.landing?.data.group,
       cover: rec.landing?.data.cover,
       coverImage: rec.landing?.data.coverImage,
+      card: rec.landing?.data.card ?? 'standard',
       badge: rec.landing?.data.sidebar?.badge,
       href: normalizePath(`/${id}`),
       order: rec.landing ? entryOrder(rec.landing) : Number.POSITIVE_INFINITY,

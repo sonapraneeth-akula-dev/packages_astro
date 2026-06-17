@@ -2,9 +2,30 @@
 /**
  * A single notebook card for the hub home page (`index.astro`).
  *
- * The cover shows the notebook's optimised image when set, otherwise a stable
- * gradient carrying its accent emoji or title initials. Card-scoped styles live
- * here; the grid/section layout stays in `index.astro`.
+ * Two styles, selected by the notebook's `card` frontmatter:
+ *  - `standard` (default): cover on top, with title/author/description below.
+ *  - `book`: a cover-only card that turns like a page. Hovering swings the
+ *    cover open to reveal the description on the page behind it; leaving turns
+ *    it back. Clicking latches it open for a few seconds (for touch / tap),
+ *    then it returns to the cover on its own. The brief click-latch is the only
+ *    part that needs JS; the hover turn is pure CSS.
+ *
+ * In both styles the cover shows the notebook's optimised image when set,
+ * otherwise a stable gradient carrying its accent emoji or title initials.
+ * Card-scoped styles live here; the grid/section layout stays in `index.astro`.
+ *
+ * Motion & cross-browser notes (book variant):
+ *  - The page-turn is a plain `rotateY` flip on the cover (a flat panel turning
+ *    on its left hinge), kept cheap on purpose: no per-frame moving sheen. A
+ *    static sheen just fades in. The easing must be a symmetric ease-in-out with
+ *    increasing X control points, or the turn front-loads into a flat snap.
+ *  - `prefers-reduced-motion: reduce` (set by Windows "Animation effects: Off",
+ *    macOS "Reduce motion", etc.) makes the engine's global reset in
+ *    `global.css` force every transition to `0.01ms`, which would make the
+ *    cover jump open with no turn. The local reduced-motion rule below restores
+ *    the turn with `!important` (just a touch quicker). This is why the turn can
+ *    look static in a real browser yet animate in automation: headless tools
+ *    like Playwright default to `no-preference` and ignore the OS setting.
  */
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
@@ -16,46 +37,89 @@ interface Props {
 }
 
 const { notebook: nb } = Astro.props;
+const isBook = nb.card === 'book';
 ---
 
-<a class="notebook-card" href={nb.href} data-pagefind-ignore>
-  <span class="notebook-cover" aria-hidden="true">
-    {nb.coverImage ? (
-      typeof nb.coverImage === 'string' ? (
-        <img class="notebook-cover-img" src={nb.coverImage} alt="" loading="lazy" decoding="async" />
-      ) : (
-        <Image
-          class="notebook-cover-img"
-          src={nb.coverImage as ImageMetadata}
-          alt=""
-          widths={[320, 480, 640]}
-          sizes="(max-width: 50rem) 100vw, 22rem"
-          loading="lazy"
-          decoding="async"
-        />
-      )
-    ) : (
-      <span class="notebook-cover-initials" style={`--cover-hue:${coverHue(nb.label)}`}>
-        {nb.cover ? (
-          <span class="notebook-cover-emoji">{nb.cover}</span>
-        ) : (
-          coverInitials(nb.label)
-        )}
-      </span>
-    )}
-  </span>
-  <span class="notebook-body">
-    <span class="notebook-title">
-      {nb.label}
-      {nb.badge && <span class="notebook-badge">{nb.badge}</span>}
-      <span class="notebook-arrow" aria-hidden="true">→</span>
+{isBook ? (
+  <div class="notebook-book" data-pagefind-ignore>
+    <span class="book-page">
+      <span class="book-page-title">{nb.label}</span>
+      {nb.author && <span class="book-page-author">{nb.author}</span>}
+      {nb.description && (
+        <span class="book-page-desc">{truncateWords(nb.description, 60)}</span>
+      )}
+      <a class="book-page-read" href={nb.href}>Read →</a>
     </span>
-    {nb.author && <span class="notebook-author">{nb.author}</span>}
-    {nb.description && (
-      <span class="notebook-desc">{truncateWords(nb.description, 100)}</span>
-    )}
-  </span>
-</a>
+    <button class="book-cover" type="button" aria-label={`Open ${nb.label} notebook`}>
+      {nb.coverImage ? (
+        typeof nb.coverImage === 'string' ? (
+          <img class="notebook-cover-img" src={nb.coverImage} alt="" loading="lazy" decoding="async" />
+        ) : (
+          <Image
+            class="notebook-cover-img"
+            src={nb.coverImage as ImageMetadata}
+            alt=""
+            widths={[320, 480, 640]}
+            sizes="(max-width: 50rem) 100vw, 22rem"
+            loading="lazy"
+            decoding="async"
+          />
+        )
+      ) : (
+        <span class="notebook-cover-initials" style={`--cover-hue:${coverHue(nb.label)}`}>
+          {nb.cover ? (
+            <span class="notebook-cover-emoji">{nb.cover}</span>
+          ) : (
+            coverInitials(nb.label)
+          )}
+        </span>
+      )}
+      <span class="book-cover-caption">
+        {nb.label}
+        {nb.badge && <span class="notebook-badge">{nb.badge}</span>}
+      </span>
+    </button>
+  </div>
+) : (
+  <a class="notebook-card" href={nb.href} data-pagefind-ignore>
+    <span class="notebook-cover" aria-hidden="true">
+      {nb.coverImage ? (
+        typeof nb.coverImage === 'string' ? (
+          <img class="notebook-cover-img" src={nb.coverImage} alt="" loading="lazy" decoding="async" />
+        ) : (
+          <Image
+            class="notebook-cover-img"
+            src={nb.coverImage as ImageMetadata}
+            alt=""
+            widths={[320, 480, 640]}
+            sizes="(max-width: 50rem) 100vw, 22rem"
+            loading="lazy"
+            decoding="async"
+          />
+        )
+      ) : (
+        <span class="notebook-cover-initials" style={`--cover-hue:${coverHue(nb.label)}`}>
+          {nb.cover ? (
+            <span class="notebook-cover-emoji">{nb.cover}</span>
+          ) : (
+            coverInitials(nb.label)
+          )}
+        </span>
+      )}
+    </span>
+    <span class="notebook-body">
+      <span class="notebook-title">
+        {nb.label}
+        {nb.badge && <span class="notebook-badge">{nb.badge}</span>}
+        <span class="notebook-arrow" aria-hidden="true">→</span>
+      </span>
+      {nb.author && <span class="notebook-author">{nb.author}</span>}
+      {nb.description && (
+        <span class="notebook-desc">{truncateWords(nb.description, 100)}</span>
+      )}
+    </span>
+  </a>
+)}
 
 <style>
   .notebook-card {
@@ -147,4 +211,205 @@ const { notebook: nb } = Astro.props;
   .notebook-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
   .notebook-arrow { margin-left: auto; color: var(--text-muted); font-size: 1.1rem; }
   .notebook-card:hover .notebook-arrow { color: var(--accent-text); }
+
+  /* ─── Book variant ────────────────────────────────────────────────────────
+     A cover-only card whose cover turns like a page. The cover (a <button>) is
+     hinged on its left edge and swings fully open in 3D on hover, revealing the
+     description "page" behind it; leaving turns it back. A click latches it
+     open via the `.is-open` class (added by the inline script) for touch/tap
+     users, then the script removes it so it returns to the cover on its own. */
+  .notebook-book {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    perspective: 1600px;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  /* The inner "page" revealed when the cover opens. */
+  .book-page {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 1.1rem 1.2rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    /* Subtle inner shadow near the spine for depth. */
+    box-shadow: inset 0.6rem 0 1.2rem -0.8rem rgba(0, 0, 0, 0.35);
+  }
+  .book-page-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  .book-page-author { color: var(--text-muted); font-size: 0.78rem; font-weight: 600; }
+  .book-page-desc {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+  .book-page-read {
+    align-self: flex-start;
+    margin-top: auto;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--accent-text);
+    text-decoration: none;
+  }
+  .book-page-read:hover { text-decoration: underline; }
+  /* The cover: hinged on the left, sits above the page until opened. */
+  .book-cover {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-subtle);
+    cursor: pointer;
+    transform-origin: left center;
+    transform: rotateY(0deg);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    box-shadow: 0.15rem 0.2rem 0.6rem rgba(0, 0, 0, 0.12);
+    /* A symmetric ease-in-out (slow start, slow finish) reads as a clean page
+       flip. Keep the bezier's X control points increasing (0.37 < 0.63);
+       beziers whose second X sits before the first (e.g. .45,.05,.2,1) front-
+       load almost all the rotation into the first moments, so the page appears
+       to snap then drift. */
+    transition: transform 1.4s cubic-bezier(0.37, 0, 0.63, 1),
+      box-shadow 1.4s ease;
+    will-change: transform;
+  }
+  /* A static sheen that fades in as the cover turns, hinting at light catching
+     the lifting page. Kept as a plain opacity fade (no moving/transformed band)
+     so the flip stays a cheap straight rotation rather than a per-frame
+     composited sweep. */
+  .book-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      105deg,
+      rgba(255, 255, 255, 0) 25%,
+      rgba(255, 255, 255, 0.28) 52%,
+      rgba(0, 0, 0, 0.16) 76%,
+      rgba(0, 0, 0, 0.4) 100%
+    );
+    opacity: 0;
+    transition: opacity 1.4s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  /* A faux spine seam down the hinge edge. */
+  .book-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0.5rem;
+    background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.28),
+      rgba(0, 0, 0, 0)
+    );
+  }
+  .book-cover-caption {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 0.85rem;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0));
+    z-index: 3;
+  }
+  /* Turn the cover fully open on hover (the page turns to reveal the desc).
+     Include the cover's own :hover for robustness, and keep it open while
+     latched by a click (the `.is-open` class). We manage stacking so the
+     revealed page sits above the rotated cover. */
+  .book-page { z-index: 1; }
+  .book-cover { z-index: 3; }
+
+  .notebook-book:hover .book-cover,
+  .notebook-book.is-hover .book-cover,
+  .book-cover:hover,
+  .book-cover:focus-visible {
+    transform: rotateY(-160deg);
+    box-shadow: 0.9rem 0.4rem 1.8rem rgba(0, 0, 0, 0.28);
+  }
+  /* Fade the sheen in alongside the turn. */
+  .notebook-book:hover .book-cover::before,
+  .notebook-book.is-hover .book-cover::before,
+  .book-cover:hover::before,
+  .book-cover:focus-visible::before,
+  .notebook-book.is-open .book-cover::before {
+    opacity: 1;
+  }
+
+  /* When explicitly latched open (click on touch), drop pointer-events so
+     the revealed page is interactive and the "Read →" link can be clicked. */
+  .notebook-book.is-open .book-cover {
+    transform: rotateY(-160deg);
+    box-shadow: 0.9rem 0.4rem 1.8rem rgba(0, 0, 0, 0.28);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .notebook-book.is-open .book-page { z-index: 4; }
+
+  .book-cover:focus-visible {
+    outline: 2px solid var(--accent-text);
+    outline-offset: 3px;
+  }
+  /* Respect users who prefer no motion: keep the page-turn (it's the core
+     interaction) but run it a touch quicker than the full flourish. The
+     `!important` is required so this beats the global reduced-motion reset in
+     `global.css`, which otherwise forces every transition to 0.01ms and makes
+     the cover snap open with no turn at all. */
+  @media (prefers-reduced-motion: reduce) {
+    .book-cover,
+    .book-cover::before { transition-duration: 0.8s !important; }
+  }
 </style>
+
+<script>
+  // Click-to-peek for touch/tap users: latch the book open briefly, then let it
+  // return to the cover on its own. Hover open/close is handled purely in CSS.
+  const REVEAL_MS = 7000;
+  for (const book of document.querySelectorAll<HTMLElement>('.notebook-book')) {
+    const cover = book.querySelector<HTMLButtonElement>('.book-cover');
+    if (!cover) continue;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    // Drive the open state from JS pointer events as well as CSS :hover. Some
+    // browsers (notably Edge) hit-test 3D-transformed elements differently, so
+    // relying on :hover alone can leave the turn stuck or unresponsive; an
+    // explicit `.is-hover` class keeps it identical across Chromium variants.
+    book.addEventListener('pointerenter', () => book.classList.add('is-hover'));
+    book.addEventListener('pointerleave', () => {
+      book.classList.remove('is-hover');
+      clearTimeout(timer);
+      book.classList.remove('is-open');
+    });
+
+    // Click-to-peek for touch/tap users: latch open briefly, then auto-close.
+    cover.addEventListener('click', () => {
+      const open = book.classList.toggle('is-open');
+      clearTimeout(timer);
+      if (open) timer = setTimeout(() => book.classList.remove('is-open'), REVEAL_MS);
+    });
+  }
+</script>
