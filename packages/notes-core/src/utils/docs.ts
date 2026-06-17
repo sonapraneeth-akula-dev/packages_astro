@@ -48,6 +48,8 @@ export interface Notebook {
   description?: string;
   /** Optional author shown on the hub card. */
   author?: string;
+  /** Optional group label used to cluster notebooks on the hub home page. */
+  group?: string;
   /** Accent emoji/glyph (used when no `coverImage` is set). */
   cover?: string;
   /** Optional optimised cover image (local) or URL string (remote). */
@@ -57,6 +59,16 @@ export interface Notebook {
   href: string;
   /** Sort order from the folder index `sidebar.order` (Infinity when unset). */
   order: number;
+}
+
+/** A cluster of notebooks sharing the same `group` on the hub home page. */
+export interface NotebookGroup {
+  /** Group label; empty string for the trailing unlabelled section. */
+  label: string;
+  /** Sort key (smallest member order), so `sidebar.order` controls groups too. */
+  order: number;
+  /** Member notebooks, already in their global hub order. */
+  notebooks: Notebook[];
 }
 
 // ─── Path helpers ────────────────────────────────────────────────────────────
@@ -264,6 +276,7 @@ export function getNotebooks(entries: DocEntry[]): Notebook[] {
       label: rec.landing ? entryLabel(rec.landing) : humanize(id),
       description: rec.landing?.data.description || undefined,
       author: rec.landing?.data.author,
+      group: rec.landing?.data.group,
       cover: rec.landing?.data.cover,
       coverImage: rec.landing?.data.coverImage,
       badge: rec.landing?.data.sidebar?.badge,
@@ -271,6 +284,37 @@ export function getNotebooks(entries: DocEntry[]): Notebook[] {
       order: rec.landing ? entryOrder(rec.landing) : Number.POSITIVE_INFINITY,
     }))
     .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+}
+
+/**
+ * Bucket notebooks by their `group` for the hub home page. Returns `null` when
+ * no notebook declares a group (so the caller renders the flat grid unchanged).
+ * Groups sort by their smallest member `order`; the unlabelled bucket (no
+ * `group`) always sorts last.
+ */
+export function groupNotebooks(notebooks: Notebook[]): NotebookGroup[] | null {
+  if (!notebooks.some((nb) => nb.group)) return null;
+  const map = new Map<string, Notebook[]>();
+  for (const nb of notebooks) {
+    const key = nb.group ?? '';
+    const bucket = map.get(key);
+    if (bucket) bucket.push(nb);
+    else map.set(key, [nb]);
+  }
+  return [...map.entries()]
+    .map(([label, items]) => ({
+      label,
+      order: items.reduce(
+        (min, nb) => Math.min(min, nb.order),
+        Number.POSITIVE_INFINITY,
+      ),
+      notebooks: items,
+    }))
+    .sort((a, b) => {
+      // The unlabelled bucket always trails labelled groups.
+      if (!a.label !== !b.label) return a.label ? -1 : 1;
+      return a.order - b.order || a.label.localeCompare(b.label);
+    });
 }
 
 /** Build a sidebar tree scoped to a single notebook. */

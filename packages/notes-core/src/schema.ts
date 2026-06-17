@@ -41,6 +41,14 @@ export function docFrontmatterSchema(image?: ImageHelper) {
     /** Optional author shown on the notebook hub card. */
     author: z.string().optional(),
     /**
+     * Optional group label used to cluster notebooks into sections on the hub
+     * home page. Set on a notebook's landing note (`<id>/index.mdx`); notebooks
+     * sharing the same `group` render under one heading. Notebooks without a
+     * group fall into an unlabelled section shown last. Ignored outside
+     * notebooks mode.
+     */
+    group: z.string().optional(),
+    /**
      * Custom rendering slug. When omitted, the route defaults to the file's path
      * slug (e.g. `advanced/concurrency` for `advanced/concurrency.mdx`).
      * Accepts values with or without a leading slash.
