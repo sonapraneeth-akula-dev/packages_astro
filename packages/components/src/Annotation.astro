@@ -63,11 +63,13 @@ const id = `annotation-${Math.random().toString(36).slice(2, 9)}`;
 
 <style>
   .annotation {
-    /* Per-colour marker + sticky-note palette. Sticky notes keep their warm
-       paper look (dark ink on a bright pad) in both themes, just like a real
-       PDF annotation, while the marker is a translucent overlay that reads on
-       any background. */
+    /* Per-colour marker + sticky-note palette. Both the marker band and the
+       sticky note keep their warm "dark ink on a bright pad" look in light and
+       dark themes, just like a real PDF highlighter. `--marker` is the pale
+       light-theme band; `--marker-dark` is the brighter band used in dark mode
+       so dark ink stays legible over the dark page. */
     --marker: rgba(250, 204, 21, 0.45);
+    --marker-dark: rgba(253, 224, 71, 0.9);
     --marker-strong: rgba(202, 138, 4, 0.9);
     --pad: #fff7cf;
     --pad-edge: #f3e08f;
@@ -75,6 +77,7 @@ const id = `annotation-${Math.random().toString(36).slice(2, 9)}`;
   }
   .annotation[data-color='green'] {
     --marker: rgba(34, 197, 94, 0.38);
+    --marker-dark: rgba(134, 239, 172, 0.9);
     --marker-strong: rgba(21, 128, 61, 0.9);
     --pad: #e6f8ea;
     --pad-edge: #b7e7c2;
@@ -82,6 +85,7 @@ const id = `annotation-${Math.random().toString(36).slice(2, 9)}`;
   }
   .annotation[data-color='blue'] {
     --marker: rgba(59, 130, 246, 0.34);
+    --marker-dark: rgba(147, 197, 253, 0.92);
     --marker-strong: rgba(29, 78, 216, 0.9);
     --pad: #e6f0ff;
     --pad-edge: #b6d2f7;
@@ -89,6 +93,7 @@ const id = `annotation-${Math.random().toString(36).slice(2, 9)}`;
   }
   .annotation[data-color='pink'] {
     --marker: rgba(236, 72, 153, 0.34);
+    --marker-dark: rgba(249, 168, 212, 0.92);
     --marker-strong: rgba(190, 24, 93, 0.9);
     --pad: #ffe9f3;
     --pad-edge: #f7c0db;
@@ -96,10 +101,23 @@ const id = `annotation-${Math.random().toString(36).slice(2, 9)}`;
   }
   .annotation[data-color='purple'] {
     --marker: rgba(139, 92, 246, 0.34);
+    --marker-dark: rgba(196, 181, 253, 0.92);
     --marker-strong: rgba(109, 40, 217, 0.9);
     --pad: #f0e9ff;
     --pad-edge: #d4c2f7;
     --ink: #34155a;
+  }
+
+  /* In dark mode, brighten the band so the dark ink reads over the dark page
+     (a translucent pale band would otherwise turn muddy). Covers both the
+     explicit toggle and the system preference. */
+  :global(html[data-theme='dark']) .annotation {
+    --marker: var(--marker-dark);
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(html:not([data-theme='light'])) .annotation {
+      --marker: var(--marker-dark);
+    }
   }
 
   /* The highlighted trigger: an inline marker stroke, reset from button UA
@@ -110,7 +128,9 @@ const id = `annotation-${Math.random().toString(36).slice(2, 9)}`;
     margin: 0;
     padding: 0 0.05em;
     font: inherit;
-    color: inherit;
+    /* Dark ink over the bright band — the highlighter look reads in both
+       themes without depending on the surrounding prose colour. */
+    color: var(--ink);
     cursor: pointer;
     /* A slightly uneven highlighter sweep that sits behind the text. */
     background-image: linear-gradient(var(--marker), var(--marker));
