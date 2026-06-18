@@ -1,6 +1,6 @@
 {
   "name": "@sonapraneeth/blog-core",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "type": "module",
   "description": "Shared blog engine for Astro + MDX: components, layouts, injected routes, posts collection, config schema and an Astro config factory.",
   "exports": {

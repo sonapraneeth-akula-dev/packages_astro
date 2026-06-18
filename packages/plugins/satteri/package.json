@@ -1,6 +1,6 @@
 {
   "name": "@sonapraneeth/rehype-satteri-autolink-headings",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "Rehype plugin that appends a clickable SVG anchor link beside each heading — a small, from-scratch replacement for rehype-autolink-headings.",
   "keywords": [
