@@ -13,10 +13,10 @@
     "./*": "./src/*"
   },
   "dependencies": {
-    "astro": "^6.4.8"
+    "astro": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^25.9.3",
-    "typescript": "^6.0.3"
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
   }
 }

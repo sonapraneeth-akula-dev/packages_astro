@@ -14,6 +14,17 @@
     "app/blog",
     "app/notes/*"
   ],
+  "catalog": {
+    "@astrojs/check": "^0.9.9",
+    "@astrojs/sitemap": "^3.7.3",
+    "@expressive-code/plugin-line-numbers": "^0.43.1",
+    "@types/node": "^25.9.3",
+    "astro": "^6.4.8",
+    "astro-expressive-code": "^0.43.1",
+    "chokidar": "^5.0.0",
+    "pagefind": "^1.3.0",
+    "typescript": "^6.0.3"
+  },
   "scripts": {
     "dev:demo:notes": "bun astro dev --root demo/notes",
     "dev:demo:notebooks": "bun astro dev --root demo/notebooks",

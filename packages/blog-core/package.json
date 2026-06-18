@@ -18,15 +18,15 @@
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.12",
-    "@astrojs/sitemap": "^3.7.3",
-    "@expressive-code/plugin-line-numbers": "^0.43.1",
+    "@astrojs/sitemap": "catalog:",
+    "@expressive-code/plugin-line-numbers": "catalog:",
     "@sonapraneeth/components": "workspace:*",
     "@sonapraneeth/rehype-satteri-autolink-headings": "workspace:*",
-    "astro": "^6.4.8",
-    "astro-expressive-code": "^0.43.1"
+    "astro": "catalog:",
+    "astro-expressive-code": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^25.9.3",
-    "typescript": "^6.0.3"
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
   }
 }
