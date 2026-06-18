@@ -9,6 +9,7 @@ import {
 } from '@sonapraneeth/rehype-satteri-autolink-headings/astro';
 import { execSync } from 'node:child_process';
 import { resolveTheme, themeFontEntries } from '@sonapraneeth/components/theme';
+import { pwa } from '@sonapraneeth/components/pwa';
 import { notesRoutes } from './routes-integration';
 import type { DocsConfig } from './config';
 import type { SidebarConfig } from './schema';
@@ -102,6 +103,18 @@ export function defineDocsAstroConfig(options: DocsAstroConfigOptions) {
         components: options.components,
         sidebar: options.sidebar,
       }),
+      // Opt-in PWA: emits a manifest + runtime-caching service worker when the
+      // site sets `pwa.enabled`. A no-op (not even added) otherwise.
+      ...(options.docsConfig.pwa?.enabled
+        ? [
+          pwa({
+            pwa: options.docsConfig.pwa,
+            title: options.docsConfig.title,
+            brand: options.docsConfig.brand,
+            description: options.docsConfig.description,
+          }),
+        ]
+        : []),
       ...(options.integrations ?? []),
     ],
     compressHTML: true,
