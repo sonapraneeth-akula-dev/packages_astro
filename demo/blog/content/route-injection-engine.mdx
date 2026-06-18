@@ -30,7 +30,12 @@ app. The injected components read per-site data through a virtual module.
 
 </Steps>
 
-```ts title="astro.config.ts"
+## Line numbers and highlighting
+
+Add `showLineNumbers` to render a gutter, and the `{n}` meta to highlight
+specific lines. Here line 3 is highlighted with the line-number gutter on:
+
+```ts title="astro.config.ts" showLineNumbers {3}
 import { defineBlogAstroConfig } from '@sonapraneeth/blog-core/astro';
 import { blogConfig } from './blog.config';
 
@@ -41,9 +46,10 @@ export default defineBlogAstroConfig({ port: 4312, blogConfig });
 
 Fenced blocks can pull their contents from a file with `file="…"`, so the prose
 and the real source never drift apart. Append `#L20-L25` to import only a range
-of lines, and use the usual `{6}` meta to highlight a line within that slice:
+of lines, turn on `showLineNumbers`, and use the usual `{6}` meta to highlight a
+line within that slice:
 
-```ts file="./snippets/inject-routes.ts#L20-L25" {6} title="inject-routes.ts"
+```ts file="./snippets/inject-routes.ts#L20-L25" showLineNumbers {1,5-6} title="inject-routes.ts"
 ```
 
 The path is resolved relative to this post. The block above shows the six
@@ -54,7 +60,7 @@ The path is resolved relative to this post. The block above shows the six
 Blocks can also read from an allow-listed remote `url="…"`. Pin the URL to a
 commit SHA so the snippet is immutable and the build is reproducible:
 
-```ts url="https://raw.githubusercontent.com/withastro/astro/refs/tags/astro%406.4.6/packages/astro/src/core/constants.ts#L1-L8"
+```ts url="https://raw.githubusercontent.com/withastro/astro/refs/tags/astro%406.4.6/packages/astro/src/core/constants.ts#L1-L8" showLineNumbers
 ```
 
 <Callout type="caution">
