@@ -5,8 +5,10 @@
  */
 import type { SiteChrome } from '@sonapraneeth/components/chrome';
 import type { ThemeConfig } from '@sonapraneeth/components/theme';
+import type { PwaConfig } from '@sonapraneeth/components/pwa';
 
 export type { NavLink, SocialProfile } from '@sonapraneeth/components/chrome';
+export type { PwaConfig } from '@sonapraneeth/components/pwa';
 export { activeSocials } from '@sonapraneeth/components/chrome';
 
 export interface BlogConfig extends SiteChrome {
@@ -26,6 +28,12 @@ export interface BlogConfig extends SiteChrome {
    * inline per page). Omit any axis to keep the engine's default look.
    */
   theme: ThemeConfig;
+  /**
+   * Opt-in Progressive Web App support. Disabled unless `pwa.enabled` is set;
+   * when on, the build emits a web manifest + a runtime-caching service worker
+   * so the site is installable and works offline once visited.
+   */
+  pwa?: PwaConfig;
 }
 
 const ICON_HOME =

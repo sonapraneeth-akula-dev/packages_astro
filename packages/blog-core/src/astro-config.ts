@@ -9,6 +9,7 @@ import {
 } from '@sonapraneeth/rehype-satteri-autolink-headings/astro';
 import { execSync } from 'node:child_process';
 import { resolveTheme, themeFontEntries } from '@sonapraneeth/components/theme';
+import { pwa } from '@sonapraneeth/components/pwa';
 import { blogRoutes } from './routes-integration';
 import type { BlogConfig } from './config';
 
@@ -100,6 +101,18 @@ export function defineBlogAstroConfig(options: BlogAstroConfigOptions) {
         blogConfig: options.blogConfig,
         components: options.components,
       }),
+      // Opt-in PWA: emits a manifest + runtime-caching service worker when the
+      // site sets `pwa.enabled`. A no-op (not even added) otherwise.
+      ...(options.blogConfig.pwa?.enabled
+        ? [
+          pwa({
+            pwa: options.blogConfig.pwa,
+            title: options.blogConfig.title,
+            brand: options.blogConfig.brand,
+            description: options.blogConfig.description,
+          }),
+        ]
+        : []),
       ...(options.integrations ?? []),
     ],
     compressHTML: true,
