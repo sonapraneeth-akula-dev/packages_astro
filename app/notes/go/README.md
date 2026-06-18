@@ -25,6 +25,8 @@ and tooling. It demonstrates the core package in "production" mode with a
 - **Optimised images**: MDX images are rendered through the core image pipeline
   (responsive `webp` variants) for high performance scores.
 - **Offline search**: Pagefind indexes the built site into `public/pagefind`.
+- **Installable PWA (opt-in)**: a web manifest, runtime-caching service worker
+  and an in-page “Install app” button — off by default, enabled with one flag.
 - **Docker**: multi-stage `Dockerfile`, `docker-compose.yml` (dev/test/ppe/prod
   + Caddy), and a `Caddyfile` for local HTTPS via Caddy's internal CA.
 
@@ -78,6 +80,62 @@ During development you can keep it in sync automatically:
 ```bash
 bun run watch:content   # rebuilds the Pagefind index on content changes
 ```
+
+---
+
+## Progressive Web App (PWA)
+
+The engine ships an **opt-in** PWA. It is disabled by default — turn it on by
+adding a `pwa` block to `notes.config.ts`:
+
+```ts
+export const docsConfig = defineDocsConfig({
+  // …existing options…
+  pwa: { enabled: true },
+});
+```
+
+When enabled, a production build (`bun run build` / `bun run preview`) emits a
+`manifest.webmanifest` and a runtime-caching service worker (`sw.js`) into the
+site root, and the layout injects the matching `<head>` tags plus an in-page
+**Install app** button (an *Add to Home Screen* hint on iOS).
+
+> Like search, the PWA only activates on a **built** site — the manifest and
+> worker are emitted by `astro build`, so they are absent on the dev server.
+
+### Icons
+
+With no icons configured, the build **generates** a default set (192px, 512px
+and a 512px `maskable` PNG, themed with the manifest colours) so the site is
+installable out of the box. To use your own, drop the files in `public/` and
+list them — this overrides the generated defaults entirely:
+
+```ts
+pwa: {
+  enabled: true,
+  icons: [
+    { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+    { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    { src: '/icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+  ],
+},
+```
+
+### Options
+
+| Option            | Default                      | Description                                              |
+| ----------------- | ---------------------------- | ------------------------------------------------------- |
+| `enabled`         | `false`                      | Master switch — nothing PWA-related ships when off.     |
+| `install`         | `true`                       | Show the in-page **Install app** button.                |
+| `name`            | site title                   | Full install name in the manifest.                      |
+| `shortName`       | site brand                   | Home-screen label.                                      |
+| `description`     | site description             | Manifest description.                                    |
+| `themeColor`      | `#0b0b0c`                    | `theme-color` + status-bar colour.                      |
+| `backgroundColor` | `themeColor`                 | Splash-screen background.                                |
+| `display`         | `standalone`                 | `standalone` \| `minimal-ui` \| `fullscreen` \| `browser`. |
+| `startUrl`        | `/`                          | Launch URL from the home screen.                        |
+| `icons`           | generated default set        | Override the home-screen icons.                         |
+| `iconColor`       | `#f5f5f7`                    | Mark colour for the generated default icons.            |
 
 ---
 

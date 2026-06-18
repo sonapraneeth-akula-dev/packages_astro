@@ -18,6 +18,8 @@ A fast, accessible blog built with **Astro + MDX**, following the
   same `syncKey` follows (and the choice is remembered).
 - **Custom MDX components** — `Callout`, `Tabs`/`TabItem` are auto-injected; add
   your own in `src/components/mdx.ts`.
+- **Installable PWA (opt-in)** — a web manifest, runtime-caching service worker
+  and an in-page “Install app” button, off by default and enabled with one flag.
 - Self-hosted fonts, light/dark/system theming, sitemap, RSS feed and SEO meta.
 
 ## Develop
@@ -80,5 +82,59 @@ import { Callout, Tabs, TabItem } from '@components/mdx';
 
 ### Configuration
 
-Edit `src/config.ts` to change the brand, title, navigation, page size and
+Edit `blog.config.ts` to change the brand, title, navigation, page size and
 social links.
+
+## Progressive Web App (PWA)
+
+The engine ships an **opt-in** PWA. It is disabled by default — turn it on by
+adding a `pwa` block to `blog.config.ts`:
+
+```ts
+export const blogConfig = defineBlogConfig({
+  // …existing options…
+  pwa: { enabled: true },
+});
+```
+
+When enabled, a production build (`bun run build` / `bun run preview`) emits a
+`manifest.webmanifest` and a runtime-caching service worker (`sw.js`) into the
+site root, and the layout injects the matching `<head>` tags plus an in-page
+**Install app** button (an *Add to Home Screen* hint on iOS).
+
+> Like search, the PWA only activates on a **built** site — the manifest and
+> worker are emitted by `astro build`, so they are absent on the dev server.
+
+### Icons
+
+With no icons configured, the build **generates** a default set (192px, 512px
+and a 512px `maskable` PNG, themed with the manifest colours) so the site is
+installable out of the box. To use your own, drop the files in `public/` and
+list them — this overrides the generated defaults entirely:
+
+```ts
+pwa: {
+  enabled: true,
+  icons: [
+    { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+    { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    { src: '/icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+  ],
+},
+```
+
+### Options
+
+| Option            | Default                      | Description                                              |
+| ----------------- | ---------------------------- | ------------------------------------------------------- |
+| `enabled`         | `false`                      | Master switch — nothing PWA-related ships when off.     |
+| `install`         | `true`                       | Show the in-page **Install app** button.                |
+| `name`            | site title                   | Full install name in the manifest.                      |
+| `shortName`       | site brand                   | Home-screen label.                                      |
+| `description`     | site description             | Manifest description.                                    |
+| `themeColor`      | `#0b0b0c`                    | `theme-color` + status-bar colour.                      |
+| `backgroundColor` | `themeColor`                 | Splash-screen background.                                |
+| `display`         | `standalone`                 | `standalone` \| `minimal-ui` \| `fullscreen` \| `browser`. |
+| `startUrl`        | `/`                          | Launch URL from the home screen.                        |
+| `icons`           | generated default set        | Override the home-screen icons.                         |
+| `iconColor`       | `#f5f5f7`                    | Mark colour for the generated default icons.            |
