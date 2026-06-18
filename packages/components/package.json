@@ -1,6 +1,6 @@
 {
   "name": "@sonapraneeth/components",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "Shared prop/config-driven Astro UI components used by the notes and blog engines.",
   "exports": {
@@ -9,6 +9,7 @@
     "./theme": "./src/theme.ts",
     "./icons": "./src/icons.ts",
     "./mdx": "./src/mdx.ts",
+    "./pwa": "./src/pwa.ts",
     "./*": "./src/*"
   },
   "dependencies": {

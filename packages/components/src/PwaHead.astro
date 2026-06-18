@@ -1,0 +1,35 @@
+---
+/**
+ * PWA <head> tags + service-worker registration. Renders nothing unless the
+ * site has `pwa.enabled` set. The manifest link and worker registration are
+ * gated to production builds because `sw.js` / `manifest.webmanifest` are only
+ * emitted by `astro build` (mirroring how Pagefind search is build-only).
+ */
+import { resolvePwa, type PwaSiteInfo } from './pwa';
+
+type Props = PwaSiteInfo;
+
+const resolved = resolvePwa(Astro.props);
+const { enabled, manifest, themeColor, appleTouchIcon } = resolved;
+const isProd = import.meta.env.PROD;
+---
+
+{
+  enabled && (
+    <>
+      <meta name="theme-color" content={themeColor} />
+      <meta name="mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-title" content={manifest.short_name} />
+      {appleTouchIcon && <link rel="apple-touch-icon" href={appleTouchIcon} />}
+      {isProd && (
+        <>
+          <link rel="manifest" href="/manifest.webmanifest" />
+          <script is:inline>
+            if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+          </script>
+        </>
+      )}
+    </>
+  )
+}

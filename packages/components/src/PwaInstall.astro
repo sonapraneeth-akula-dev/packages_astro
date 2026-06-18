@@ -1,0 +1,284 @@
+---
+/**
+ * In-page PWA install affordance. Renders only on a built site (the manifest +
+ * service worker that make install possible are emitted by `astro build`, so
+ * there is nothing to install on the dev server) and only when the site has PWA
+ * enabled with `install` (the default).
+ *
+ * The button is shown whenever the app isn't already installed. Clicking it
+ * always does something: if the browser has offered a native install prompt
+ * (`beforeinstallprompt`, captured ahead of time) it triggers the OS install
+ * dialog; otherwise it reveals short, browser-specific instructions (e.g. the
+ * iOS Safari “Share → Add to Home Screen” flow, or the Chromium menu). It hides
+ * itself once installed / running standalone, and a dismissal is remembered.
+ */
+import { resolvePwa, type PwaSiteInfo } from './pwa';
+
+type Props = PwaSiteInfo;
+
+const { enabled, install } = resolvePwa(Astro.props);
+// Install only works on a built site — gate to production builds, matching
+// PwaHead (which emits the manifest link + service-worker registration there).
+const show = enabled && install && import.meta.env.PROD;
+// The dev-only ScreenSizeIndicator occupies the same bottom-left corner whenever
+// PUBLIC_APP_ENV is not 'prod' (independent of build mode), so raise the button
+// above it in those environments to avoid overlapping.
+const hasDevIndicator = __APP_ENV__ !== 'prod';
+---
+
+{
+  show && (
+    <div
+      class:list={['pwa-install', { 'pwa-install--raised': hasDevIndicator }]}
+      data-pwa-install
+      hidden
+    >
+      <button type="button" class="pwa-install__btn" data-pwa-install-btn aria-haspopup="dialog">
+        <svg
+          class="pwa-install__icon"
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 3v12" />
+          <path d="m7 10 5 5 5-5" />
+          <path d="M5 21h14" />
+        </svg>
+        <span>Install app</span>
+      </button>
+      <button
+        type="button"
+        class="pwa-install__close"
+        data-pwa-install-close
+        aria-label="Dismiss install prompt"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </svg>
+      </button>
+      <div class="pwa-install__hint" data-pwa-install-hint role="dialog" hidden>
+        <p data-pwa-install-hint-text>
+          To install, open your browser menu and choose <strong>Install app</strong>.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+{
+  show && (
+    <script is:inline>
+      (() => {
+        const root = document.querySelector('[data-pwa-install]');
+        if (!root || root.dataset.pwaReady) return;
+        root.dataset.pwaReady = '1';
+
+        const STORAGE_KEY = 'pwa-install-dismissed';
+        const btn = root.querySelector('[data-pwa-install-btn]');
+        const closeBtn = root.querySelector('[data-pwa-install-close]');
+        const hint = root.querySelector('[data-pwa-install-hint]');
+        const hintText = root.querySelector('[data-pwa-install-hint-text]');
+
+        const standalone =
+          window.matchMedia('(display-mode: standalone)').matches ||
+          window.navigator.standalone === true;
+        if (standalone) return;
+
+        let dismissed = false;
+        try { dismissed = localStorage.getItem(STORAGE_KEY) === '1'; } catch (e) {}
+        if (dismissed) return;
+
+        const ua = navigator.userAgent || '';
+        const isIOS =
+          (/iphone|ipad|ipod/i.test(ua) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) &&
+          !('MSStream' in window);
+        const isAndroid = /android/i.test(ua);
+        const isFirefox = /firefox|fxios/i.test(ua);
+        const isEdge = ua.indexOf('Edg') !== -1;
+
+        // Tailor the manual fallback instructions to the user's browser.
+        if (hintText) {
+          let msg;
+          if (isIOS) {
+            msg = 'Tap the Share button, then “Add to Home Screen” to install this app.';
+          } else if (isFirefox) {
+            msg = isAndroid
+              ? 'Open the browser menu, then “Install” to add this app.'
+              : 'Firefox doesn’t support installing this app — try Chrome or Edge.';
+          } else if (isAndroid) {
+            msg = 'Open the browser menu (⋮), then “Install app” / “Add to Home screen”.';
+          } else if (isEdge) {
+            msg = 'Open the Edge menu (…), then Apps → “Install this site as an app”.';
+          } else {
+            msg = 'Click the install icon in the address bar, or open the menu (⋮) → “Install app”.';
+          }
+          hintText.textContent = msg;
+        }
+
+        let deferred = null;
+
+        const show = () => { root.hidden = false; };
+        const hide = () => { root.hidden = true; };
+        const closeHint = () => { if (hint) hint.hidden = true; };
+
+        window.addEventListener('beforeinstallprompt', (event) => {
+          // Stash the event so the button can trigger the native dialog on click.
+          event.preventDefault();
+          deferred = event;
+          closeHint();
+          show();
+        });
+        window.addEventListener('appinstalled', () => {
+          hide();
+          try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {}
+        });
+
+        // Show the button proactively (not only on beforeinstallprompt, which is
+        // unreliable): if no native prompt is available, the click falls back to
+        // the manual instructions so the button always does something.
+        show();
+
+        btn.addEventListener('click', async () => {
+          if (deferred) {
+            deferred.prompt();
+            const choice = await deferred.userChoice;
+            deferred = null;
+            if (choice && choice.outcome === 'accepted') hide();
+            return;
+          }
+          // No native prompt available — toggle the manual instructions.
+          if (hint) hint.hidden = !hint.hidden;
+        });
+
+        closeBtn.addEventListener('click', () => {
+          hide();
+          try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {}
+        });
+
+        document.addEventListener('click', (event) => {
+          if (hint && !hint.hidden && !root.contains(event.target)) hint.hidden = true;
+        });
+      })();
+    </script>
+  )
+}
+
+<style>
+  .pwa-install {
+    position: fixed;
+    left: 1rem;
+    bottom: 1rem;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: calc(var(--radius, 0.5rem) + 0.25rem);
+    box-shadow: 0 6px 24px -8px rgb(0 0 0 / 0.35);
+  }
+
+  /* Clear the dev-only screen-size indicator (bottom-left, ~3.4rem tall). */
+  .pwa-install--raised {
+    bottom: 4rem;
+  }
+
+  @media (max-width: 40rem) {
+    /* Clear the mobile bottom tab bar (already above the dev indicator). */
+    .pwa-install,
+    .pwa-install--raised {
+      bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  .pwa-install__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.85rem;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-contrast, #fff);
+    background: var(--accent, #4f46e5);
+    border: none;
+    border-radius: var(--radius, 0.5rem);
+    cursor: pointer;
+    transition: filter 0.15s ease;
+  }
+  .pwa-install__btn:hover {
+    filter: brightness(1.08);
+  }
+  .pwa-install__btn:focus-visible {
+    outline: 2px solid var(--accent, #4f46e5);
+    outline-offset: 2px;
+  }
+
+  .pwa-install__icon {
+    flex: none;
+  }
+
+  .pwa-install__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    color: var(--text-muted, #6b7280);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius, 0.5rem);
+    cursor: pointer;
+  }
+  .pwa-install__close:hover {
+    color: var(--text, #111827);
+    background: color-mix(in srgb, var(--border, #e5e7eb) 60%, transparent);
+  }
+  .pwa-install__close:focus-visible {
+    outline: 2px solid var(--accent, #4f46e5);
+    outline-offset: 2px;
+  }
+
+  .pwa-install__hint {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 0.6rem);
+    width: max(15rem, 100%);
+    padding: 0.75rem 0.9rem;
+    color: var(--text, #111827);
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: var(--radius, 0.5rem);
+    box-shadow: 0 6px 24px -8px rgb(0 0 0 / 0.35);
+  }
+  .pwa-install__hint p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pwa-install__btn {
+      transition: none;
+    }
+  }
+</style>
