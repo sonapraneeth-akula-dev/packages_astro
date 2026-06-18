@@ -1,0 +1,104 @@
+---
+title: Turn the Blog Into an Installable PWA
+description: Flip one config flag to ship a web manifest, an offline service worker and an in-page install button.
+pubDate: 2026-06-17
+category: Engineering
+tags: [pwa, offline, performance, dx]
+cover: "📲"
+---
+
+import { Callout, Steps, Badge } from '@sonapraneeth/blog-core/components/mdx';
+
+The engine ships an **opt-in Progressive Web App**. It is off by default, so an
+unconfigured site behaves exactly as before — no manifest, no service worker, no
+extra `<head>` tags. Turn it on with a single flag and the build does the rest.
+
+<Callout type="tip">
+  Like Pagefind search, the PWA is build-only: the manifest and service worker
+  are emitted by `astro build`, so they activate on the built site (and
+  `astro preview`), not the dev server.
+</Callout>
+
+## Enable it
+
+Add a `pwa` block to your `blog.config.ts`:
+
+```ts title="blog.config.ts"
+import { defineBlogConfig } from '@sonapraneeth/blog-core/config';
+
+export const blogConfig = defineBlogConfig({
+  // …existing options…
+  pwa: { enabled: true },
+});
+```
+
+That is the whole setup. On the next build you get:
+
+<Steps>
+
+1. A `manifest.webmanifest` written to the site root.
+2. A runtime-caching service worker (`sw.js`) registered on load.
+3. The matching `<head>` tags — `theme-color`, apple-touch meta and the
+   manifest link.
+4. An in-page **Install app** button (an *Add to Home Screen* hint on iOS).
+
+</Steps>
+
+## Icons come for free
+
+With no icons configured, the build **generates** a default set — a 192px and
+512px icon plus a 512px `maskable` variant, themed with your manifest colours —
+so the site is installable out of the box. <Badge text="no assets required" />
+
+To use your own, drop the files in `public/` and list them. Your entries
+override the generated defaults entirely, and the first PNG also becomes the iOS
+apple-touch-icon:
+
+```ts title="blog.config.ts"
+pwa: {
+  enabled: true,
+  icons: [
+    { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+    { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    { src: '/icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+  ],
+},
+```
+
+## How the service worker caches
+
+The worker precaches nothing at build time, so it needs no asset manifest, and
+instead fills its cache as the reader browses:
+
+- **Navigations** use *network-first* — content stays fresh, and the cache is the
+  offline fallback when the network is gone.
+- **Assets** use *stale-while-revalidate* — instant from cache, refreshed in the
+  background.
+
+Each deploy gets a new cache id, and stale caches are pruned on activation.
+
+<Callout type="note">
+  The browser, not the site, decides when to surface the install prompt. The
+  **Install app** button stays hidden until the browser reports the site is
+  installable; on iOS Safari (which has no prompt event) it shows the manual
+  *Add to Home Screen* hint instead.
+</Callout>
+
+## Tune the manifest
+
+Every field is optional and falls back to your site data. The common ones:
+
+| Option            | Default          | Description                              |
+| ----------------- | ---------------- | ---------------------------------------- |
+| `enabled`         | `false`          | Master switch.                           |
+| `install`         | `true`           | Show the in-page install button.         |
+| `name`            | site title       | Full install name.                       |
+| `shortName`       | site brand       | Home-screen label.                       |
+| `themeColor`      | `#0b0b0c`        | Theme + status-bar colour.               |
+| `backgroundColor` | `themeColor`     | Splash-screen background.                |
+| `display`         | `standalone`     | Launch display mode.                     |
+| `icons`           | generated set    | Override the home-screen icons.          |
+
+Build, preview, then install the site from your browser's address bar — it now
+opens in its own window and works offline.
+
