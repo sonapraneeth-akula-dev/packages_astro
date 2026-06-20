@@ -9,6 +9,8 @@ import ProgressBar from '@sonapraneeth/components/ProgressBar.astro';
 import CategoryIcon from '../components/CategoryIcon.astro';
 import TagIcon from '../components/TagIcon.astro';
 import Icon from '@sonapraneeth/components/Icon.astro';
+// KaTeX stylesheet URL (emitted as a cached file, not inlined) for LaTeX math.
+import katexHref from 'katex/dist/katex.min.css?url';
 
 interface Props {
   post: Post;
@@ -21,9 +23,15 @@ interface Props {
 const { post, headings, readingTime, newerPost, olderPost } = Astro.props;
 const { title, description, pubDate, updatedDate, category, tags, cover, coverImage, coverAlt } =
   post.data;
+
+// Math renders to HTML at build time, but KaTeX needs its stylesheet. Ship it
+// only when this post has math: either `math: true` is set in frontmatter, or
+// the body contains an unescaped `$` (remark-math's delimiter).
+const needsKatex = post.data.math || /(?<!\\)\$/.test(post.body ?? '');
 ---
 
 <BaseLayout title={title} description={description} article>
+  {needsKatex && <link rel="stylesheet" href={katexHref} />}
   <ProgressBar />
   <article class="post container" data-pagefind-body>
     <header class="post-head">

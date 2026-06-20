@@ -58,6 +58,13 @@ export function docFrontmatterSchema(image?: ImageHelper) {
     sidebar: docSidebarMetaSchema.optional(),
     /** Hide from listings / sidebar while drafting (only shown in dev). */
     draft: z.boolean().default(false),
+    /**
+     * Force-load the KaTeX stylesheet for LaTeX math. Leave unset to rely on
+     * auto-detection (the layout ships the CSS only when the body contains an
+     * unescaped `$`); set `true` to load it regardless — useful when math is
+     * injected by an imported MDX component the body scan can't see.
+     */
+    math: z.boolean().default(false),
     /** Optional last-updated date shown in the page header. */
     lastUpdated: z.coerce.date().optional(),
     /** Optional accent emoji/glyph shown in the page header. */

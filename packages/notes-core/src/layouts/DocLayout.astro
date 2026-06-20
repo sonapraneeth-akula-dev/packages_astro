@@ -8,6 +8,8 @@ import Icon from '@sonapraneeth/components/Icon.astro';
 import { formatDateTime } from '../utils/format';
 import type { DocsConfig } from '../config';
 import type { SidebarNode, DocLink, Breadcrumb } from '../utils/docs';
+// KaTeX stylesheet URL (emitted as a cached file, not inlined) for LaTeX math.
+import katexHref from 'katex/dist/katex.min.css?url';
 
 interface Props {
   config: DocsConfig;
@@ -23,6 +25,8 @@ interface Props {
   editUrl?: string;
   cover?: string;
   tableOfContents?: boolean;
+  /** Load the KaTeX stylesheet (this note contains LaTeX math). */
+  needsKatex?: boolean;
   /** Notebook label (notebooks mode) — used as the Pagefind filter + sidebar heading. */
   notebookLabel?: string;
   /** Link back to the notebook hub (notebooks mode). */
@@ -43,6 +47,7 @@ const {
   editUrl,
   cover,
   tableOfContents = true,
+  needsKatex = false,
   notebookLabel,
   backLink,
 } = Astro.props;
@@ -52,6 +57,7 @@ const showToc = tableOfContents && headings.length > 0;
 ---
 
 <BaseLayout config={config} title={title} description={description} article>
+  {needsKatex && <link rel="stylesheet" href={katexHref} />}
   <ProgressBar />
   <div class="docs container">
     <DocsSidebar

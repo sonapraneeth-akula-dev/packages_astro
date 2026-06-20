@@ -21,6 +21,13 @@ export function postFrontmatterSchema({ image }: { image: ImageFunction }) {
     tags: z.array(z.string()).default([]),
     /** Hide from listings while drafting. */
     draft: z.boolean().default(false),
+    /**
+     * Force-load the KaTeX stylesheet for LaTeX math. Leave unset to rely on
+     * auto-detection (the layout ships the CSS only when the body contains an
+     * unescaped `$`); set `true` to load it regardless — useful when math is
+     * injected by an imported MDX component the body scan can't see.
+     */
+    math: z.boolean().default(false),
     /** Optional accent emoji/glyph shown on cards when no hero image. */
     cover: z.string().optional(),
     /**

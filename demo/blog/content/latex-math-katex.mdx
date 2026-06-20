@@ -1,0 +1,59 @@
+---
+title: Writing Math with LaTeX
+description: Inline and block LaTeX rendered at build time with KaTeX — no client-side JavaScript, no layout shift.
+pubDate: 2026-01-12
+category: Writing
+tags: [latex, math, katex, mdx]
+cover: "∑"
+---
+
+The satteri Markdown processor wires `remark-math` and `rehype-katex` into the
+pipeline, so any `.md` or `.mdx` post can contain LaTeX. The math is rendered to
+HTML **at build time** by KaTeX — there is no runtime library to download and no
+flash of unstyled formulae.
+
+## Inline math
+
+Wrap an expression in single dollar signs to keep it in the flow of a sentence.
+The mass–energy equivalence $E = mc^2$ sits on the baseline, and so does the
+golden ratio $\varphi = \frac{1 + \sqrt{5}}{2}$ or a quick sum like
+$\sum_{i=1}^{n} i = \frac{n(n+1)}{2}$.
+
+Inline math inherits the surrounding font size, so it never disturbs the line
+height of a paragraph — for example $a^2 + b^2 = c^2$ reads naturally mid-clause.
+
+## Block math
+
+Use double dollar signs for display equations. They render centered on their own
+line with the standard KaTeX display spacing.
+
+$$
+\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}
+$$
+
+Multi-line derivations work too, via an `aligned` environment:
+
+$$
+\begin{aligned}
+  (a + b)^2 &= a^2 + 2ab + b^2 \\
+  (a - b)^2 &= a^2 - 2ab + b^2 \\
+  a^2 - b^2 &= (a + b)(a - b)
+\end{aligned}
+$$
+
+Matrices, fractions and Greek all render as expected:
+
+$$
+A = \begin{bmatrix}
+  \alpha & \beta \\
+  \gamma & \delta
+\end{bmatrix}
+\qquad
+\det(A) = \alpha\delta - \beta\gamma
+$$
+
+## Escaping dollar signs
+
+To show a literal dollar sign instead of opening a math span, escape it with a
+backslash: a coffee costs \$3.50. Only unescaped `$`/`$$` pairs are treated as
+math delimiters.
