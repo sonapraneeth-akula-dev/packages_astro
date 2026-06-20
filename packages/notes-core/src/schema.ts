@@ -65,6 +65,8 @@ export function docFrontmatterSchema(image?: ImageHelper) {
      * injected by an imported MDX component the body scan can't see.
      */
     math: z.boolean().default(false),
+    /** Optional published date shown in the page header. */
+    publishedDate: z.coerce.date().optional(),
     /** Optional last-updated date shown in the page header. */
     lastUpdated: z.coerce.date().optional(),
     /** Optional accent emoji/glyph shown in the page header. */

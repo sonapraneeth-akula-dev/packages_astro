@@ -21,6 +21,7 @@ interface Props {
   prev?: DocLink;
   next?: DocLink;
   readingTime?: string;
+  publishedDate?: Date;
   lastUpdated?: Date;
   editUrl?: string;
   cover?: string;
@@ -43,6 +44,7 @@ const {
   prev,
   next,
   readingTime,
+  publishedDate,
   lastUpdated,
   editUrl,
   cover,
@@ -83,8 +85,17 @@ const showToc = tableOfContents && headings.length > 0;
         </nav>
         <h1>{cover && <span class="doc-cover" aria-hidden="true">{cover} </span>}{title}</h1>
         {description && <p class="doc-lede">{description}</p>}
-        {(readingTime || lastUpdated) && (
+        {(readingTime || publishedDate || lastUpdated) && (
           <div class="doc-meta">
+            {publishedDate && (
+              <span class="meta-item">
+                <span class="meta-label">Published</span>
+                <time datetime={publishedDate.toISOString()}>
+                  {formatDateTime(publishedDate, config.timeZone, config.timeZoneLabel)}
+                </time>
+              </span>
+            )}
+            {publishedDate && lastUpdated && <span class="dot" aria-hidden="true">·</span>}
             {lastUpdated && (
               <span class="meta-item">
                 <span class="meta-label">Updated</span>
@@ -93,7 +104,7 @@ const showToc = tableOfContents && headings.length > 0;
                 </time>
               </span>
             )}
-            {readingTime && lastUpdated && <span class="dot" aria-hidden="true">·</span>}
+            {readingTime && (publishedDate || lastUpdated) && <span class="dot" aria-hidden="true">·</span>}
             {readingTime && <span>{readingTime}</span>}
           </div>
         )}
