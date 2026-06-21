@@ -18,6 +18,14 @@ import { docsConfig } from 'virtual:notes-core/config';
 const searchFilters = {
   notebook: { label: 'Notebook', icon: 'notebook' as const },
 };
+
+// (#2) Metadata shown in each result card's meta line. No date sort here —
+// notes aren't all dated, and an applied sort drops untagged pages.
+const searchMeta = [
+  { key: 'notebook', icon: 'notebook' as const },
+  { key: 'date', icon: 'calendar' as const },
+  { key: 'reading', icon: 'clock' as const },
+];
 ---
 
 <BaseLayout
@@ -35,7 +43,12 @@ const searchFilters = {
   </div>
 
   <div class="container">
-    <PagefindSearch placeholder={`Search ${docsConfig.title}…`} filters={searchFilters} />
+    <PagefindSearch
+      placeholder={`Search ${docsConfig.title}…`}
+      filters={searchFilters}
+      meta={searchMeta}
+      highlight
+    />
   </div>
 </BaseLayout>
 

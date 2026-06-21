@@ -33,7 +33,7 @@ interface SubResult {
 
 interface ResultData {
   url: string;
-  meta: { title?: string };
+  meta: { title?: string; [key: string]: string | undefined };
   excerpt: string;
   sub_results?: SubResult[];
 }
@@ -54,10 +54,31 @@ interface PagefindApi {
   filters: () => Promise<FilterGroups>;
   search: (
     term: string | null,
-    opts?: { filters?: Record<string, string[]> },
+    opts?: { filters?: Record<string, string[]>; sort?: Record<string, string> },
   ) => Promise<SearchResponse>;
   preload?: (term: string, opts?: { filters?: Record<string, string[]> }) => void;
 }
+
+/** A sort option offered in the widget's "Sort by" dropdown (#1). */
+interface SortOption {
+  /** Stable id, also the option value, e.g. `date-desc`. */
+  id: string;
+  /** Label shown in the dropdown, e.g. `Newest`. */
+  label: string;
+  /** Pagefind sort key tagged on pages, e.g. `date`. */
+  key: string;
+  /** Sort direction. */
+  dir: 'asc' | 'desc';
+}
+
+/** A metadata field rendered in the result card's meta line (#2). */
+interface MetaField {
+  /** Pagefind meta key, e.g. `category`. */
+  key: string;
+  /** Built-in icon shown before the value. */
+  icon?: 'category' | 'tag' | 'notebook' | 'clock' | 'calendar';
+}
+
 
 /** Per-filter-key presentation, configured by the host route. */
 interface FilterMeta {
@@ -80,6 +101,9 @@ const ICON_PATHS: Record<string, string> = {
   tag: '<path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3H4a1 1 0 0 0-1 1v5.59A2 2 0 0 0 3.83 11l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83z"/><circle cx="7" cy="7" r="1.2"/>',
   notebook:
     '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  calendar:
+    '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
 };
 
 /** Turn a filter key like `notebook` into a display label like `Notebook`. */
@@ -123,8 +147,13 @@ export async function initPagefindSearch(root: HTMLElement): Promise<void> {
   const bundlePath = root.dataset.pfBundle || '/pagefind/';
   const pageSize = Number(root.dataset.pfPageSize || '8') || 8;
   const filterConfig = parseFilterConfig(root.dataset.pfFilters);
+  const sortOptions = parseJsonArray<SortOption>(root.dataset.pfSorts);
+  const metaFields = parseJsonArray<MetaField>(root.dataset.pfMeta);
+  const highlight = root.dataset.pfHighlight === 'true';
 
   const filtersEl = root.querySelector<HTMLElement>('.pf-filters')!;
+  const sortEl = root.querySelector<HTMLSelectElement>('.pf-sort')!;
+  const sortWrapEl = root.querySelector<HTMLElement>('.pf-sortwrap')!;
   const scopeEl = root.querySelector<HTMLElement>('.pf-scope')!;
   const input = root.querySelector<HTMLInputElement>('.pf-input')!;
   const clearBtn = root.querySelector<HTMLButtonElement>('.pf-clear')!;
@@ -140,11 +169,17 @@ export async function initPagefindSearch(root: HTMLElement): Promise<void> {
   let pagefind: PagefindApi;
   try {
     pagefind = (await import(/* @vite-ignore */ `${bundlePath}pagefind.js`)) as PagefindApi;
+    // (#4) Append the matched term as `?highlight=` to result URLs so the
+    // destination page can mark it (see the PagefindHighlight script in the
+    // article layouts). Must be set before init.
+    if (highlight) await pagefind.options({ highlightParam: 'highlight' });
     await pagefind.init();
   } catch {
     fallbackEl.hidden = false;
     return;
   }
+
+  renderSortOptions();
 
   /** Currently selected filter values, keyed by filter name. */
   const active = new Map<string, Set<string>>();
@@ -158,6 +193,32 @@ export async function initPagefindSearch(root: HTMLElement): Promise<void> {
   await runSearch();
 
   // --- rendering -----------------------------------------------------------
+
+  /** (#1) Populate the "Sort by" dropdown, or hide it when no sorts configured. */
+  function renderSortOptions(): void {
+    if (sortOptions.length === 0) {
+      sortWrapEl.hidden = true;
+      return;
+    }
+    sortWrapEl.hidden = false;
+    sortEl.replaceChildren();
+    const relevance = document.createElement('option');
+    relevance.value = '';
+    relevance.textContent = 'Relevance';
+    sortEl.appendChild(relevance);
+    for (const opt of sortOptions) {
+      const el = document.createElement('option');
+      el.value = opt.id;
+      el.textContent = opt.label;
+      sortEl.appendChild(el);
+    }
+  }
+
+  /** The Pagefind `sort` object for the current dropdown selection, if any. */
+  function buildSort(): Record<string, string> | undefined {
+    const chosen = sortOptions.find((o) => o.id === sortEl.value);
+    return chosen ? { [chosen.key]: chosen.dir } : undefined;
+  }
 
   function renderFilters(all: FilterGroups): void {
     filtersEl.replaceChildren();
@@ -260,6 +321,36 @@ export async function initPagefindSearch(root: HTMLElement): Promise<void> {
     link.textContent = d.meta?.title || d.url;
     heading.appendChild(link);
     card.appendChild(heading);
+
+    // (#2) Meta line built from configured metadata fields present on the page.
+    if (metaFields.length > 0) {
+      const items: HTMLElement[] = [];
+      for (const field of metaFields) {
+        const value = d.meta?.[field.key];
+        if (!value) continue;
+        const item = document.createElement('span');
+        item.className = 'pf-meta-item';
+        const icon = makeIcon(field.icon);
+        if (icon) item.appendChild(icon);
+        item.appendChild(document.createTextNode(value));
+        items.push(item);
+      }
+      if (items.length > 0) {
+        const metaLine = document.createElement('p');
+        metaLine.className = 'pf-result-meta';
+        items.forEach((item, i) => {
+          if (i > 0) {
+            const dot = document.createElement('span');
+            dot.className = 'pf-meta-dot';
+            dot.setAttribute('aria-hidden', 'true');
+            dot.textContent = '\u00b7';
+            metaLine.appendChild(dot);
+          }
+          metaLine.appendChild(item);
+        });
+        card.appendChild(metaLine);
+      }
+    }
 
     const excerpt = document.createElement('p');
     excerpt.className = 'pf-excerpt';
@@ -383,7 +474,7 @@ export async function initPagefindSearch(root: HTMLElement): Promise<void> {
       return;
     }
 
-    const search = await pagefind.search(term || null, { filters });
+    const search = await pagefind.search(term || null, { filters, sort: buildSort() });
     results = search.results;
     shown = 0;
     resultsEl.replaceChildren();
@@ -434,6 +525,8 @@ export async function initPagefindSearch(root: HTMLElement): Promise<void> {
     void runSearch();
   });
 
+  sortEl.addEventListener('change', () => void runSearch());
+
   moreBtn.addEventListener('click', () => void renderMore());
 }
 
@@ -444,5 +537,16 @@ function parseFilterConfig(raw: string | undefined): FilterConfig {
     return parsed && typeof parsed === 'object' ? (parsed as FilterConfig) : {};
   } catch {
     return {};
+  }
+}
+
+/** Parse a `data-*` attribute holding a JSON array; returns `[]` on any error. */
+function parseJsonArray<T>(raw: string | undefined): T[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? (parsed as T[]) : [];
+  } catch {
+    return [];
   }
 }

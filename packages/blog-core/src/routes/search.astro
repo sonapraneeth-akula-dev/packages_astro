@@ -19,6 +19,20 @@ const searchFilters = {
   category: { label: 'Category', hrefBase: '/categories/', icon: 'category' as const },
   tag: { label: 'Tag', hrefBase: '/tags/', icon: 'tag' as const },
 };
+
+// (#1) Date sort — posts are tagged `data-pagefind-sort="date:..."`.
+const searchSorts = [
+  { id: 'date-desc', label: 'Newest', key: 'date', dir: 'desc' as const },
+  { id: 'date-asc', label: 'Oldest', key: 'date', dir: 'asc' as const },
+];
+
+// (#2) Metadata shown in each result card's meta line.
+const searchMeta = [
+  { key: 'cover' },
+  { key: 'category', icon: 'category' as const },
+  { key: 'date', icon: 'calendar' as const },
+  { key: 'reading', icon: 'clock' as const },
+];
 ---
 
 <BaseLayout
@@ -35,7 +49,13 @@ const searchFilters = {
   </div>
 
   <div class="container">
-    <PagefindSearch placeholder={`Search ${blogConfig.title}…`} filters={searchFilters} />
+    <PagefindSearch
+      placeholder={`Search ${blogConfig.title}…`}
+      filters={searchFilters}
+      sorts={searchSorts}
+      meta={searchMeta}
+      highlight
+    />
   </div>
 </BaseLayout>
 

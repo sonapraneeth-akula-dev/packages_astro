@@ -83,6 +83,15 @@ const showToc = tableOfContents && headings.length > 0;
       data-pagefind-body
       data-pagefind-filter={notebookLabel ? `notebook:${notebookLabel}` : undefined}
     >
+      {/* (#2) Search-result metadata: rendered in the search cards' meta line.
+          Each inline `key:value` must be its own element. */}
+      <div class="doc-meta-index" aria-hidden="true" data-pagefind-ignore>
+        {notebookLabel && <span data-pagefind-meta={`notebook:${notebookLabel}`}></span>}
+        {lastUpdated && (
+          <span data-pagefind-meta={`date:${formatDateTime(lastUpdated, config.timeZone, config.timeZoneLabel)}`}></span>
+        )}
+        {readingTime && <span data-pagefind-meta={`reading:${readingTime}`}></span>}
+      </div>
       <header class="doc-head">
         <nav class="crumbs" aria-label="Breadcrumb">
           {breadcrumbs.map((crumb, i) => (
@@ -93,7 +102,7 @@ const showToc = tableOfContents && headings.length > 0;
           ))}
         </nav>
         <h1>{cover && <span class="doc-cover" aria-hidden="true">{cover} </span>}{title}</h1>
-        {description && <p class="doc-lede">{description}</p>}
+        {description && <p class="doc-lede" data-pagefind-weight="2">{description}</p>}
         {(readingTime || publishedDate || lastUpdated) && (
           <div class="doc-meta">
             {publishedDate && (
@@ -143,7 +152,7 @@ const showToc = tableOfContents && headings.length > 0;
         <div class:list={['doc-body', { 'has-toc': showToc }]}>
           <slot />
           {keywords.length > 0 && (
-            <span class="doc-keywords" aria-hidden="true">{keywords.join(' ')}</span>
+            <span class="doc-keywords" aria-hidden="true" data-pagefind-weight="0.5">{keywords.join(' ')}</span>
           )}
         </div>
         {showToc && (
@@ -183,6 +192,17 @@ const showToc = tableOfContents && headings.length > 0;
     ?.addEventListener('click', () => window.print());
 </script>
 
+{/* (#4) When arriving from search with `?highlight=`, mark the matched term in
+    the note. The Pagefind highlight bundle is emitted at build time and is
+    absent on the dev server, so this is guarded and only runs when needed. */}
+<script is:inline>
+  if (new URLSearchParams(location.search).has('highlight')) {
+    import('/pagefind/pagefind-highlight.js')
+      .then(() => new window.PagefindHighlight({ highlightParam: 'highlight' }))
+      .catch(() => {});
+  }
+</script>
+
 <style>
   /* Three columns on desktop: nav sidebar · article · on-this-page TOC. */
   .docs {
@@ -196,6 +216,17 @@ const showToc = tableOfContents && headings.length > 0;
 
   /* Search-only keywords: indexed by Pagefind but visually removed. */
   .doc-keywords {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Off-screen carrier for Pagefind result metadata (#2). */
+  .doc-meta-index {
     position: absolute;
     width: 1px;
     height: 1px;

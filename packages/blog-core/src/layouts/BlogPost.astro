@@ -37,6 +37,7 @@ const needsKatex = post.data.math || /(?<!\\)\$/.test(post.body ?? '');
     class="post container"
     data-pagefind-body
     data-pagefind-filter={`category:${category}`}
+    data-pagefind-sort={`date:${pubDate.toISOString().slice(0, 10)}`}
   >
     {/* Hidden per-tag filter facets. A Pagefind filter attribute holds a single
         value, so each tag needs its own element. `data-pagefind-ignore` keeps
@@ -47,6 +48,15 @@ const needsKatex = post.data.math || /(?<!\\)\$/.test(post.body ?? '');
         {tags.map((t) => <span data-pagefind-filter={`tag:${t}`}>{t}</span>)}
       </div>
     )}
+    {/* (#2) Search-result metadata: rendered in the search cards' meta line.
+        Each inline `key:value` must be its own element (only one inline meta
+        per attribute is allowed). */}
+    <div class="post-meta-index" aria-hidden="true" data-pagefind-ignore>
+      <span data-pagefind-meta={`category:${category}`}></span>
+      {cover && <span data-pagefind-meta={`cover:${cover}`}></span>}
+      <span data-pagefind-meta={`date:${formatDateTime(pubDate)}`}></span>
+      <span data-pagefind-meta={`reading:${readingTime}`}></span>
+    </div>
     <header class="post-head">
       <nav class="crumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
@@ -54,7 +64,7 @@ const needsKatex = post.data.math || /(?<!\\)\$/.test(post.body ?? '');
         <a href={`/categories/${slugify(category)}`}>{category}</a>
       </nav>
       <h1>{title}</h1>
-      <p class="post-lede">{description}</p>
+      <p class="post-lede" data-pagefind-weight="2">{description}</p>
       <div class="post-meta">
         {cover && <span class="post-cover" aria-hidden="true">{cover}</span>}
         <span class="meta-item">
@@ -109,7 +119,7 @@ const needsKatex = post.data.math || /(?<!\\)\$/.test(post.body ?? '');
       <div class="post-body">
         <slot />
         {keywords.length > 0 && (
-          <span class="post-keywords" aria-hidden="true">{keywords.join(' ')}</span>
+          <span class="post-keywords" aria-hidden="true" data-pagefind-weight="0.5">{keywords.join(' ')}</span>
         )}
       </div>
       <aside class="post-aside" data-pagefind-ignore>
@@ -160,6 +170,17 @@ const needsKatex = post.data.math || /(?<!\\)\$/.test(post.body ?? '');
     ?.addEventListener('click', () => window.print());
 </script>
 
+{/* (#4) When arriving from search with `?highlight=`, mark the matched term in
+    the article. The Pagefind highlight bundle is emitted at build time and is
+    absent on the dev server, so this is guarded and only runs when needed. */}
+<script is:inline>
+  if (new URLSearchParams(location.search).has('highlight')) {
+    import('/pagefind/pagefind-highlight.js')
+      .then(() => new window.PagefindHighlight({ highlightParam: 'highlight' }))
+      .catch(() => {});
+  }
+</script>
+
 <style>
   /* The post uses the full --container width. Readable text inside is capped to
      a comfortable measure (see .post-body text children) while code blocks,
@@ -181,6 +202,17 @@ const needsKatex = post.data.math || /(?<!\\)\$/.test(post.body ?? '');
 
   /* Search-only keywords: indexed by Pagefind but visually removed. */
   .post-keywords {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Off-screen carrier for Pagefind result metadata (#2). */
+  .post-meta-index {
     position: absolute;
     width: 1px;
     height: 1px;

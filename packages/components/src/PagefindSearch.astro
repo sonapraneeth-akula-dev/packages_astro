@@ -27,6 +27,12 @@ interface Props {
   pageSize?: number;
   /** Per-filter-key presentation (label, taxonomy link, icon). */
   filters?: Record<string, FilterMeta>;
+  /** (#1) "Sort by" options. Each needs a Pagefind sort key tagged on pages. */
+  sorts?: Array<{ id: string; label: string; key: string; dir: 'asc' | 'desc' }>;
+  /** (#2) Metadata fields rendered in each result card's meta line. */
+  meta?: Array<{ key: string; icon?: 'category' | 'tag' | 'notebook' | 'clock' | 'calendar' }>;
+  /** (#4) Add `?highlight=` to result URLs so the destination page marks it. */
+  highlight?: boolean;
   /** Search input placeholder. */
   placeholder?: string;
 }
@@ -35,6 +41,9 @@ const {
   bundlePath = '/pagefind/',
   pageSize = 8,
   filters = {},
+  sorts = [],
+  meta = [],
+  highlight = false,
   placeholder = 'Search…',
 } = Astro.props;
 ---
@@ -44,6 +53,9 @@ const {
   data-pf-bundle={bundlePath}
   data-pf-page-size={pageSize}
   data-pf-filters={JSON.stringify(filters)}
+  data-pf-sorts={JSON.stringify(sorts)}
+  data-pf-meta={JSON.stringify(meta)}
+  data-pf-highlight={String(highlight)}
 >
   <form class="pf-form" role="search" onsubmit="return false">
     <div class="pf-inputwrap">
@@ -76,8 +88,14 @@ const {
   </form>
 
   <div class="pf-filters" aria-label="Filters" hidden></div>
+  <div class="pf-toolbar">
+    <p class="pf-status" role="status" aria-live="polite"></p>
+    <label class="pf-sortwrap" hidden>
+      <span class="pf-sort-label">Sort by</span>
+      <select class="pf-sort" aria-label="Sort results"></select>
+    </label>
+  </div>
   <p class="pf-scope" hidden></p>
-  <p class="pf-status" role="status" aria-live="polite"></p>
   <div class="pf-results"></div>
   <button type="button" class="pf-more" hidden>Load more</button>
 
@@ -306,10 +324,47 @@ const {
   }
 
   /* Status + results ------------------------------------------------------- */
+  .pf-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
   .pf-status {
-    margin: 0 0 1rem;
+    margin: 0;
     color: var(--text-muted);
     font-size: 0.9rem;
+  }
+  /* (#1) Sort dropdown */
+  .pf-sortwrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: none;
+  }
+  .pf-sortwrap[hidden] {
+    display: none;
+  }
+  .pf-sort-label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .pf-sort {
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--text);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.35rem 0.6rem;
+    cursor: pointer;
+  }
+  .pf-sort:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
   }
   .pf-results {
     display: flex;
@@ -339,6 +394,27 @@ const {
   }
   .pf-result-title a:hover {
     color: var(--accent-text, var(--accent));
+  }
+  /* (#2) Result meta line */
+  .pf-result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+  }
+  .pf-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .pf-meta-item .pf-chip-icon {
+    opacity: 0.75;
+  }
+  .pf-meta-dot {
+    opacity: 0.5;
   }
   .pf-excerpt {
     margin: 0;
