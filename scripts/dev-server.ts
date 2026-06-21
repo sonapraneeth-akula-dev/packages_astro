@@ -161,14 +161,28 @@ process.on('SIGINT', shutdown);
 
 /**
  * Watch the glob-driven source dirs and restart the dev server when files are
- * added or removed (the cases Astro misses under bind-mount polling). Edits
- * fire `change`, which we ignore so Astro's HMR handles them uninterrupted.
+ * added or removed (the cases Astro misses under bind-mount polling). Plain
+ * content edits fire `change`, which we leave to Astro's HMR — except edits to
+ * a handbook landing page (`index.mdx`), whose frontmatter (group, cover, card,
+ * title, sidebar label) feeds the engine-generated home hub and scoped sidebar.
+ * Those generated/injected routes are not re-rendered on a content `change`
+ * under bind-mount polling, so a `group:` edit never shows up without a manual
+ * restart. We treat index.mdx edits as structural and restart; chapter edits
+ * (ch-*.mdx) keep flowing through HMR uninterrupted.
  */
 function watchStructure(): void {
   let timer: ReturnType<typeof setTimeout> | null = null;
   const onStructureChange = (path: string): void => {
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => restart(`New/removed file detected (${path})`), STRUCTURE_DEBOUNCE_MS);
+  };
+  // A landing-page edit is the one `change` we must act on (see above).
+  const isLandingPage = (path: string): boolean =>
+    /(^|[\\/])index\.mdx$/.test(path);
+  const onLandingEdit = (path: string): void => {
+    if (!isLandingPage(path)) return; // leave chapter edits to HMR
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => restart(`Landing page edited (${path})`), STRUCTURE_DEBOUNCE_MS);
   };
 
   chokidar
@@ -177,9 +191,10 @@ function watchStructure(): void {
     .on('unlink', onStructureChange)
     .on('addDir', onStructureChange)
     .on('unlinkDir', onStructureChange)
+    .on('change', onLandingEdit)
     .on('ready', () =>
       console.log(
-        `[dev-server] Watching ${STRUCTURE_WATCH_DIRS.join(', ')} for new/removed files` +
+        `[dev-server] Watching ${STRUCTURE_WATCH_DIRS.join(', ')} for new/removed files + index.mdx edits` +
         (usePolling ? ' (polling @ 1000ms).' : '.'),
       ),
     );
