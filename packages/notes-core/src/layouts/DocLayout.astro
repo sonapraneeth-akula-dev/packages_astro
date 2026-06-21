@@ -5,7 +5,7 @@ import DocsSidebar from '../components/DocsSidebar.astro';
 import TableOfContents from '@sonapraneeth/components/TableOfContents.astro';
 import ProgressBar from '@sonapraneeth/components/ProgressBar.astro';
 import Icon from '@sonapraneeth/components/Icon.astro';
-import { formatDateTime } from '../utils/format';
+import { formatDateTime, slugify } from '../utils/format';
 import type { DocsConfig } from '../config';
 import type { SidebarNode, DocLink, Breadcrumb } from '../utils/docs';
 // KaTeX stylesheet URL (emitted as a cached file, not inlined) for LaTeX math.
@@ -32,6 +32,10 @@ interface Props {
   notebookLabel?: string;
   /** Link back to the notebook hub (notebooks mode). */
   backLink?: DocLink;
+  /** Optional category, rendered as a chip linking to its taxonomy page. */
+  category?: string;
+  /** Optional tags, rendered as chips linking to their taxonomy pages. */
+  tags?: string[];
   /** Search-only keywords/aliases (indexed by Pagefind, hidden on the page). */
   keywords?: string[];
 }
@@ -54,6 +58,8 @@ const {
   needsKatex = false,
   notebookLabel,
   backLink,
+  category,
+  tags = [],
   keywords = [],
 } = Astro.props;
 
@@ -109,6 +115,16 @@ const showToc = tableOfContents && headings.length > 0;
             )}
             {readingTime && (publishedDate || lastUpdated) && <span class="dot" aria-hidden="true">·</span>}
             {readingTime && <span>{readingTime}</span>}
+          </div>
+        )}
+        {(category || tags.length > 0) && (
+          <div class="doc-taxonomy" data-pagefind-ignore>
+            {category && (
+              <a class="chip chip--accent" href={`/categories/${slugify(category)}`}>{category}</a>
+            )}
+            {tags.map((tag) => (
+              <a class="chip" href={`/tags/${slugify(tag)}`}>#{tag}</a>
+            ))}
           </div>
         )}
         <div class="doc-actions" data-pagefind-ignore>
@@ -226,6 +242,13 @@ const showToc = tableOfContents && headings.length > 0;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--accent-text);
+  }
+
+  .doc-taxonomy {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
 
   .doc-actions {

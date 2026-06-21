@@ -6,12 +6,21 @@ export type Post = CollectionEntry<'blog'>;
 /** Build-aware draft visibility: drafts only render outside production. */
 const includeDrafts = import.meta.env.DEV;
 
-/** All publishable posts, newest first. */
+/** All publishable posts, newest first (includes archived posts). */
 export async function getPublishedPosts(): Promise<Post[]> {
   const posts = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
   return posts.sort(
     (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
   );
+}
+
+/**
+ * Posts shown in the main home feed and RSS, newest first. Excludes archived
+ * posts (which stay reachable by direct URL and in tag/category listings).
+ */
+export async function getFeedPosts(): Promise<Post[]> {
+  const posts = await getPublishedPosts();
+  return posts.filter((post) => !post.data.archived);
 }
 
 /** Convert a label into a URL-safe slug. */

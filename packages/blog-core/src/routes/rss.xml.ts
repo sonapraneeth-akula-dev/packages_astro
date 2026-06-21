@@ -1,10 +1,10 @@
 import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
 import { blogConfig } from 'virtual:blog-core/config';
-import { getPublishedPosts } from '../utils/posts';
+import { getFeedPosts } from '../utils/posts';
 
 export async function GET(context: APIContext) {
-  const posts = await getPublishedPosts();
+  const posts = await getFeedPosts();
   return rss({
     title: blogConfig.title,
     description: blogConfig.description,

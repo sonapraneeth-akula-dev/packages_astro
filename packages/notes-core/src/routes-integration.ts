@@ -33,6 +33,10 @@ const ID = {
 const ROUTES = {
   home: '@sonapraneeth/notes-core/routes/index.astro',
   doc: '@sonapraneeth/notes-core/routes/[...slug].astro',
+  categories: '@sonapraneeth/notes-core/routes/categories/index.astro',
+  category: '@sonapraneeth/notes-core/routes/categories/[category].astro',
+  tags: '@sonapraneeth/notes-core/routes/tags/index.astro',
+  tag: '@sonapraneeth/notes-core/routes/tags/[tag].astro',
   search: '@sonapraneeth/notes-core/routes/search.astro',
   notFound: '@sonapraneeth/notes-core/routes/404.astro',
 } as const;
@@ -80,6 +84,10 @@ export function notesRoutes(options: NotesRoutesOptions): AstroIntegration {
 
         injectRoute({ pattern: '/', entrypoint: ROUTES.home, prerender: true });
         injectRoute({ pattern: '/[...slug]', entrypoint: ROUTES.doc, prerender: true });
+        injectRoute({ pattern: '/categories', entrypoint: ROUTES.categories, prerender: true });
+        injectRoute({ pattern: '/categories/[category]', entrypoint: ROUTES.category, prerender: true });
+        injectRoute({ pattern: '/tags', entrypoint: ROUTES.tags, prerender: true });
+        injectRoute({ pattern: '/tags/[tag]', entrypoint: ROUTES.tag, prerender: true });
         if (options.docsConfig.search) {
           injectRoute({ pattern: '/search', entrypoint: ROUTES.search, prerender: true });
         }

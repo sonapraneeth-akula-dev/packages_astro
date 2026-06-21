@@ -6,10 +6,10 @@ import PostCard from '../components/PostCard.astro';
 import PostRow from '../components/PostRow.astro';
 import Pagination from '@sonapraneeth/components/Pagination.astro';
 import { blogConfig } from 'virtual:blog-core/config';
-import { getPublishedPosts, readingTime, type Post } from '../utils/posts';
+import { getFeedPosts, readingTime, type Post } from '../utils/posts';
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const posts = await getPublishedPosts();
+  const posts = await getFeedPosts();
   return paginate(posts, { pageSize: blogConfig.pageSize });
 }) satisfies GetStaticPaths;
 

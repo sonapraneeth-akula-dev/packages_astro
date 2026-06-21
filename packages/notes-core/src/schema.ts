@@ -56,6 +56,14 @@ export function docFrontmatterSchema(image?: ImageHelper) {
     slug: z.string().optional(),
     /** Per-doc sidebar metadata. */
     sidebar: docSidebarMetaSchema.optional(),
+    /**
+     * Optional single category used to group notes on the `/categories`
+     * taxonomy pages. Notes without a category are simply omitted from the
+     * category listings.
+     */
+    category: z.string().optional(),
+    /** Optional tags used to group notes on the `/tags` taxonomy pages. */
+    tags: z.array(z.string()).default([]),
     /** Hide from listings / sidebar while drafting (only shown in dev). */
     draft: z.boolean().default(false),
     /**

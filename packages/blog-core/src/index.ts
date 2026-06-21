@@ -39,6 +39,7 @@ export type { BlogRoutesOptions } from './routes-integration';
 // Posts + taxonomy helpers
 export {
   getPublishedPosts,
+  getFeedPosts,
   slugify,
   getCategories,
   getTags,

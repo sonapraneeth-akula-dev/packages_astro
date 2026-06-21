@@ -1,0 +1,72 @@
+---
+/**
+ * Injected tags index route (`/tags`). A frequency-scaled tag cloud linking to
+ * each tag's listing page.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getLiveDocs, getTags } from '../../utils/taxonomy';
+import { docsConfig } from 'virtual:notes-core/config';
+
+const docs = await getLiveDocs();
+const tags = getTags(docs);
+
+// Scale chip size by relative frequency for a tag-cloud feel.
+const max = Math.max(1, ...tags.map((t) => t.count));
+function scale(count: number): number {
+  return 0.85 + (count / max) * 0.6; // rem font-size between ~0.85 and ~1.45
+}
+---
+
+<BaseLayout config={docsConfig} title="Tags" description="Browse notes by tag.">
+  <div class="container page-head">
+    <p class="eyebrow">Browse</p>
+    <h1>Tags</h1>
+    <p class="lede">{tags.length} {tags.length === 1 ? 'tag' : 'tags'} across the notes.</p>
+  </div>
+
+  <div class="container cloud">
+    {tags.map((tag) => (
+      <a class="cloud-tag" href={`/tags/${tag.slug}`} style={`font-size:${scale(tag.count)}rem`}>
+        {tag.name}
+        <span class="ct">{tag.count}</span>
+      </a>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding-bottom: 3rem;
+    align-items: center;
+  }
+  .cloud-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 600;
+    line-height: 1.2;
+    transition: all 0.15s ease;
+  }
+  .cloud-tag:hover {
+    color: var(--accent-text);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-1px);
+  }
+  .ct {
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    background: var(--bg-subtle);
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+  }
+</style>

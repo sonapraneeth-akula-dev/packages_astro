@@ -28,6 +28,12 @@ export function postFrontmatterSchema({ image }: { image: ImageFunction }) {
     /** Hide from listings while drafting. */
     draft: z.boolean().default(false),
     /**
+     * Archive the post: keep it reachable by direct URL and in tag/category
+     * listings, but drop it from the main home feed and the RSS feed. Useful for
+     * older posts you want to preserve without surfacing them up front.
+     */
+    archived: z.boolean().default(false),
+    /**
      * Force-load the KaTeX stylesheet for LaTeX math. Leave unset to rely on
      * auto-detection (the layout ships the CSS only when the body contains an
      * unescaped `$`); set `true` to load it regardless — useful when math is

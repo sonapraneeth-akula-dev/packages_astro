@@ -50,6 +50,8 @@ const needsKatex = entry.data.math || /(?<!\\)\$/.test(entry.body ?? '');
   needsKatex={needsKatex}
   notebookLabel={notebook?.label}
   backLink={backLink ?? undefined}
+  category={entry.data.category}
+  tags={entry.data.tags}
   keywords={entry.data.keywords}
 >
   <Content components={components} />

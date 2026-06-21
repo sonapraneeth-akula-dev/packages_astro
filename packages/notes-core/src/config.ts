@@ -56,6 +56,10 @@ const ICON_HOME =
   '<path d="M3 9.5 12 3l9 6.5"></path><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"></path><path d="M9 21v-6h6v6"></path>';
 const ICON_SEARCH =
   '<circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>';
+const ICON_CATEGORIES =
+  '<rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect>';
+const ICON_TAGS =
+  '<path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3H4a1 1 0 0 0-1 1v5.59A2 2 0 0 0 3.83 11l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83z"></path><circle cx="7" cy="7" r="1.2"></circle>';
 const ICON_BOOK =
   '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>';
 
@@ -70,6 +74,8 @@ export const defaultDocsConfig: DocsConfig = {
   timeZoneLabel: 'IST',
   nav: [
     { href: '/', label: 'Home', icon: ICON_HOME },
+    { href: '/categories', label: 'Categories', icon: ICON_CATEGORIES },
+    { href: '/tags', label: 'Tags', icon: ICON_TAGS },
     { href: '/search', label: 'Search', icon: ICON_SEARCH },
   ],
   socials: [

@@ -1,0 +1,48 @@
+---
+/**
+ * Injected categories index route (`/categories`). Lists every category that
+ * at least one note declares in its frontmatter, with note counts.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getLiveDocs, getCategories } from '../../utils/taxonomy';
+import { docsConfig } from 'virtual:notes-core/config';
+
+const docs = await getLiveDocs();
+const categories = getCategories(docs);
+---
+
+<BaseLayout config={docsConfig} title="Categories" description="Browse notes by category.">
+  <div class="container page-head">
+    <p class="eyebrow">Browse</p>
+    <h1>Categories</h1>
+    <p class="lede">{categories.length} {categories.length === 1 ? 'topic' : 'topics'} across the notes.</p>
+  </div>
+
+  <div class="container cat-grid">
+    {categories.map((cat) => (
+      <a class="card cat-card" href={`/categories/${cat.slug}`}>
+        <span class="cat-name">{cat.name}</span>
+        <span class="cat-count">{cat.count} {cat.count === 1 ? 'note' : 'notes'}</span>
+      </a>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1.25rem;
+    padding-bottom: 3rem;
+  }
+  .cat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.25rem;
+    color: var(--text);
+  }
+  .cat-card:hover { color: var(--text); }
+  .cat-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; }
+  .cat-count { color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-mono); }
+</style>

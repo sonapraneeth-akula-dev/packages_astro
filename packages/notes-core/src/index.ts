@@ -79,3 +79,13 @@ export {
   coverHue,
   formatDateTime,
 } from './utils/format';
+
+// Tags + categories taxonomy helpers
+export {
+  getLiveDocs,
+  getCategories,
+  getTags,
+  docsInCategory,
+  docsWithTag,
+} from './utils/taxonomy';
+export type { Taxonomy } from './utils/taxonomy';

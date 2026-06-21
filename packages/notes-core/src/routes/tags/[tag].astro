@@ -1,0 +1,62 @@
+---
+/**
+ * Injected per-tag route (`/tags/[tag]`). Lists the notes carrying this tag.
+ */
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getLiveDocs, getTags, docsWithTag } from '../../utils/taxonomy';
+import { entrySlug, entryLabel } from '../../utils/docs';
+import type { DocEntry } from '../../content';
+import { docsConfig } from 'virtual:notes-core/config';
+
+export const getStaticPaths = (async () => {
+  const docs = await getLiveDocs();
+  return getTags(docs).map((tag) => ({
+    params: { tag: tag.slug },
+    props: { name: tag.name, docs: docsWithTag(docs, tag.slug) },
+  }));
+}) satisfies GetStaticPaths;
+
+const { name, docs } = Astro.props as { name: string; docs: DocEntry[] };
+const sorted = [...docs].sort((a, b) => entryLabel(a).localeCompare(entryLabel(b)));
+---
+
+<BaseLayout config={docsConfig} title={`#${name} · Tag`} description={`Notes tagged ${name}.`}>
+  <div class="container page-head">
+    <p class="eyebrow"><a href="/tags">Tags</a> /</p>
+    <h1>#{name}</h1>
+    <p class="lede">{sorted.length} {sorted.length === 1 ? 'note' : 'notes'} tagged with this.</p>
+  </div>
+
+  <div class="container rows">
+    {sorted.map((doc) => (
+      <a class="card doc-row" href={entrySlug(doc)}>
+        <span class="doc-row-title">
+          {doc.data.cover && <span class="doc-row-cover" aria-hidden="true">{doc.data.cover} </span>}
+          {entryLabel(doc)}
+        </span>
+        {doc.data.description && <span class="doc-row-desc">{doc.data.description}</span>}
+      </a>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding-bottom: 3rem;
+  }
+  .doc-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 1rem 1.25rem;
+    color: var(--text);
+  }
+  .doc-row:hover { color: var(--text); }
+  .doc-row-title { font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; }
+  .doc-row-desc { color: var(--text-muted); font-size: 0.9rem; }
+  .page-head .eyebrow a { color: var(--accent-text); }
+</style>
