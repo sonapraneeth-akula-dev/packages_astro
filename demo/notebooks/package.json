@@ -1,6 +1,6 @@
 {
   "name": "@sonapraneeth/notebooks-demo",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "type": "module",
   "private": true,
   "description": "Showcase notes site demonstrating @sonapraneeth/notes-core notebooks mode — multiple self-contained sub-notes (C++, Go, C#) under one site.",

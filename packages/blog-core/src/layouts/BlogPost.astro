@@ -21,7 +21,7 @@ interface Props {
 }
 
 const { post, headings, readingTime, newerPost, olderPost } = Astro.props;
-const { title, description, pubDate, updatedDate, category, tags, cover, coverImage, coverAlt } =
+const { title, description, pubDate, updatedDate, category, tags, keywords, cover, coverImage, coverAlt } =
   post.data;
 
 // Math renders to HTML at build time, but KaTeX needs its stylesheet. Ship it
@@ -33,7 +33,20 @@ const needsKatex = post.data.math || /(?<!\\)\$/.test(post.body ?? '');
 <BaseLayout title={title} description={description} article>
   {needsKatex && <link rel="stylesheet" href={katexHref} />}
   <ProgressBar />
-  <article class="post container" data-pagefind-body>
+  <article
+    class="post container"
+    data-pagefind-body
+    data-pagefind-filter={`category:${category}`}
+  >
+    {/* Hidden per-tag filter facets. A Pagefind filter attribute holds a single
+        value, so each tag needs its own element. `data-pagefind-ignore` keeps
+        the values out of the indexed body text (and excerpts) while the filter
+        attribute still applies — feeding the "Tag" group in the search panel. */}
+    {tags.length > 0 && (
+      <div class="tag-facets" aria-hidden="true" data-pagefind-ignore>
+        {tags.map((t) => <span data-pagefind-filter={`tag:${t}`}>{t}</span>)}
+      </div>
+    )}
     <header class="post-head">
       <nav class="crumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
@@ -95,6 +108,9 @@ const needsKatex = post.data.math || /(?<!\\)\$/.test(post.body ?? '');
     <div class="post-grid">
       <div class="post-body">
         <slot />
+        {keywords.length > 0 && (
+          <span class="post-keywords" aria-hidden="true">{keywords.join(' ')}</span>
+        )}
       </div>
       <aside class="post-aside" data-pagefind-ignore>
         <TableOfContents headings={headings} />
@@ -150,6 +166,29 @@ const needsKatex = post.data.math || /(?<!\\)\$/.test(post.body ?? '');
      tables and images stretch to the full article column so large screens are
      used well on this code-heavy blog. */
   .post { padding-block: 2.5rem 4rem; }
+
+  /* Off-screen carrier for the per-tag Pagefind filter facets. Clipped rather
+     than `display:none` so it stays in the DOM for the static index. */
+  .tag-facets {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Search-only keywords: indexed by Pagefind but visually removed. */
+  .post-keywords {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 
   .crumbs {
     display: flex;

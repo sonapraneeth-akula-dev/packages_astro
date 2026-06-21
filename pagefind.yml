@@ -1,0 +1,13 @@
+# Pagefind indexing configuration (repo-root default).
+#
+# The root `build:demo:*` / `build:app:*` scripts run Pagefind from this
+# directory, so this file mirrors the per-package `pagefind.yml` files to keep
+# behaviour identical no matter which build command is used.
+#
+# By default Pagefind strips punctuation when indexing, so terms like `C#` and
+# `C++` collapse to the bare token `c` (and `#`/`+` searches match nothing).
+# Keeping `#` and `+` lets Pagefind also index the punctuated tokens, so a
+# search for `c#`/`c++` matches those terms specifically.
+#
+# See https://pagefind.app/docs/indexing/#indexing-special-characters
+include_characters: "+#"

@@ -27,6 +27,9 @@ const { name, posts } = Astro.props as { name: string; posts: Post[] };
     <p class="eyebrow"><a href="/tags">Tags</a> /</p>
     <h1 class="page-title"><TagIcon />{name}</h1>
     <p class="lede">{posts.length} {posts.length === 1 ? 'post' : 'posts'} tagged with this.</p>
+    <p class="scope-search">
+      <a href={`/search?tag=${encodeURIComponent(name)}`}>Search within #{name} →</a>
+    </p>
   </div>
 
   <div class="container rows">
@@ -50,4 +53,6 @@ const { name, posts } = Astro.props as { name: string; posts: Post[] };
     gap: 0.5rem;
   }
   .page-title :global(.icon-tag) { color: var(--accent-text); }
+  .scope-search { margin-top: 0.5rem; font-size: 0.9rem; }
+  .scope-search a { color: var(--accent-text); font-weight: 600; }
 </style>

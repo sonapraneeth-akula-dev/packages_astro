@@ -59,6 +59,12 @@ export function docFrontmatterSchema(image?: ImageHelper) {
     /** Hide from listings / sidebar while drafting (only shown in dev). */
     draft: z.boolean().default(false),
     /**
+     * Extra search-only keywords/aliases. Indexed by Pagefind but not shown on
+     * the page — useful for terms the tokenizer mangles (e.g. `csharp`/`dotnet`
+     * for a "C#" note, since `C#` indexes as the bare token `c`).
+     */
+    keywords: z.array(z.string()).default([]),
+    /**
      * Force-load the KaTeX stylesheet for LaTeX math. Leave unset to rely on
      * auto-detection (the layout ships the CSS only when the body contains an
      * unescaped `$`); set `true` to load it regardless — useful when math is

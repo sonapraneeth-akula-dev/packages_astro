@@ -32,6 +32,8 @@ interface Props {
   notebookLabel?: string;
   /** Link back to the notebook hub (notebooks mode). */
   backLink?: DocLink;
+  /** Search-only keywords/aliases (indexed by Pagefind, hidden on the page). */
+  keywords?: string[];
 }
 
 const {
@@ -52,6 +54,7 @@ const {
   needsKatex = false,
   notebookLabel,
   backLink,
+  keywords = [],
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
@@ -123,6 +126,9 @@ const showToc = tableOfContents && headings.length > 0;
       <div class="doc-grid">
         <div class:list={['doc-body', { 'has-toc': showToc }]}>
           <slot />
+          {keywords.length > 0 && (
+            <span class="doc-keywords" aria-hidden="true">{keywords.join(' ')}</span>
+          )}
         </div>
         {showToc && (
           <aside class="doc-aside" data-pagefind-ignore>
@@ -171,6 +177,17 @@ const showToc = tableOfContents && headings.length > 0;
     align-items: start;
   }
   .doc { min-width: 0; padding-block: 0; }
+
+  /* Search-only keywords: indexed by Pagefind but visually removed. */
+  .doc-keywords {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 
   .crumbs {
     display: flex;

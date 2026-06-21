@@ -1,0 +1,397 @@
+---
+/**
+ * Pagefind search widget (shared by the blog and notes engines).
+ *
+ * Renders the markup skeleton and hands configuration to the JS-API controller
+ * in {@link ./pagefind-search.ts}, which shows the available filters up front
+ * (so visitors can browse by scope before typing) and runs the search live.
+ *
+ * The Pagefind bundle is generated at build time into `bundlePath`; on the dev
+ * server it is absent, so the widget degrades to a build hint.
+ */
+interface FilterMeta {
+  /** Pretty group heading. Defaults to the title-cased key. */
+  label?: string;
+  /** Base path for the taxonomy page; when set, the chip label links to
+   *  `${hrefBase}${slugify(value)}`. Omit to make the whole chip a filter
+   *  toggle with no navigation. */
+  hrefBase?: string;
+  /** Built-in icon shown before the label. */
+  icon?: 'category' | 'tag' | 'notebook';
+}
+
+interface Props {
+  /** Where the Pagefind bundle lives. Defaults to `/pagefind/`. */
+  bundlePath?: string;
+  /** Results to show before a "Load more" button appears. Defaults to 8. */
+  pageSize?: number;
+  /** Per-filter-key presentation (label, taxonomy link, icon). */
+  filters?: Record<string, FilterMeta>;
+  /** Search input placeholder. */
+  placeholder?: string;
+}
+
+const {
+  bundlePath = '/pagefind/',
+  pageSize = 8,
+  filters = {},
+  placeholder = 'Search…',
+} = Astro.props;
+---
+
+<div
+  class="pf"
+  data-pf-bundle={bundlePath}
+  data-pf-page-size={pageSize}
+  data-pf-filters={JSON.stringify(filters)}
+>
+  <form class="pf-form" role="search" onsubmit="return false">
+    <div class="pf-inputwrap">
+      <svg
+        class="pf-icon"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+      <input
+        class="pf-input"
+        type="search"
+        placeholder={placeholder}
+        aria-label="Search this site"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
+      <button type="button" class="pf-clear" hidden aria-label="Clear search">×</button>
+    </div>
+  </form>
+
+  <div class="pf-filters" aria-label="Filters" hidden></div>
+  <p class="pf-scope" hidden></p>
+  <p class="pf-status" role="status" aria-live="polite"></p>
+  <div class="pf-results"></div>
+  <button type="button" class="pf-more" hidden>Load more</button>
+
+  <p class="pf-fallback" hidden>
+    The search index is generated at build time. To try it on the dev server,
+    run <code>bun run search:index</code> once to emit the index into
+    <code>public/pagefind/</code>, then reload this page. A full
+    <code>bun run build</code> also produces it for the preview.
+  </p>
+</div>
+
+<script>
+  import { initPagefindSearch } from './pagefind-search';
+
+  for (const el of document.querySelectorAll<HTMLElement>('.pf')) {
+    void initPagefindSearch(el);
+  }
+</script>
+
+<style is:global>
+  .pf {
+    padding-bottom: 3rem;
+  }
+
+  /* Search input ----------------------------------------------------------- */
+  .pf-form {
+    margin: 0 0 1.25rem;
+  }
+  .pf-inputwrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .pf-icon {
+    position: absolute;
+    inset-inline-start: 1rem;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+  .pf-input {
+    width: 100%;
+    padding: 0.95rem 3rem;
+    font: inherit;
+    font-size: 1.05rem;
+    color: var(--text);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .pf-input::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+  .pf-input:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+  /* Hide the native search clear control; we render our own. */
+  .pf-input::-webkit-search-cancel-button {
+    appearance: none;
+  }
+  .pf-clear {
+    position: absolute;
+    inset-inline-end: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+  .pf-clear:hover {
+    color: var(--text);
+    background: var(--bg-subtle);
+  }
+
+  /* Filter chips ----------------------------------------------------------- */
+  .pf-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+  .pf-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.6rem;
+  }
+  .pf-group-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-inline-end: 0.25rem;
+  }
+  .pf-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Split pill: a label segment (links to the taxonomy page when configured)
+     and a separated count segment that toggles the in-page filter. */
+  .pf-chip {
+    display: inline-flex;
+    align-items: stretch;
+    font-size: 0.85rem;
+    background: var(--accent-soft);
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+  .pf-chip:hover {
+    border-color: var(--accent);
+  }
+  .pf-chip.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .pf-chip.is-empty {
+    opacity: 0.4;
+  }
+
+  /* Whole-chip toggle variant (no taxonomy link): the button is the chip. */
+  .pf-chip--toggle {
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.85rem;
+  }
+
+  .pf-chip-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    color: var(--accent-text);
+    background: transparent;
+    border: none;
+    font: inherit;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  a.pf-chip-main {
+    cursor: pointer;
+  }
+  a.pf-chip-main:hover {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+  .pf-chip.is-active .pf-chip-main {
+    color: var(--accent-contrast, #fff);
+  }
+  .pf-chip-icon {
+    flex: none;
+    color: currentColor;
+    opacity: 0.85;
+  }
+  .pf-chip-label {
+    font-weight: 500;
+  }
+
+  .pf-chip-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.65rem;
+    min-width: 1.5rem;
+    justify-content: center;
+    border: none;
+    border-inline-start: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: var(--accent-text);
+    font: inherit;
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  button.pf-chip-count {
+    cursor: pointer;
+  }
+  button.pf-chip-count:hover {
+    background: color-mix(in srgb, var(--accent) 26%, transparent);
+  }
+  .pf-chip.is-active .pf-chip-count {
+    background: color-mix(in srgb, #000 18%, transparent);
+    border-inline-start-color: color-mix(in srgb, #000 18%, transparent);
+    color: var(--accent-contrast, #fff);
+  }
+
+  /* Scope banner ----------------------------------------------------------- */
+  .pf-scope {
+    margin: 0 0 1rem;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .pf-scope strong {
+    color: var(--text);
+  }
+  .pf-clear-filters {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--accent-text, var(--accent));
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .pf-clear-filters:hover {
+    text-decoration: underline;
+  }
+
+  /* Status + results ------------------------------------------------------- */
+  .pf-status {
+    margin: 0 0 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .pf-results {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .pf-result {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 1.1rem 1.3rem;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .pf-result:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.07);
+  }
+  .pf-result-title {
+    margin: 0 0 0.35rem;
+    font-size: 1.15rem;
+    line-height: 1.3;
+  }
+  .pf-result-title a {
+    color: var(--text);
+    text-decoration: none;
+  }
+  .pf-result-title a:hover {
+    color: var(--accent-text, var(--accent));
+  }
+  .pf-excerpt {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .pf-excerpt mark {
+    color: var(--text);
+    background: color-mix(in srgb, var(--accent) 28%, transparent);
+    border-radius: 3px;
+    padding: 0 0.15em;
+  }
+  .pf-subresults {
+    margin: 0.7rem 0 0;
+    padding: 0.6rem 0 0;
+    border-top: 1px solid var(--border);
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .pf-subresults a {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    text-decoration: none;
+  }
+  .pf-subresults a:hover {
+    color: var(--accent-text, var(--accent));
+  }
+
+  /* Load more + fallback --------------------------------------------------- */
+  .pf-more {
+    margin-top: 1.25rem;
+    padding: 0.6rem 1.2rem;
+    font: inherit;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  .pf-more:hover {
+    border-color: var(--border-hover);
+  }
+  .pf-fallback {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    background: var(--surface);
+  }
+</style>

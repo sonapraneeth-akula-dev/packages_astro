@@ -1,0 +1,10 @@
+# Pagefind indexing configuration.
+#
+# By default Pagefind strips punctuation when indexing, so language names like
+# `C#` and `C++` collapse to the bare token `c` (and `#`/`+` searches match
+# nothing). Keeping `#` and `+` lets Pagefind also index the punctuated tokens
+# `c#` and `c++`, so a search for `c#` matches the C# notebook specifically
+# rather than every `c*` page.
+#
+# See https://pagefind.app/docs/indexing/#indexing-special-characters
+include_characters: "+#"

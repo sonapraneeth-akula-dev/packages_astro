@@ -1,6 +1,24 @@
 ---
+/**
+ * Injected search route (`/search`). The Pagefind index is generated at build
+ * time into `/pagefind/` and is absent on the dev server, so the widget
+ * degrades gracefully with a build hint.
+ *
+ * The widget reads its filters from the live Pagefind index, so the category
+ * and tag facets are shown up front. `/search?category=…` and `/search?tag=…`
+ * deep links pre-select that scope so a category/tag page can offer a search
+ * box scoped to itself.
+ */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PagefindSearch from '@sonapraneeth/components/PagefindSearch.astro';
 import { blogConfig } from 'virtual:blog-core/config';
+
+// Chip presentation: the category/tag label links to its taxonomy page, while
+// the count segment toggles the in-page filter.
+const searchFilters = {
+  category: { label: 'Category', hrefBase: '/categories/', icon: 'category' as const },
+  tag: { label: 'Tag', hrefBase: '/tags/', icon: 'tag' as const },
+};
 ---
 
 <BaseLayout
@@ -16,138 +34,8 @@ import { blogConfig } from 'virtual:blog-core/config';
     </p>
   </div>
 
-  <div class="container search-wrap">
-    <div id="search" data-pagefind-ui></div>
-    <p id="search-fallback" class="search-fallback" hidden>
-      The search index is generated at build time. To try it on the dev server,
-      run <code>bun run search:index</code> once to emit the index into
-      <code>public/pagefind/</code>, then reload this page. A full
-      <code>bun run build</code> also produces it for the preview.
-    </p>
+  <div class="container">
+    <PagefindSearch placeholder={`Search ${blogConfig.title}…`} filters={searchFilters} />
   </div>
 </BaseLayout>
 
-<script>
-  // Pagefind assets are emitted into /pagefind/ during the build step
-  // (`pagefind --site dist`) and are absent on the dev server. The UI bundle is
-  // a classic script exposing a global `PagefindUI`, so we inject it as a
-  // <script> tag and degrade gracefully with a hint if it is missing.
-  function initSearch() {
-    const fallback = document.getElementById('search-fallback');
-    const showFallback = () => {
-      if (fallback) fallback.hidden = false;
-    };
-
-    const css = document.createElement('link');
-    css.rel = 'stylesheet';
-    css.href = '/pagefind/pagefind-ui.css';
-    document.head.appendChild(css);
-
-    const script = document.createElement('script');
-    script.src = '/pagefind/pagefind-ui.js';
-    script.onload = () => {
-      const PagefindUI = (window as unknown as {
-        PagefindUI?: new (opts: unknown) => void;
-      }).PagefindUI;
-      if (!PagefindUI) {
-        showFallback();
-        return;
-      }
-      new PagefindUI({
-        element: '#search',
-        showSubResults: true,
-        showImages: false,
-        pageSize: 8,
-        resetStyles: false,
-      });
-    };
-    script.onerror = showFallback;
-    document.body.appendChild(script);
-  }
-  initSearch();
-</script>
-
-<style is:global>
-  /* Map Pagefind UI tokens onto the site's design tokens (both themes). */
-  #search {
-    --pagefind-ui-primary: var(--accent);
-    --pagefind-ui-text: var(--text);
-    --pagefind-ui-background: var(--surface);
-    --pagefind-ui-border: var(--border);
-    --pagefind-ui-tag: var(--bg-subtle);
-    --pagefind-ui-border-width: 1px;
-    --pagefind-ui-border-radius: var(--radius);
-    --pagefind-ui-font: var(--font-sans);
-  }
-
-  /* Make the typed query and placeholder legible in both themes. */
-  #search .pagefind-ui__search-input {
-    color: var(--text);
-    background: var(--bg-subtle);
-    border-color: var(--border);
-  }
-  #search .pagefind-ui__search-input::placeholder {
-    color: var(--text-muted);
-    opacity: 1;
-  }
-
-  /* Replace the bulky "Clear" text button with a bare × glyph (no border/ring).
-     Pagefind's .pagefind-ui__form is the offset parent and wraps the results
-     drawer too, so anchor to the input row (64px tall, button top:3px) the way
-     Pagefind does, then optically centre the × inside it. */
-  #search .pagefind-ui__search-clear {
-    top: calc(3px * var(--pagefind-ui-scale));
-    inset-inline-end: calc(8px * var(--pagefind-ui-scale));
-    height: calc(58px * var(--pagefind-ui-scale));
-    width: calc(58px * var(--pagefind-ui-scale));
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 0; /* hides the literal "Clear" label */
-    cursor: pointer;
-    transition: color 0.15s ease;
-  }
-  #search .pagefind-ui__search-clear::before {
-    content: "\00d7"; /* × */
-    font-size: 1.6rem;
-    line-height: 1;
-    /* The × glyph sits slightly above its line box; nudge it to centre. */
-    transform: translateY(-0.04em);
-  }
-  #search .pagefind-ui__search-clear:hover {
-    color: var(--text);
-  }
-
-  /* Wrap each result in a card so it gains the site's surface + hover lift. */
-  #search .pagefind-ui__result {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    padding: 1.1rem 1.3rem;
-    margin-bottom: 0.85rem;
-    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  #search .pagefind-ui__result:hover {
-    border-color: var(--border-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.07);
-  }
-</style>
-
-<style>
-  /* Fill the full --container like article pages, so results use wide screens
-     well instead of sitting in a narrow centred column. */
-  .search-wrap { padding-bottom: 3rem; }
-  .search-fallback {
-    margin-top: 1rem;
-    padding: 1rem 1.25rem;
-    border: 1px dashed var(--border);
-    border-radius: var(--radius);
-    color: var(--text-muted);
-    background: var(--surface);
-  }
-</style>

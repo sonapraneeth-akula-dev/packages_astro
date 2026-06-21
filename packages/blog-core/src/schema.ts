@@ -19,6 +19,12 @@ export function postFrontmatterSchema({ image }: { image: ImageFunction }) {
     category: z.string(),
     /** Each post can carry multiple tags. */
     tags: z.array(z.string()).default([]),
+    /**
+     * Extra search-only keywords/aliases. Indexed by Pagefind but not shown on
+     * the page — useful for terms the tokenizer mangles (e.g. `csharp`/`dotnet`
+     * for a "C#" post, since `C#` indexes as the bare token `c`).
+     */
+    keywords: z.array(z.string()).default([]),
     /** Hide from listings while drafting. */
     draft: z.boolean().default(false),
     /**
