@@ -8,7 +8,7 @@ const includeDrafts = import.meta.env.DEV;
 
 /** All publishable posts, newest first (includes archived posts). */
 export async function getPublishedPosts(): Promise<Post[]> {
-  const posts = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+  const posts: Post[] = await getCollection('blog', ({ data }: Post) => includeDrafts || !data.draft);
   return posts.sort(
     (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
   );
@@ -70,7 +70,7 @@ export function postsInCategory(posts: Post[], categorySlug: string): Post[] {
 
 /** Posts carrying a given tag (matched by slug). */
 export function postsWithTag(posts: Post[], tagSlug: string): Post[] {
-  return posts.filter((p) => p.data.tags.some((t) => slugify(t) === tagSlug));
+  return posts.filter((p) => p.data.tags.some((t: string) => slugify(t) === tagSlug));
 }
 
 /** Reading-time estimate (~200 wpm) from a post body. */

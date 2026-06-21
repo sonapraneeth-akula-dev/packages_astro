@@ -7,7 +7,7 @@ const includeDrafts = import.meta.env.DEV;
 
 /** All live notes (drafts included only outside production). */
 export async function getLiveDocs(): Promise<DocEntry[]> {
-  return getCollection('docs', ({ data }) => includeDrafts || !data.draft);
+  return getCollection('docs', ({ data }: DocEntry) => includeDrafts || !data.draft);
 }
 
 /** A taxonomy term (category or tag) with its post count. */
@@ -50,5 +50,5 @@ export function docsInCategory(docs: DocEntry[], categorySlug: string): DocEntry
 
 /** Notes carrying a tag (matched by slug). */
 export function docsWithTag(docs: DocEntry[], tagSlug: string): DocEntry[] {
-  return docs.filter((d) => d.data.tags.some((t) => slugify(t) === tagSlug));
+  return docs.filter((d) => d.data.tags.some((t: string) => slugify(t) === tagSlug));
 }
