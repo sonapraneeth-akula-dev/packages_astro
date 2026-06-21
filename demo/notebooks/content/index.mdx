@@ -21,3 +21,13 @@ to show how a single site can host many sub-notes, each a project in itself.
   notebook, and a **← All notebooks** link brings you back here. **Search** spans
   every notebook, and each notebook can also offer search scoped to itself.
 </Callout>
+
+## Multi-script content
+
+This site declares a `scriptFonts` entry (Noto Sans Devanagari), so individual
+spans can opt into a non-Latin face while the rest of the page keeps the body
+font. Tag a span with a `lang` attribute and the generated `.font-devanagari`
+class — only this site ships the extra font:
+
+> <span lang="sa" class="font-devanagari">अथ योगानुशासनम् ॥१॥</span> —
+> *Atha Yogānuśāsanam* (ā ī ū ṛ ṅ ś ṣ ḥ render in-font via the `latin-ext` subset).

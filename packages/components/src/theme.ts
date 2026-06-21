@@ -47,6 +47,12 @@ export interface ThemeConfig {
    * selected option). Enable to evaluate which combination fits best.
    */
   switcher?: boolean;
+  /**
+   * Extra non-Latin fonts to self-host for this site only (e.g. Devanagari).
+   * Each registers a `.font-<id>` utility class for tagging foreign-script
+   * spans. Empty by default — nothing extra ships unless a site opts in.
+   */
+  scriptFonts?: ScriptFontConfig[];
 }
 
 export interface ResolvedTheme {
@@ -54,6 +60,7 @@ export interface ResolvedTheme {
   fonts: FontComboName;
   radius: RadiusName;
   switcher: boolean;
+  scriptFonts: ScriptFontConfig[];
 }
 
 /** Preserves the engines' original look when a site sets no `theme`. */
@@ -62,7 +69,54 @@ export const DEFAULT_THEME: ResolvedTheme = {
   fonts: 'jakarta',
   radius: 'default',
   switcher: false,
+  scriptFonts: [],
 };
+
+/**
+ * An extra, non-Latin font self-hosted only for the sites that declare it (e.g.
+ * Devanagari, Tamil). Each entry registers one Google Fonts family under
+ * `--font-script-<id>` and emits a `.font-<id>` utility class. Authors then tag
+ * a foreign-script span in Markdown/MDX with that class plus a `lang` attribute:
+ *
+ * ```html
+ * <span lang="sa" class="font-devanagari">अथ योगानुशासनम्</span>
+ * ```
+ *
+ * Unlike the body-font combo, these carry their own `subsets` so only the
+ * needed glyph ranges download, and they are never preloaded (content fonts
+ * shouldn't block the first paint).
+ */
+export interface ScriptFontConfig {
+  /** Identifier used in markup as `.font-<id>` (lower-kebab), e.g. `devanagari`. */
+  id: string;
+  /** Google Fonts family name, e.g. `Noto Sans Devanagari`. */
+  name: string;
+  /** Variable-axis range or discrete weights (non-empty), e.g. `['400 700']`. */
+  weights: [string, ...string[]];
+  /** Google Fonts subsets to download (non-empty), e.g. `['devanagari']`. */
+  subsets: [string, ...string[]];
+  /**
+   * Font-family fallback applied before the web font loads (and if it fails).
+   * Default `sans-serif`. Prefer naming the OS family for the script, e.g.
+   * `"'Nirmala UI', 'Noto Sans Devanagari', sans-serif"`.
+   */
+  fallback?: string;
+  /** Preload above the fold. Default `false` (content fonts defer). */
+  preload?: boolean;
+  /**
+   * Optical size multiplier emitted as `font-size: <scale>em` on the utility
+   * class. Many non-Latin scripts (Devanagari, Tamil, …) have a smaller
+   * apparent height than Latin at the same point size, so they read too small
+   * inline. A value like `1.15` upscales the tagged span to match. Default `1`
+   * (no scaling).
+   */
+  scale?: number;
+}
+
+/** Custom property a script font binds its self-hosted family to. */
+function scriptFontVar(id: string): string {
+  return `--font-script-${id}`;
+}
 
 /** The six accent custom properties each palette defines for one colour scheme. */
 interface AccentTokens {
@@ -232,8 +286,8 @@ export interface ThemeFontEntry {
   cssVariable: string;
   /** Variable-axis range or discrete weights (non-empty). */
   weights: [string, ...string[]];
-  styles: ['normal'];
-  subsets: ['latin'];
+  styles: [string, ...string[]];
+  subsets: [string, ...string[]];
 }
 
 /** A `<Font>` slot the layout renders for an active, registered family. */
@@ -244,7 +298,20 @@ export interface ThemeFontVar {
 }
 
 function fontEntry(name: string, cssVariable: string, weights: [string, ...string[]]): ThemeFontEntry {
-  return { name, cssVariable, weights, styles: ['normal'], subsets: ['latin'] };
+  // `latin-ext` covers IAST/transliteration diacritics (ā ī ū ś ṣ ṅ ḥ ṛ …) that
+  // the base `latin` subset omits, so romanized text renders in-font.
+  return { name, cssVariable, weights, styles: ['normal'], subsets: ['latin', 'latin-ext'] };
+}
+
+/** A self-hosted family for a declared script font, bound to `--font-script-<id>`. */
+function scriptFontEntry(sf: ScriptFontConfig): ThemeFontEntry {
+  return {
+    name: sf.name,
+    cssVariable: scriptFontVar(sf.id),
+    weights: sf.weights,
+    styles: ['normal'],
+    subsets: sf.subsets,
+  };
 }
 
 /** Body + heading roles preload (above the fold); mono defers. */
@@ -320,18 +387,23 @@ function allFamilyEntries(): ThemeFontEntry[] {
  *     {@link renderThemeStyle}), enabling runtime font switching.
  */
 export function themeFontEntries(theme: ResolvedTheme): ThemeFontEntry[] {
-  if (theme.switcher) return allFamilyEntries();
-  const combo = FONT_COMBOS[theme.fonts];
   const entries: ThemeFontEntry[] = [];
-  const seen = new Set<string>();
-  for (const role of FONT_ROLES) {
-    const fam = combo[role];
-    if (!fam) continue;
-    const cssVariable = ROLE_VAR[role];
-    if (seen.has(cssVariable)) continue;
-    seen.add(cssVariable);
-    entries.push(fontEntry(fam.name, cssVariable, fam.weights));
+  if (theme.switcher) {
+    entries.push(...allFamilyEntries());
+  } else {
+    const combo = FONT_COMBOS[theme.fonts];
+    const seen = new Set<string>();
+    for (const role of FONT_ROLES) {
+      const fam = combo[role];
+      if (!fam) continue;
+      const cssVariable = ROLE_VAR[role];
+      if (seen.has(cssVariable)) continue;
+      seen.add(cssVariable);
+      entries.push(fontEntry(fam.name, cssVariable, fam.weights));
+    }
   }
+  // Site-declared script fonts self-host alongside the combo (any mode).
+  for (const sf of theme.scriptFonts) entries.push(scriptFontEntry(sf));
   return entries;
 }
 
@@ -341,6 +413,7 @@ export function themeFontEntries(theme: ResolvedTheme): ThemeFontEntry[] {
  * heading families are preloaded to keep the initial paint fast.
  */
 export function themeFontVars(theme: ResolvedTheme): ThemeFontVar[] {
+  const vars: ThemeFontVar[] = [];
   if (theme.switcher) {
     const combo = FONT_COMBOS[theme.fonts];
     const preload = new Set<string>();
@@ -348,21 +421,27 @@ export function themeFontVars(theme: ResolvedTheme): ThemeFontVar[] {
       const fam = combo[role];
       if (fam && PRELOAD_ROLES.has(role)) preload.add(`--ff-${familySlug(fam.name)}`);
     }
-    return allFamilyEntries().map((e) => ({
-      cssVariable: e.cssVariable,
-      preload: preload.has(e.cssVariable),
-    }));
+    vars.push(
+      ...allFamilyEntries().map((e) => ({
+        cssVariable: e.cssVariable,
+        preload: preload.has(e.cssVariable),
+      })),
+    );
+  } else {
+    const combo = FONT_COMBOS[theme.fonts];
+    const seen = new Set<string>();
+    for (const role of FONT_ROLES) {
+      const fam = combo[role];
+      if (!fam) continue;
+      const cssVariable = ROLE_VAR[role];
+      if (seen.has(cssVariable)) continue;
+      seen.add(cssVariable);
+      vars.push({ cssVariable, preload: PRELOAD_ROLES.has(role) });
+    }
   }
-  const combo = FONT_COMBOS[theme.fonts];
-  const vars: ThemeFontVar[] = [];
-  const seen = new Set<string>();
-  for (const role of FONT_ROLES) {
-    const fam = combo[role];
-    if (!fam) continue;
-    const cssVariable = ROLE_VAR[role];
-    if (seen.has(cssVariable)) continue;
-    seen.add(cssVariable);
-    vars.push({ cssVariable, preload: PRELOAD_ROLES.has(role) });
+  // Script fonts render a (deferred) <Font> slot so their @font-face ships.
+  for (const sf of theme.scriptFonts) {
+    vars.push({ cssVariable: scriptFontVar(sf.id), preload: sf.preload ?? false });
   }
   return vars;
 }
@@ -410,6 +489,7 @@ export function renderThemeStyle(theme: ResolvedTheme): string {
       `@media (prefers-color-scheme: dark) {\n  :root:not([data-theme="light"]) {\n${declarations(palette.dark, '    ')}\n  }\n}`,
       `html[data-theme="light"] {\n${declarations(palette.light)}\n}`,
       `html[data-theme="dark"] {\n${declarations(palette.dark)}\n}`,
+      ...scriptFontClasses(theme.scriptFonts),
     ].join('\n');
   }
 
@@ -440,7 +520,24 @@ export function renderThemeStyle(theme: ResolvedTheme): string {
     blocks.push(`html[data-font="${value}"] {\n${declarations(fontMap(value))}\n}`);
   }
 
+  blocks.push(...scriptFontClasses(theme.scriptFonts));
+
   return blocks.join('\n');
+}
+
+/**
+ * A `.font-<id>` utility class per declared script font, binding font-family to
+ * the self-hosted family with the configured fallback. Authors apply it (plus a
+ * `lang` attribute) to foreign-script spans in their content. An optional
+ * `scale` upscales the span (`font-size: <scale>em`) so scripts with a smaller
+ * apparent height than Latin don't read too small inline.
+ */
+function scriptFontClasses(scriptFonts: ScriptFontConfig[]): string[] {
+  return scriptFonts.map((sf) => {
+    const decls = [`  font-family: var(${scriptFontVar(sf.id)}), ${sf.fallback ?? 'sans-serif'};`];
+    if (sf.scale && sf.scale !== 1) decls.push(`  font-size: ${sf.scale}em;`);
+    return `.font-${sf.id} {\n${decls.join('\n')}\n}`;
+  });
 }
 
 /**

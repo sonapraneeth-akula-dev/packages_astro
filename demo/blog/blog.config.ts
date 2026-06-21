@@ -23,7 +23,27 @@ export const blogConfig = defineBlogConfig({
   // Showcase the theme system: violet accent, the Inter "modern" font combo
   // and large corner radius. `switcher` ships every preset and renders the live
   // theme switcher so you can preview palette/font/radius combinations.
-  theme: { palette: 'violet', fonts: 'modern', radius: 'large', switcher: true },
+  //
+  // `scriptFonts` self-hosts Noto Serif Devanagari for this site only and emits
+  // a `.font-devanagari` class. Tag a span with it plus `lang`, e.g.
+  // `<span lang="sa" class="font-devanagari">अथ योगानुशासनम्</span>`.
+  theme: {
+    palette: 'violet',
+    fonts: 'modern',
+    radius: 'large',
+    switcher: true,
+    scriptFonts: [
+      {
+        id: 'devanagari',
+        name: 'Noto Serif Devanagari',
+        weights: ['400 700'],
+        subsets: ['devanagari'],
+        fallback: "'Nirmala UI', 'Noto Serif Devanagari', serif",
+        // Devanagari reads small next to Latin at the same point size; upscale.
+        scale: 1.4,
+      },
+    ],
+  },
   nav: [
     { href: '/', label: 'Home', icon: ICON_HOME },
     { href: '/categories', label: 'Categories', icon: ICON_CATEGORIES },

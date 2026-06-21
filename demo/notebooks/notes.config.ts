@@ -32,5 +32,25 @@ export const docsConfig = defineDocsConfig({
   // Showcase the theme system: indigo accent, the Poppins "geometric" font
   // combo and fully-rounded (pill) corners. `switcher` renders the live theme
   // switcher so you can preview palette/font/radius combinations.
-  theme: { palette: 'indigo', fonts: 'geometric', radius: 'full', switcher: true },
+  //
+  // `scriptFonts` self-hosts Noto Sans Devanagari for this site only and emits a
+  // `.font-devanagari` class. Tag a span with it plus `lang`, e.g.
+  // `<span lang="sa" class="font-devanagari">अथ योगानुशासनम्</span>`.
+  theme: {
+    palette: 'indigo',
+    fonts: 'geometric',
+    radius: 'full',
+    switcher: true,
+    scriptFonts: [
+      {
+        id: 'devanagari',
+        name: 'Noto Sans Devanagari',
+        weights: ['400 700'],
+        subsets: ['devanagari'],
+        fallback: "'Nirmala UI', 'Noto Sans Devanagari', sans-serif",
+        // Devanagari reads small next to Latin at the same point size; upscale.
+        scale: 1.4,
+      },
+    ],
+  },
 });

@@ -32,3 +32,18 @@ Good reading typography is invisible. The reader simply keeps going.
 - Headings on a distinct display face for rhythm.
 
 Contrast and spacing carry far more weight than any decorative flourish.
+
+## Beyond Latin: tagging foreign scripts
+
+The body font is self-hosted with the `latin` and `latin-ext` subsets, so
+romanized transliteration renders in-font — for example *Atha Yogānuśāsanam*
+(ā ī ū ṛ ṅ ś ṣ ḥ). For non-Latin scripts, this site declares a `scriptFonts`
+entry (Noto Serif Devanagari) and tags individual spans with a `lang` attribute
+and the generated `.font-devanagari` class:
+
+> <span lang="sa" class="font-devanagari">अथ योगानुशासनम् ॥१॥</span>
+>
+> **1. Atha Yogānuśāsanam.** — *now, the exposition of Yoga.*
+
+Only the page that needs it ships the extra font, and only the tagged span
+switches families. Everything else keeps the body face.
