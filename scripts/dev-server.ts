@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process';
+import { connect } from 'node:net';
 import chokidar from 'chokidar';
 
 /**
@@ -38,10 +39,16 @@ function resolvePort(): number {
 }
 
 const PORT = resolvePort();
-const PROBE_URL = `http://127.0.0.1:${PORT}/`;
 const PROBE_INTERVAL_MS = 5_000;
-const STARTUP_GRACE_MS = 30_000; // first boot + Vite dependency optimisation
-const MAX_FAILED_PROBES = 3; // ~15s unresponsive ⇒ treat as hung
+// First boot can be slow (Astro type-gen + Vite dependency optimisation under
+// Docker bind-mount polling regularly takes 35–40s). The grace period must sit
+// comfortably above that worst case, otherwise probing races a still-booting
+// server: it logs spurious "Health probe failed" warnings and, once boots
+// exceed grace + MAX_FAILED_PROBES×interval, kills a server that was merely
+// booting — an endless restart loop that leaves Caddy returning 502.
+const STARTUP_GRACE_MS = 60_000;
+const MAX_FAILED_PROBES = 3; // ~15s unbound ⇒ treat as hung
+const PROBE_TIMEOUT_MS = 4_000;
 const RESTART_BACKOFF_MS = 1_000;
 
 // Source dirs whose file SET (not contents) Astro fails to re-scan under
@@ -101,15 +108,39 @@ function restart(reason: string): void {
 async function probe(): Promise<void> {
   if (!child) return;
   if (Date.now() - startedAt < STARTUP_GRACE_MS) return; // still booting
-  try {
-    await fetch(PROBE_URL, { signal: AbortSignal.timeout(4_000) });
-    failedProbes = 0; // any HTTP response means the port is bound and serving
-  } catch {
-    failedProbes += 1;
-    console.warn(`[dev-server] Health probe failed (${failedProbes}/${MAX_FAILED_PROBES}).`);
-    if (failedProbes >= MAX_FAILED_PROBES) {
-      restart('Dev server is unresponsive');
-    }
+
+  // Probe with a raw TCP connection, not an HTTP request. The only failure this
+  // watchdog exists to catch is Astro's in-process restart hanging and never
+  // rebinding the port (container "up" but Caddy gets 502). On localhost an
+  // unbound port refuses the connection instantly, so that hang is detected
+  // reliably. Crucially, a *bound but busy* server — e.g. while the concurrent
+  // `search:index` (astro build + pagefind) saturates the CPU for ~40s — still
+  // accepts the TCP connection immediately, so it is never mistaken for a hang.
+  // An HTTP fetch with a short timeout would instead time out under that load
+  // and kill a perfectly healthy server, which only adds more load and loops.
+  const ok = await new Promise<boolean>((resolve) => {
+    const socket = connect({ host: '127.0.0.1', port: PORT });
+    let settled = false;
+    const finish = (alive: boolean): void => {
+      if (settled) return;
+      settled = true;
+      socket.destroy();
+      resolve(alive);
+    };
+    socket.setTimeout(PROBE_TIMEOUT_MS);
+    socket.once('connect', () => finish(true));
+    socket.once('timeout', () => finish(false));
+    socket.once('error', () => finish(false));
+  });
+
+  if (ok) {
+    failedProbes = 0; // port is bound and accepting connections
+    return;
+  }
+  failedProbes += 1;
+  console.warn(`[dev-server] Health probe failed (${failedProbes}/${MAX_FAILED_PROBES}).`);
+  if (failedProbes >= MAX_FAILED_PROBES) {
+    restart('Dev server is not listening on its port');
   }
 }
 
