@@ -33,7 +33,7 @@ interface SubResult {
 
 interface ResultData {
   url: string;
-  meta: { title?: string; [key: string]: string | undefined };
+  meta: { title?: string;[key: string]: string | undefined };
   excerpt: string;
   sub_results?: SubResult[];
 }
@@ -185,6 +185,8 @@ export async function initPagefindSearch(root: HTMLElement): Promise<void> {
   const active = new Map<string, Set<string>>();
   let results: Result[] = [];
   let shown = 0;
+  /** Normalized query words, used to tighten excerpt highlights (see runSearch). */
+  let queryTerms: string[] = [];
 
   const groups = await pagefind.filters();
   renderFilters(groups);
@@ -355,8 +357,10 @@ export async function initPagefindSearch(root: HTMLElement): Promise<void> {
     const excerpt = document.createElement('p');
     excerpt.className = 'pf-excerpt';
     // Pagefind HTML-entity-encodes excerpts before adding its <mark> tags, so
-    // this is safe to assign as innerHTML (see Pagefind API docs).
-    excerpt.innerHTML = d.excerpt;
+    // this is safe to assign as innerHTML (see Pagefind API docs). We first
+    // tighten the marks so only the matched word stays highlighted, not the
+    // whole whitespace token (e.g. `Note(string` → `Note(` + marked `string`).
+    excerpt.innerHTML = tightenExcerpt(d.excerpt, queryTerms);
     card.appendChild(excerpt);
 
     const subs = (d.sub_results ?? []).filter((s) => s.url !== d.url).slice(0, 3);
@@ -465,6 +469,15 @@ export async function initPagefindSearch(root: HTMLElement): Promise<void> {
     const hasFilters = Object.keys(filters).length > 0;
     clearBtn.hidden = term.length === 0;
 
+    // Split the query into normalized words so excerpt highlights can be
+    // tightened to the matched word rather than the whole whitespace token.
+    queryTerms = term
+      ? term
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter(Boolean)
+        .map(normalizeWord)
+      : [];
+
     if (!term && !hasFilters) {
       results = [];
       shown = 0;
@@ -549,4 +562,56 @@ function parseJsonArray<T>(raw: string | undefined): T[] {
   } catch {
     return [];
   }
+}
+
+/** Lowercase + strip diacritics, mirroring Pagefind's normalization for
+ *  prefix comparison (e.g. `Café` → `cafe`). */
+function normalizeWord(word: string): string {
+  return word
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Re-tighten Pagefind's excerpt highlights.
+ *
+ * Pagefind matches at token granularity (splitting on punctuation) but
+ * highlights at whitespace-word granularity, so a glued word like `Note(string`
+ * or `std::string{"notes"}` gets fully wrapped in a single <mark> even though
+ * only `string` matched. This walks each <mark>, splits it back into
+ * word/punctuation runs, and keeps the <mark> only around word runs that match
+ * a query term (by the same bidirectional prefix rule Pagefind uses). Glued
+ * punctuation and unrelated sub-words become plain text.
+ *
+ * If a mark contains no word that matches (unexpected), Pagefind's original
+ * mark is left untouched so a highlight is never silently dropped.
+ */
+function tightenExcerpt(html: string, terms: string[]): string {
+  if (terms.length === 0) return html;
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html;
+  for (const mark of [...tpl.content.querySelectorAll('mark')]) {
+    const text = mark.textContent ?? '';
+    // Split keeping delimiters: word runs (letters/numbers) vs everything else.
+    const parts = text.split(/([^\p{L}\p{N}]+)/u).filter(Boolean);
+    const frag = document.createDocumentFragment();
+    let anyMatched = false;
+    for (const part of parts) {
+      const isWord = /[\p{L}\p{N}]/u.test(part);
+      const norm = isWord ? normalizeWord(part) : '';
+      const matches =
+        isWord && terms.some((t) => norm.startsWith(t) || t.startsWith(norm));
+      if (matches) {
+        const m = document.createElement('mark');
+        m.textContent = part;
+        frag.appendChild(m);
+        anyMatched = true;
+      } else {
+        frag.appendChild(document.createTextNode(part));
+      }
+    }
+    if (anyMatched) mark.replaceWith(frag);
+  }
+  return tpl.innerHTML;
 }

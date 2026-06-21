@@ -1,6 +1,6 @@
 {
   "name": "@sonapraneeth/components",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "type": "module",
   "description": "Shared prop/config-driven Astro UI components used by the notes and blog engines.",
   "exports": {
