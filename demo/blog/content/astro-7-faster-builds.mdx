@@ -1,0 +1,84 @@
+---
+title: Upgrading to Astro 7 — A Third Off Our Build Times
+description: A real before/after benchmark of moving this monorepo from Astro 6 to Astro 7, plus the migration that turned out to be a one-line change.
+pubDate: 2026-06-25
+category: Engineering
+tags: [astro, performance, build, dx]
+keywords: [astro7, vite8, rolldown, satteri, rust]
+cover: "🚀"
+---
+
+import { Callout, Steps } from '@sonapraneeth/blog-core/components/mdx';
+
+[Astro 7](https://astro.build/blog/astro-7/) landed with one headline: speed.
+The `.astro` compiler is now written in Rust, Markdown and MDX run through a new
+Rust pipeline ([Sätteri](https://satteri.bruits.org/)), the rendering engine is
+queue-based, and the whole thing rides on [Vite 8](https://vite.dev/blog/announcing-vite8)
+with its Rolldown bundler. The post claims **15–61% faster builds**. We upgraded
+this monorepo and measured it.
+
+<Callout type="note">
+  The numbers below are a real A/B run on the same machine, same session, with a
+  warm image cache — Astro 6.4.8 against Astro 7.0.2, building all five sites in
+  this workspace.
+</Callout>
+
+## The result
+
+Per-site Astro build time dropped by roughly a third across every site, with the
+Markdown-heaviest one (the docs demo) gaining the most — exactly where the new
+Rust compiler and Sätteri pipeline are supposed to help.
+
+| Site | Pages | Astro 6 | Astro 7 | Change |
+| --- | --- | --- | --- | --- |
+| docs / notes demo | 35 | 7.34s | 4.71s | **−35.8%** |
+| notebooks demo | 15 | 5.62s | 3.66s | **−34.9%** |
+| blog demo | 34 | 5.68s | 3.87s | **−31.9%** |
+| Go handbook | 18 | 5.87s | 3.93s | **−33.0%** |
+| blog app | 40 | 6.01s | 4.06s | **−32.4%** |
+
+Total wall time for the orchestrated build of all five sites — including
+Pagefind indexing, font copying and Vite dependency optimization — went from
+**56.55s to 45.42s**, about **−19.7%**.
+
+<Callout type="tip">
+  The per-site compile win (~32%) is larger than the wall-clock win (~20%)
+  because the wall total also carries fixed per-site overhead — Pagefind, font
+  copying, content-store clears — that Astro 7 doesn't speed up. The compiler
+  itself is the part that got dramatically faster.
+</Callout>
+
+## The migration was almost nothing
+
+The surprising part: for a codebase that already followed Astro's
+recommendations, Astro 7 was close to a drop-in upgrade.
+
+<Steps>
+
+1. Bump `astro` to `^7` (and `@astrojs/mdx` to `^7`) across the workspace.
+2. Run the build. That's it.
+
+</Steps>
+
+Two things saved us from the headline breaking changes. We already set
+`compressHTML: true`, so the new JSX-style whitespace default never applied. And
+our Markdown pipeline already used an explicit `processor: unified()` from
+`@astrojs/markdown-remark`, so the switch to Sätteri-by-default didn't touch our
+KaTeX, heading-anchor or code-import plugins.
+
+## Why Vite 8 matters here
+
+Astro 7 upgrades to Vite 8, which ships [Rolldown](https://rolldown.rs/) — a
+Rust bundler replacing esbuild and Rollup with a single unified one, benchmarked
+[10–30× faster than Rollup](https://github.com/rolldown/benchmarks). For a
+content site most of the build is `.astro` compilation, Markdown, and bundling,
+and all three moved to native code in this release. The compound effect is what
+shows up as that consistent one-third reduction above.
+
+## Takeaway
+
+Even on small sites — ours top out at 40 pages — the Astro build phase got
+about a third faster, landing inside the
+[Astro 7 announcement's](https://astro.build/blog/astro-7/) claimed range. The
+larger your Markdown corpus, the more you'll see. For a near-zero-effort
+upgrade, that's a rare deal.

@@ -24,7 +24,7 @@ name: go-notes
 services:
   # ─── Reverse proxy (Caddy) ─────────────────────────────────────────────────
   caddy:
-    image: caddy:2.10-alpine
+    image: caddy:2.11-alpine
     container_name: go-notes-caddy
     restart: unless-stopped
     ports:

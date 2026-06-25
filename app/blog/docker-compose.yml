@@ -34,7 +34,7 @@ services:
   # Caddy reads ./Caddyfile and routes each hostname to its container. On a
   # public server it can also provision HTTPS automatically (see the Caddyfile).
   caddy:
-    image: caddy:2.10-alpine
+    image: caddy:2.11-alpine
     container_name: blog-caddy
     restart: unless-stopped
     ports:
