@@ -11,6 +11,14 @@ export type { NavLink, SocialProfile } from '@sonapraneeth/components/chrome';
 export type { PwaConfig } from '@sonapraneeth/components/pwa';
 export { activeSocials } from '@sonapraneeth/components/chrome';
 
+import type { CaptionAlignConfig } from '@sonapraneeth/components/captions';
+export type {
+  CaptionAlign,
+  CaptionKind,
+  CaptionAlignConfig,
+} from '@sonapraneeth/components/captions';
+export { resolveCaptionAlign } from '@sonapraneeth/components/captions';
+
 export interface BlogConfig extends SiteChrome {
   /** Full site name used in <title> and metadata. */
   title: string;
@@ -34,6 +42,13 @@ export interface BlogConfig extends SiteChrome {
    * so the site is installable and works offline once visited.
    */
   pwa?: PwaConfig;
+  /**
+   * Alignment of numbered-block and figure captions (Algorithm, Listing,
+   * DocImage). Each kind falls back to `default`, which itself defaults to
+   * `'center'`. Posts may override any kind via the `captionAlign` frontmatter
+   * field.
+   */
+  captionAlign?: CaptionAlignConfig;
 }
 
 const ICON_HOME =
@@ -56,6 +71,7 @@ export const defaultBlogConfig: BlogConfig = {
   timeZoneLabel: 'IST',
   search: true,
   theme: {},
+  captionAlign: { default: 'center' },
   nav: [
     { href: '/', label: 'Home', icon: ICON_HOME },
     { href: '/categories', label: 'Categories', icon: ICON_CATEGORIES },

@@ -12,41 +12,13 @@ export type { NavLink, SocialProfile } from '@sonapraneeth/components/chrome';
 export type { PwaConfig } from '@sonapraneeth/components/pwa';
 export { activeSocials } from '@sonapraneeth/components/chrome';
 
-/** Horizontal alignment for a block/figure caption. */
-export type CaptionAlign = 'left' | 'center' | 'right';
-
-/** Block kinds that render a caption and honour {@link CaptionAlignConfig}. */
-export type CaptionKind = 'algorithm' | 'listing' | 'figure';
-
-/**
- * Per-kind caption alignment. Any kind left unset falls back to `default`,
- * which itself defaults to `'center'`. Set site-wide via {@link DocsConfig} and
- * override per page via the `captionAlign` frontmatter field.
- */
-export interface CaptionAlignConfig {
-  /** Fallback for kinds not listed below. Defaults to `'center'`. */
-  default?: CaptionAlign;
-  /** `<Algorithm>` captions. */
-  algorithm?: CaptionAlign;
-  /** `<Listing>` (code) captions. */
-  listing?: CaptionAlign;
-  /** `<DocImage>` figure captions. */
-  figure?: CaptionAlign;
-}
-
-/**
- * Resolve the effective caption alignment for a kind. Page overrides win over
- * the site config; each level falls back to its `default`, then to `'center'`.
- */
-export function resolveCaptionAlign(
-  kind: CaptionKind,
-  site?: CaptionAlignConfig,
-  page?: CaptionAlignConfig,
-): CaptionAlign {
-  return (
-    page?.[kind] ?? page?.default ?? site?.[kind] ?? site?.default ?? 'center'
-  );
-}
+import type { CaptionAlignConfig } from '@sonapraneeth/components/captions';
+export type {
+  CaptionAlign,
+  CaptionKind,
+  CaptionAlignConfig,
+} from '@sonapraneeth/components/captions';
+export { resolveCaptionAlign } from '@sonapraneeth/components/captions';
 
 export interface DocsConfig extends SiteChrome {
   /** Full site name used in <title> and metadata. */

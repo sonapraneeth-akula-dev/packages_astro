@@ -49,6 +49,19 @@ export function postFrontmatterSchema({ image }: { image: ImageFunction }) {
     coverImage: image().optional(),
     /** Alt text for `coverImage`; falls back to the post title when omitted. */
     coverAlt: z.string().optional(),
+    /**
+     * Per-post caption alignment override. Any kind left unset inherits the
+     * site config (which defaults to `'center'`). `default` applies to kinds
+     * not listed. See the `captionAlign` blog config option.
+     */
+    captionAlign: z
+      .object({
+        default: z.enum(['left', 'center', 'right']).optional(),
+        algorithm: z.enum(['left', 'center', 'right']).optional(),
+        listing: z.enum(['left', 'center', 'right']).optional(),
+        figure: z.enum(['left', 'center', 'right']).optional(),
+      })
+      .optional(),
   });
 }
 

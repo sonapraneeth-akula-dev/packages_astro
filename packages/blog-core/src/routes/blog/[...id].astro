@@ -3,6 +3,8 @@ import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
 import { components } from 'virtual:blog-core/components';
+import { blogConfig } from 'virtual:blog-core/config';
+import { resolveCaptionAlign } from '../../config';
 import { getPublishedPosts, readingTime } from '../../utils/posts';
 
 export const getStaticPaths = (async () => {
@@ -22,6 +24,14 @@ export const getStaticPaths = (async () => {
 const { post, newerPost, olderPost } = Astro.props;
 const { Content, headings } = await render(post);
 const rt = readingTime(post.body);
+
+// Resolve caption alignment (site default + per-post override) once and expose
+// it to the caption components rendered inside <Content> via Astro.locals.
+Astro.locals.captionAlign = {
+  algorithm: resolveCaptionAlign('algorithm', blogConfig.captionAlign, post.data.captionAlign),
+  listing: resolveCaptionAlign('listing', blogConfig.captionAlign, post.data.captionAlign),
+  figure: resolveCaptionAlign('figure', blogConfig.captionAlign, post.data.captionAlign),
+};
 ---
 
 <BlogPost

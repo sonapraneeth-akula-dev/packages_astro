@@ -9,6 +9,7 @@
     "./theme": "./src/theme.ts",
     "./icons": "./src/icons.ts",
     "./mdx": "./src/mdx.ts",
+    "./captions": "./src/captions.ts",
     "./numbering": "./src/numbering.ts",
     "./pwa": "./src/pwa.ts",
     "./*": "./src/*"
