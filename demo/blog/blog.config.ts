@@ -22,7 +22,7 @@ export const blogConfig = defineBlogConfig({
   timeZone: 'Asia/Kolkata',
   timeZoneLabel: 'IST',
   search: true,
-  pwa: { enabled: true },
+  pwa: { enabled: true, precache: 'all' },
   // Showcase the theme system: violet accent, the Inter "modern" font combo
   // and large corner radius. `switcher` ships every preset and renders the live
   // theme switcher so you can preview palette/font/radius combinations.

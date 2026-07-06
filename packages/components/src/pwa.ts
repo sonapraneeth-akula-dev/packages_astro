@@ -14,7 +14,8 @@
  */
 import type { AstroIntegration } from 'astro';
 import { fileURLToPath } from 'node:url';
-import { writeFile } from 'node:fs/promises';
+import { writeFile, readFile, readdir } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { deflateSync } from 'node:zlib';
 import path from 'node:path';
 
@@ -70,6 +71,20 @@ export interface PwaConfig {
    * installable (and an Add-to-Home-Screen hint on iOS). Defaults to `true`.
    */
   install?: boolean;
+  /**
+   * Offline precaching strategy. The service worker always runtime-caches what
+   * you browse; this controls how much it *proactively* downloads in the
+   * background (off the main thread, images last) so the site works offline
+   * before you've visited every page:
+   *   - `false` (default) — precache nothing; cache fills only as you browse.
+   *   - `'core'` — precache all pages + CSS/JS/fonts/icons + the Pagefind
+   *     search bundle, but leave large raster images to runtime caching.
+   *   - `'all'` — precache everything, including images (downloaded last).
+   * On every reconnect/visit the worker fetches only the files whose content
+   * changed and prunes anything the latest build removed, so deploys sync
+   * incrementally rather than re-downloading the whole site.
+   */
+  precache?: 'core' | 'all' | false;
 }
 
 /** The fields PWA resolution needs from a site's resolved config. */
@@ -106,6 +121,8 @@ export interface ResolvedPwa {
   appleTouchIcon?: string;
   /** Whether to render the in-page install button. */
   install: boolean;
+  /** Background precache strategy: `false`, `'core'` or `'all'`. */
+  precache: 'core' | 'all' | false;
   /** True when the site relies on the engine-generated default PNG icons. */
   usesDefaultIcons: boolean;
   /** Background colour for generated default icons. */
@@ -162,6 +179,7 @@ export function resolvePwa(info: PwaSiteInfo): ResolvedPwa {
     themeColor,
     appleTouchIcon,
     install: pwa.install ?? true,
+    precache: pwa.precache ?? false,
     usesDefaultIcons,
     iconBackground: backgroundColor,
     iconColor: pwa.iconColor ?? '#f5f5f7',
@@ -236,6 +254,245 @@ async function staleWhileRevalidate(request) {
 }
 `;
 }
+
+// ---------------------------------------------------------------------------
+// Incremental precache (opt-in via `pwa.precache`)
+//
+// When enabled, the build enumerates the output into a precache manifest of
+// `{ url, revision }` entries and bakes it into a smarter service worker. That
+// worker fills the cache in the background after activation (off the main
+// thread, images last), and on every visit/reconnect syncs *incrementally*:
+// only files whose revision changed are re-fetched, and anything the latest
+// build dropped is pruned. Fingerprinted `/_astro/*` URLs carry a `null`
+// revision (their URL already encodes the content), so they're only fetched
+// when genuinely new.
+// ---------------------------------------------------------------------------
+
+/** One precache entry: a request URL and a content revision (`null` = immutable URL). */
+interface PrecacheEntry {
+  url: string;
+  revision: string | null;
+}
+
+const IMAGE_EXT = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif']);
+/** Extensions worth precaching for a working offline site (the `'core'` set). */
+const CORE_EXT = new Set([
+  'html', 'css', 'js', 'mjs', 'json', 'wasm',
+  'woff2', 'woff', 'ttf', 'otf', 'eot',
+  'svg', 'ico', 'webmanifest', 'txt',
+  'pf_meta', 'pf_index', 'pf_fragment', // Pagefind index shards
+]);
+
+/** Recursively list every file under a directory (absolute paths). */
+async function listFiles(dir: string): Promise<string[]> {
+  const entries = await readdir(dir, { withFileTypes: true });
+  const out: string[] = [];
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...(await listFiles(full)));
+    else out.push(full);
+  }
+  return out;
+}
+
+/** Map a build-output relative path to the URL the browser requests for it. */
+function outputUrl(relPosix: string): string {
+  if (relPosix === 'index.html') return '/';
+  if (relPosix.endsWith('/index.html')) {
+    return '/' + relPosix.slice(0, -'index.html'.length); // keeps the trailing slash
+  }
+  return '/' + relPosix;
+}
+
+/**
+ * Walk the build output and produce an ordered precache manifest. Documents
+ * come first, then critical assets, then images (so background fetching leaves
+ * the heaviest files for last). Fingerprinted `/_astro/*` files get a `null`
+ * revision; everything else is hashed so content changes are detected.
+ */
+async function buildPrecacheManifest(
+  outDir: string,
+  mode: 'core' | 'all',
+): Promise<PrecacheEntry[]> {
+  const files = await listFiles(outDir);
+
+  const docs: PrecacheEntry[] = [];
+  const assets: PrecacheEntry[] = [];
+  const images: PrecacheEntry[] = [];
+
+  for (const abs of files) {
+    const relPosix = path.relative(outDir, abs).split(path.sep).join('/');
+    // Never precache the worker itself or sourcemaps.
+    if (relPosix === 'sw.js' || relPosix.endsWith('.map')) continue;
+
+    const ext = (relPosix.split('.').pop() ?? '').toLowerCase();
+    const isImage = IMAGE_EXT.has(ext);
+    const isHtml = ext === 'html';
+    const isCore = isHtml || CORE_EXT.has(ext);
+    if (!isCore && !isImage) continue; // skip anything unexpected
+    if (isImage && mode !== 'all') continue;
+
+    const url = outputUrl(relPosix);
+    const revision = relPosix.startsWith('_astro/')
+      ? null
+      : createHash('sha256').update(await readFile(abs)).digest('hex').slice(0, 16);
+    const entry: PrecacheEntry = { url, revision };
+
+    if (isHtml) docs.push(entry);
+    else if (isImage) images.push(entry);
+    else assets.push(entry);
+  }
+
+  const byUrl = (a: PrecacheEntry, b: PrecacheEntry) => a.url.localeCompare(b.url);
+  docs.sort(byUrl);
+  assets.sort(byUrl);
+  images.sort(byUrl);
+  return [...docs, ...assets, ...images];
+}
+
+/**
+ * The incremental-precache service worker. Runtime behaviour matches the
+ * lightweight worker (network-first navigations, stale-while-revalidate
+ * assets) but it also owns a baked-in precache manifest that it syncs in the
+ * background: new/changed entries are fetched (throttled, images last) and
+ * dropped entries are pruned, all keyed off content revisions.
+ */
+function precacheServiceWorkerSource(
+  buildId: string,
+  manifest: PrecacheEntry[],
+): string {
+  return `// Generated by @sonapraneeth/components/pwa — do not edit.
+const VERSION = '${buildId}';
+const CACHE = 'sonapraneeth-pwa';
+const MANIFEST_KEY = '/__precache-manifest__';
+const OFFLINE_FALLBACK = '/';
+const MANIFEST = ${JSON.stringify(manifest)};
+
+self.addEventListener('install', () => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    (async () => {
+      // Drop caches from older worker versions (e.g. the per-build names).
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)));
+      await self.clients.claim();
+      // Fill the precache in the background; do not block activation on it.
+      syncPrecache();
+    })(),
+  );
+});
+
+// The page pings us on load and whenever the network returns, so the sync also
+// runs while a tab is open (keeping the worker alive long enough to finish).
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SYNC') event.waitUntil(syncPrecache());
+});
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+  if (request.mode === 'navigate') {
+    event.respondWith(navigate(request));
+    return;
+  }
+  event.respondWith(staleWhileRevalidate(request));
+});
+
+// Network-first for pages (fresh when online), precache/runtime as the offline
+// fallback — tolerant of trailing-slash differences between request and store.
+async function navigate(request) {
+  const cache = await caches.open(CACHE);
+  try {
+    const response = await fetch(request);
+    if (response && response.ok) cache.put(request, response.clone());
+    return response;
+  } catch {
+    const p = new URL(request.url).pathname;
+    const hit =
+      (await cache.match(request)) ||
+      (await cache.match(p)) ||
+      (await cache.match(p.endsWith('/') ? p + 'index.html' : p + '/'));
+    return hit || (await cache.match(OFFLINE_FALLBACK)) || Response.error();
+  }
+}
+
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(CACHE);
+  const cached = await cache.match(request);
+  const network = fetch(request)
+    .then((response) => {
+      if (response && response.ok) cache.put(request, response.clone());
+      return response;
+    })
+    .catch(() => undefined);
+  return cached || (await network) || Response.error();
+}
+
+let syncing = false;
+async function syncPrecache() {
+  if (syncing) return;
+  syncing = true;
+  try {
+    const cache = await caches.open(CACHE);
+
+    // Previous manifest (url -> revision), so we only refetch what changed.
+    const prevRes = await cache.match(MANIFEST_KEY);
+    const prev = new Map();
+    if (prevRes) {
+      try {
+        for (const e of await prevRes.json()) prev.set(e.url, e.revision);
+      } catch {}
+    }
+
+    // Prune cached entries the latest build no longer ships (reclaims space).
+    const wanted = new Set(MANIFEST.map((e) => e.url));
+    const cachedReqs = await cache.keys();
+    await Promise.all(
+      cachedReqs.map(async (req) => {
+        const p = new URL(req.url).pathname;
+        if (p === MANIFEST_KEY) return;
+        if (!wanted.has(p)) await cache.delete(req);
+      }),
+    );
+
+    // Fetch only new or content-changed entries, in manifest order (images
+    // last), throttled so the background fill never saturates the network.
+    const stale = [];
+    for (const entry of MANIFEST) {
+      const present = await cache.match(entry.url);
+      if (present && prev.get(entry.url) === entry.revision) continue;
+      stale.push(entry.url);
+    }
+    const CONCURRENCY = 5;
+    for (let i = 0; i < stale.length; i += CONCURRENCY) {
+      await Promise.all(
+        stale.slice(i, i + CONCURRENCY).map(async (url) => {
+          try {
+            const res = await fetch(url, { cache: 'no-cache' });
+            if (res && res.ok) await cache.put(url, res.clone());
+          } catch {}
+        }),
+      );
+    }
+
+    await cache.put(
+      MANIFEST_KEY,
+      new Response(JSON.stringify(MANIFEST), {
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+  } finally {
+    syncing = false;
+  }
+}
+`;
+}
+
 
 // ---------------------------------------------------------------------------
 // Default icon generation
@@ -419,7 +676,22 @@ export function pwa(info: PwaSiteInfo): AstroIntegration {
           JSON.stringify(resolved.manifest, null, 2),
           'utf8',
         );
-        await writeFile(path.join(out, 'sw.js'), serviceWorkerSource(buildId), 'utf8');
+
+        if (resolved.precache) {
+          // Enumerate the build output into a revision-keyed manifest and emit
+          // the incremental-precache worker (background fill + change-only sync).
+          const manifest = await buildPrecacheManifest(out, resolved.precache);
+          await writeFile(
+            path.join(out, 'sw.js'),
+            precacheServiceWorkerSource(buildId, manifest),
+            'utf8',
+          );
+          logger.info(
+            `Emitted precache sw.js (${resolved.precache}: ${manifest.length} entries) and manifest.webmanifest.`,
+          );
+        } else {
+          await writeFile(path.join(out, 'sw.js'), serviceWorkerSource(buildId), 'utf8');
+        }
 
         if (resolved.usesDefaultIcons) {
           const { iconBackground: bg, iconColor: fg } = resolved;
@@ -431,9 +703,7 @@ export function pwa(info: PwaSiteInfo): AstroIntegration {
               defaultIconPng(512, bg, fg, true),
             ),
           ]);
-          logger.info('Emitted manifest.webmanifest, sw.js and default PWA icons.');
-        } else {
-          logger.info('Emitted manifest.webmanifest and sw.js (PWA enabled).');
+          logger.info('Emitted default PWA icons.');
         }
       },
     },

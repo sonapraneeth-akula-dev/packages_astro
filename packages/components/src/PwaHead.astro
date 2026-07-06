@@ -10,8 +10,22 @@ import { resolvePwa, type PwaSiteInfo } from './pwa';
 type Props = PwaSiteInfo;
 
 const resolved = resolvePwa(Astro.props);
-const { enabled, manifest, themeColor, appleTouchIcon } = resolved;
+const { enabled, manifest, themeColor, appleTouchIcon, precache } = resolved;
 const isProd = import.meta.env.PROD;
+
+// Worker registration. With precache on, the page also pings the worker to sync
+// its precache on load and on every reconnect (while the tab is open), and asks
+// for persistent storage so the offline cache resists eviction.
+const registerScript = precache
+  ? `if ('serviceWorker' in navigator) window.addEventListener('load', function () {
+  navigator.serviceWorker.register('/sw.js').then(function (reg) {
+    var sync = function () { navigator.serviceWorker.ready.then(function (r) { if (r.active) r.active.postMessage({ type: 'SYNC' }); }); };
+    sync();
+    addEventListener('online', sync);
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
+  }).catch(function () {});
+});`
+  : `if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });`;
 ---
 
 {
@@ -25,9 +39,7 @@ const isProd = import.meta.env.PROD;
       {isProd && (
         <>
           <link rel="manifest" href="/manifest.webmanifest" />
-          <script is:inline>
-            if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
-          </script>
+          <script is:inline set:html={registerScript} />
         </>
       )}
     </>

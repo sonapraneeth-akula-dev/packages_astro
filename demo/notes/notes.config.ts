@@ -38,5 +38,5 @@ export const docsConfig = defineDocsConfig({
   // "classical" font combo and small corner radius. `switcher` renders the live
   // theme switcher so you can preview palette/font/radius combinations.
   theme: { palette: 'emerald', fonts: 'classical', radius: 'small', switcher: true },
-  pwa: { enabled: true },
+  pwa: { enabled: true, precache: 'all' },
 });
