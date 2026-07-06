@@ -1,0 +1,111 @@
+---
+title: Numbered blocks
+description: Auto-numbered, cross-referenceable Algorithms, Listings and Callouts — numbers derive from frontmatter part/chapter plus heading structure and are resolved at build time.
+category: Components
+tags:
+  - mdx
+  - components
+part: "II"
+chapter: 3
+sidebar:
+  order: 6
+---
+
+# Numbered blocks
+
+Some notes — algorithms textbooks, specs, lecture notes — need **numbered,
+referenceable** blocks like "Algorithm 4.1.2" or "Listing 3.2.1". Typing those
+numbers by hand is fragile: insert one block and every later number (and every
+reference to it) is wrong.
+
+The engine numbers blocks **automatically at build time**. You give a block a
+stable `id`; its number is derived from the page's `part` / `chapter`
+frontmatter plus the surrounding `##` / `###` headings, and `<Ref>` turns that
+`id` into a live link. Nothing is typed by hand, so numbers can never drift.
+
+<Callout type="tip" title="This page's numbers">
+  This page sets <code>part: "II"</code> and <code>chapter: 3</code> in its
+  frontmatter, so every block below is numbered <code>II.3.section[.subsection].n</code>.
+</Callout>
+
+## Numbered callouts
+
+Add an `id` (as the **first** attribute) to turn any `<Callout>` into a numbered,
+referenceable box. The number is prepended to the title; callouts without an
+`id` are unchanged.
+
+<Callout id="def-invariant" type="important" title="Loop invariant">
+  A condition that holds before and after every iteration of a loop. See
+  <Ref id="alg-euclid" /> for one in action.
+</Callout>
+
+<Callout id="def-gcd" type="note" title="Greatest common divisor">
+  The largest integer dividing two numbers with no remainder.
+</Callout>
+
+Each block type has its own counter that resets at every heading, so these are
+numbered `II.3.1.1` and `II.3.1.2`.
+
+## Algorithms
+
+`<Algorithm>` renders booktabs-style pseudocode with auto-numbered lines, bold
+keywords and small-caps call names. Give it an `id` for a numbered caption.
+
+<Algorithm
+  id="alg-euclid"
+  title="Euclid's algorithm for the greatest common divisor"
+  input="Two non-negative integers `a` and `b`"
+  output="`gcd(a, b)`"
+  code={`function GCD(a, b)
+    while b ≠ 0 do
+        t ← b
+        b ← a mod b
+        a ← t
+    end while
+    return a
+end function`}
+/>
+
+## Code listings
+
+Wrap a fenced code block in `<Listing>` to give it a numbered caption and an
+anchor. Here is <Ref id="alg-euclid" /> transcribed to Python:
+
+<Listing id="lst-euclid-py" caption="Euclid's algorithm in Python">
+```python
+def gcd(a: int, b: int) -> int:
+    while b:
+        a, b = b, a % b
+    return a
+```
+</Listing>
+
+## Cross-references
+
+`<Ref id="…" />` resolves to the target's label and number and links to it —
+resolved at build time, so it stays correct as blocks move:
+
+- Algorithm → <Ref id="alg-euclid" />
+- Listing → <Ref id="lst-euclid-py" />
+- Callout → <Ref id="def-invariant" /> and <Ref id="def-gcd" />
+
+References also work **across pages** in the same site; the number reflects the
+target page's own `part` / `chapter`.
+
+## Authoring rules
+
+<Steps>
+1. Set `part:` and/or `chapter:` in the page **frontmatter** (optional). Section
+   and subsection numbers come from `##` and `###` headings automatically.
+
+2. Give a `<Callout>`, `<Algorithm>` or `<Listing>` an **`id` as its first
+   attribute** to make it numbered and referenceable.
+
+3. Reference it anywhere with `<Ref id="…" />` — never write the number yourself.
+</Steps>
+
+<Callout type="note" title="How the number is built">
+  `[part.][chapter.]section[.subsection].n` — `part`/`chapter` from frontmatter,
+  `section`/`subsection` from `##`/`###`, and `n` a per-type counter that resets
+  at every heading.
+</Callout>
