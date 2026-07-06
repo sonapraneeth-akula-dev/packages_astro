@@ -435,7 +435,8 @@ a.chip:hover {
   .bottom-nav,
   .reading-progress,
   .docs-sidebar,
-  #screen-size-indicator {
+  #screen-size-indicator,
+  .heading-anchor {
     display: none !important;
   }
 
