@@ -10,6 +10,9 @@ const ICON_SEARCH =
   '<circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>';
 
 export const blogConfig = defineBlogConfig({
+  // Numbered-block / figure caption alignment (Algorithm, Listing, DocImage).
+  // Posts can override per kind via the `captionAlign` frontmatter field.
+  captionAlign: { default: 'center' },
   brand: 'Grihasetu',
   title: 'Grihasetu Blog',
   description:

@@ -8,6 +8,9 @@ const ICON_BOOK =
   '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>';
 
 export const docsConfig = defineDocsConfig({
+  // Numbered-block / figure caption alignment (Algorithm, Listing, DocImage).
+  // Pages can override per kind via the `captionAlign` frontmatter field.
+  captionAlign: { default: 'center' },
   brand: 'Go Notes',
   title: 'Go Notes — A Practical Handbook',
   description:
