@@ -1,0 +1,138 @@
+---
+/**
+ * Injected print route (`/print/<notebook>`) — concatenates every page of a
+ * notebook into one long, chrome-free document and auto-opens the browser
+ * print dialog, so a whole handbook can be saved as a single PDF. Registered
+ * only in notebooks mode; a curated `sidebar.json` (single-tree mode) yields
+ * no print routes.
+ */
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { buildNotebookPrintRoutes } from '../../utils/docs';
+import { resolveCaptionAlign } from '../../config';
+import { docsConfig } from 'virtual:notes-core/config';
+import { components } from 'virtual:notes-core/components';
+// KaTeX stylesheet URL (emitted as a cached file, not inlined) for LaTeX math.
+import katexHref from 'katex/dist/katex.min.css?url';
+
+export async function getStaticPaths() {
+  if (!docsConfig.notebooks) return [];
+  const entries = await getCollection('docs');
+  return buildNotebookPrintRoutes(entries);
+}
+
+const { notebook, entries } = Astro.props;
+
+// Render every page up front so they can be laid out sequentially below.
+const pages = await Promise.all(
+  entries.map(async (entry) => ({ entry, Content: (await render(entry)).Content })),
+);
+
+// Ship KaTeX CSS only when at least one page has math.
+const needsKatex = entries.some(
+  (e) => e.data.math || /(?<!\\)\$/.test(e.body ?? ''),
+);
+---
+
+<BaseLayout
+  config={docsConfig}
+  title={`Print · ${notebook.label}`}
+  description={notebook.description}
+>
+  {needsKatex && <link rel="stylesheet" href={katexHref} />}
+  <div class="print-view container">
+    <header class="print-cover">
+      <h1>
+        {notebook.cover && <span class="print-cover-glyph" aria-hidden="true">{notebook.cover} </span>}
+        {notebook.label}
+      </h1>
+      {notebook.description && <p class="print-lede">{notebook.description}</p>}
+      {notebook.author && <p class="print-author">{notebook.author}</p>}
+      <p class="print-hint" data-pagefind-ignore>
+        The print dialog opens automatically — choose “Save as PDF” to export
+        the whole notebook, or close it to keep reading on screen.
+      </p>
+    </header>
+
+    {pages.map(({ entry, Content }) => {
+      // Per-page caption alignment (site default + per-page override).
+      Astro.locals.captionAlign = {
+        algorithm: resolveCaptionAlign('algorithm', docsConfig.captionAlign, entry.data.captionAlign),
+        listing: resolveCaptionAlign('listing', docsConfig.captionAlign, entry.data.captionAlign),
+        figure: resolveCaptionAlign('figure', docsConfig.captionAlign, entry.data.captionAlign),
+      };
+      return (
+        <section class="print-doc">
+          <article class="doc">
+            <header class="doc-head">
+              <h1>
+                {entry.data.cover && <span class="doc-cover" aria-hidden="true">{entry.data.cover} </span>}
+                {entry.data.title}
+              </h1>
+              {entry.data.description && <p class="doc-lede">{entry.data.description}</p>}
+            </header>
+            <div class="doc-body">
+              <Content components={components} />
+            </div>
+          </article>
+        </section>
+      );
+    })}
+  </div>
+</BaseLayout>
+
+<script>
+  // Open the print dialog once the page (fonts, math, images) has loaded.
+  addEventListener('load', () => window.print());
+</script>
+
+<style>
+  .print-view {
+    padding-block: 2.5rem 4rem;
+    max-width: 52rem;
+  }
+  .print-cover {
+    padding-block: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .print-cover h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin: 0 0 0.5rem;
+  }
+  .print-lede {
+    color: var(--text-muted);
+    font-size: 1.15rem;
+    max-width: 40rem;
+  }
+  .print-author {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin: 0.25rem 0 0;
+  }
+  .print-hint {
+    margin-top: 1.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    background: var(--surface-2, rgba(127, 127, 127, 0.08));
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .print-doc + .print-doc {
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border);
+  }
+  .doc { min-width: 0; }
+  .doc-head { margin-bottom: 1.5rem; }
+  .doc-head h1 { margin: 0 0 0.5rem; }
+
+  /* Screen-only: no dialog on print, so drop the hint from the PDF. */
+  @media print {
+    .print-hint { display: none !important; }
+    .print-view { max-width: none; padding: 0; }
+    /* Start each chapter on a fresh page in the exported PDF. */
+    .print-doc { break-before: page; }
+    .print-cover { break-after: page; border-bottom: 0; }
+  }
+</style>

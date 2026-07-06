@@ -32,6 +32,8 @@ interface Props {
   notebookLabel?: string;
   /** Link back to the notebook hub (notebooks mode). */
   backLink?: DocLink;
+  /** Whole-notebook print view URL (notebooks mode, `/print/<id>`). */
+  printHref?: string;
   /** Optional category, rendered as a chip linking to its taxonomy page. */
   category?: string;
   /** Optional tags, rendered as chips linking to their taxonomy pages. */
@@ -58,6 +60,7 @@ const {
   needsKatex = false,
   notebookLabel,
   backLink,
+  printHref,
   category,
   tags = [],
   keywords = [],
@@ -140,6 +143,11 @@ const showToc = tableOfContents && headings.length > 0;
           <button type="button" class="ghost-btn" data-print-doc>
             <Icon name="printer" /><span>Print / Save as PDF</span>
           </button>
+          {printHref && (
+            <a class="ghost-btn" href={printHref}>
+              <Icon name="book" /><span>Print notebook</span>
+            </a>
+          )}
           {editUrl && (
             <a class="ghost-btn" href={editUrl} target="_blank" rel="noopener">
               <Icon name="pencil" /><span>Edit this page</span>

@@ -59,6 +59,7 @@ Astro.locals.captionAlign = {
   needsKatex={needsKatex}
   notebookLabel={notebook?.label}
   backLink={backLink ?? undefined}
+  printHref={notebook ? `/print/${notebook.id}` : undefined}
   category={entry.data.category}
   tags={entry.data.tags}
   keywords={entry.data.keywords}

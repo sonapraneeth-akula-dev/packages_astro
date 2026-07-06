@@ -33,6 +33,7 @@ const ID = {
 const ROUTES = {
   home: '@sonapraneeth/notes-core/routes/index.astro',
   doc: '@sonapraneeth/notes-core/routes/[...slug].astro',
+  print: '@sonapraneeth/notes-core/routes/print/[notebook].astro',
   categories: '@sonapraneeth/notes-core/routes/categories/index.astro',
   category: '@sonapraneeth/notes-core/routes/categories/[category].astro',
   tags: '@sonapraneeth/notes-core/routes/tags/index.astro',
@@ -84,6 +85,11 @@ export function notesRoutes(options: NotesRoutesOptions): AstroIntegration {
 
         injectRoute({ pattern: '/', entrypoint: ROUTES.home, prerender: true });
         injectRoute({ pattern: '/[...slug]', entrypoint: ROUTES.doc, prerender: true });
+        // Whole-notebook print view (notebooks mode only, and only when the
+        // sidebar is auto-generated — a curated sidebar keeps a single tree).
+        if (options.docsConfig.notebooks && !options.sidebar) {
+          injectRoute({ pattern: '/print/[notebook]', entrypoint: ROUTES.print, prerender: true });
+        }
         injectRoute({ pattern: '/categories', entrypoint: ROUTES.categories, prerender: true });
         injectRoute({ pattern: '/categories/[category]', entrypoint: ROUTES.category, prerender: true });
         injectRoute({ pattern: '/tags', entrypoint: ROUTES.tags, prerender: true });

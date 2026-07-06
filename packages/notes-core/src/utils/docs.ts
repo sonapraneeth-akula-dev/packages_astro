@@ -569,6 +569,38 @@ export function buildDocRoutes(
   );
 }
 
+export interface NotebookPrintRoute {
+  params: { notebook: string };
+  props: {
+    /** The notebook being printed. */
+    notebook: Notebook;
+    /** Every page of the notebook, in reading (sidebar) order. */
+    entries: DocEntry[];
+  };
+}
+
+/**
+ * Compute one print route per notebook (`/print/<id>`), gathering all of that
+ * notebook's pages in reading order so a whole handbook can be rendered on a
+ * single page and saved as one PDF. Notebooks mode only; a curated
+ * `sidebar.json` (single-tree mode) yields no print routes.
+ */
+export function buildNotebookPrintRoutes(
+  entries: DocEntry[],
+): NotebookPrintRoute[] {
+  const live = entries.filter((e) => !e.data.draft || includeDrafts);
+  const bySlug = new Map(live.map((e) => [entrySlug(e), e]));
+  return getNotebooks(live).map((notebook) => {
+    const tree = buildNotebookSidebar(live, notebook);
+    const ordered: DocEntry[] = [];
+    for (const link of flattenSidebar(tree)) {
+      const entry = bySlug.get(link.href);
+      if (entry && notebookSegment(entry) === notebook.id) ordered.push(entry);
+    }
+    return { params: { notebook: notebook.id }, props: { notebook, entries: ordered } };
+  });
+}
+
 export interface HomeData {
   rootEntry: DocEntry | null;
   tree: SidebarNode[];
