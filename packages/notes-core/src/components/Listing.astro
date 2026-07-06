@@ -1,0 +1,51 @@
+---
+/**
+ * A numbered, referenceable code listing. Wrap a fenced code block so it gets an
+ * auto-numbered caption ("Listing 4.1.1 — …") and a stable anchor for <Ref>:
+ *
+ *   <Listing id="kmp-cpp" caption="KMP search in C++">
+ *   ```cpp
+ *   // …
+ *   ```
+ *   </Listing>
+ *
+ * The number is resolved at build time from `virtual:numbering` (id must be the
+ * FIRST attribute so the parser can find it).
+ */
+import numbering from 'virtual:numbering';
+
+interface Props {
+  /** Stable id for referencing. Must be the first attribute. */
+  id: string;
+  /** Optional caption shown after the number. */
+  caption?: string;
+  /** Override the label (default "Listing"). */
+  label?: string;
+}
+
+const { id, caption, label } = Astro.props;
+const entry = numbering.byId[id];
+const num = entry?.number;
+const lbl = label ?? entry?.label ?? 'Listing';
+---
+
+<figure id={id} class="listing">
+  <figcaption class="listing-cap">
+    <strong>{lbl}{num ? ` ${num}` : ''}</strong>{caption ? <> — <span>{caption}</span></> : null}
+  </figcaption>
+  <slot />
+</figure>
+
+<style>
+  .listing {
+    margin: 1.5rem 0;
+  }
+  .listing-cap {
+    margin-bottom: 0.4rem;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+  }
+  .listing-cap span { font-weight: 400; }
+  /* Tighten the gap between the caption and the expressive-code frame. */
+  .listing :global(.expressive-code) { margin-top: 0; }
+</style>

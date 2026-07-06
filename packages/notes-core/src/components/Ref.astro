@@ -1,0 +1,38 @@
+---
+/**
+ * Internal cross-reference to a numbered block, resolved at build time from the
+ * `virtual:numbering` map. Renders a link like "Algorithm 4.1.1" pointing at the
+ * target block's page + anchor. Never type numbers by hand — reference by `id`:
+ *
+ *   See <Ref id="kmp" /> for the full pseudocode.
+ */
+import numbering from 'virtual:numbering';
+
+interface Props {
+  /** The `id` of the target <Callout>, <Algorithm> or <Listing>. */
+  id: string;
+  /** Optionally override the displayed label (defaults to the target's label). */
+  label?: string;
+}
+
+const { id, label } = Astro.props;
+const entry = numbering.byId[id];
+const text = entry ? `${label ?? entry.label} ${entry.number}` : `[?${id}]`;
+---
+{
+  entry ? (
+    <a class="xref" href={`${entry.url}#${id}`}>{text}</a>
+  ) : (
+    <span class="xref xref--missing" title={`Unknown reference id: ${id}`}>{text}</span>
+  )
+}
+
+<style>
+  .xref {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .xref:hover { text-decoration: underline; }
+  .xref--missing { color: #ef4444; cursor: help; }
+</style>

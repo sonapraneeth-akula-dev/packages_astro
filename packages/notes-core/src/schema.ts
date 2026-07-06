@@ -57,6 +57,14 @@ export function docFrontmatterSchema(image?: ImageHelper) {
     /** Per-doc sidebar metadata. */
     sidebar: docSidebarMetaSchema.optional(),
     /**
+     * Optional Part number/label for the auto-numbering system (e.g. "I", "4").
+     * Combined with `chapter` and the page's `##` / `###` headings, referenceable
+     * blocks are numbered `[part.][chapter.]section[.subsection].n`.
+     */
+    part: z.coerce.string().optional(),
+    /** Optional Chapter number/label for the auto-numbering system (e.g. "4"). */
+    chapter: z.coerce.string().optional(),
+    /**
      * Optional single category used to group notes on the `/categories`
      * taxonomy pages. Notes without a category are simply omitted from the
      * category listings.

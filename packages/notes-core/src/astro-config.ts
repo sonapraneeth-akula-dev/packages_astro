@@ -11,6 +11,7 @@ import { execSync } from 'node:child_process';
 import { resolveTheme, themeFontEntries } from '@sonapraneeth/components/theme';
 import { pwa } from '@sonapraneeth/components/pwa';
 import { notesRoutes } from './routes-integration';
+import { numbering } from './numbering';
 import type { DocsConfig } from './config';
 import type { SidebarConfig } from './schema';
 
@@ -96,6 +97,11 @@ export function defineDocsAstroConfig(options: DocsAstroConfigOptions) {
       }),
       satteriMdx(),
       sitemap(),
+      // Build-time auto-numbering for referenceable blocks: exposes the
+      // `virtual:numbering` map consumed by <Algorithm>/<Listing>/<Callout id>
+      // and <Ref>. Numbers derive from `part`/`chapter` frontmatter + heading
+      // structure, so authors never type them by hand.
+      numbering(),
       // The engine owns all page routing/search: this injects `/`, `/[...slug]`,
       // `/search` and `/404` so sites need no `src/pages/` of their own.
       notesRoutes({

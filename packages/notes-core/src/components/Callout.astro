@@ -1,0 +1,40 @@
+---
+/**
+ * Notes wrapper over the shared <Callout>. Behaves identically for normal
+ * callouts, but when given an `id` it becomes a numbered, referenceable block:
+ * the auto-number (from `virtual:numbering`) is prepended to the title and an
+ * anchor is added, so <Ref id="…" /> can link to it.
+ *
+ *   <Callout id="kmp-invariant" type="important" title="Loop invariant">…</Callout>
+ *
+ * `id` must be the FIRST attribute so the build-time parser can find it.
+ */
+import { Callout as CoreCallout } from '@sonapraneeth/components/mdx';
+import numbering from 'virtual:numbering';
+
+type CalloutType = 'note' | 'tip' | 'important' | 'caution' | 'warning' | 'danger';
+
+interface Props {
+  id?: string;
+  type?: CalloutType;
+  title?: string;
+  /** Override the numbered label (defaults to the callout type, e.g. "Note"). */
+  label?: string;
+}
+
+const { id, type = 'note', title, label } = Astro.props;
+const entry = id ? numbering.byId[id] : undefined;
+const numberedTitle = entry
+  ? `${label ?? entry.label} ${entry.number}${title ? ` — ${title}` : ''}`
+  : title;
+---
+
+{
+  id ? (
+    <div id={id}>
+      <CoreCallout type={type} title={numberedTitle}><slot /></CoreCallout>
+    </div>
+  ) : (
+    <CoreCallout type={type} title={numberedTitle}><slot /></CoreCallout>
+  )
+}
