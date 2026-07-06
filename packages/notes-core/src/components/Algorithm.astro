@@ -84,14 +84,22 @@ const rows = lines.map((line, i) => ({ n: startLine + i, html: formatCode(line) 
   </figcaption>
 
   {(input || output) && (
-    <div class="algo-io">
-      {input && (
-        <p><span class="algo-io-key">Input:</span> <Fragment set:html={formatProse(input)} /></p>
-      )}
-      {output && (
-        <p><span class="algo-io-key">Output:</span> <Fragment set:html={formatProse(output)} /></p>
-      )}
-    </div>
+    <table class="algo-io">
+      <tbody>
+        {input && (
+          <tr>
+            <th scope="row" class="algo-io-key">Input</th>
+            <td class="algo-io-val"><Fragment set:html={formatProse(input)} /></td>
+          </tr>
+        )}
+        {output && (
+          <tr>
+            <th scope="row" class="algo-io-key">Output</th>
+            <td class="algo-io-val"><Fragment set:html={formatProse(output)} /></td>
+          </tr>
+        )}
+      </tbody>
+    </table>
   )}
 
   <ol class="algo-body">
@@ -120,28 +128,55 @@ const rows = lines.map((line, i) => ({ n: startLine + i, html: formatCode(line) 
     font-size: 0.95rem;
   }
   .algo-cap .algo-title { font-weight: 400; }
-  .algo-io {
-    padding: 0.5rem 1rem;
+  /* Prefix with .algo to beat the global `.doc-body th/td` border + `th`
+     background rules (DocLayout.astro), which otherwise win on specificity. */
+  .algo .algo-io {
+    width: 100%;
+    margin: 0;
+    border: 0;
     border-top: 1px solid var(--border);
+    border-collapse: collapse;
+    font-size: inherit;
+    background: none;
   }
-  .algo-io p { margin: 0.15rem 0; }
-  .algo-io-key { font-weight: 700; }
+  .algo .algo-io th,
+  .algo .algo-io td {
+    padding: 0.4rem 1rem;
+    vertical-align: top;
+    border: 0;
+    background: none;
+  }
+  .algo .algo-io-key {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+    font-weight: 700;
+    font-family: var(--font-heading);
+  }
+  .algo .algo-io-val {
+    text-align: left;
+  }
   .algo-io :global(code),
   .algo-code :global(*),
   .algo-code {
     font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
   }
 
-  .algo-body {
+  /* Prefix with .algo to beat the global `.doc-body ol/li` rules (max-width:
+     48rem, padding-left, margin-block) that otherwise squeeze the code body
+     narrower than the container at ultra-wide viewports. */
+  .algo .algo-body {
     margin: 0;
     padding: 0.5rem 0 0.6rem;
+    max-width: none;
     list-style: none;
     border-top: 1px solid var(--border);
   }
-  .algo-line {
+  .algo .algo-line {
     display: flex;
     align-items: baseline;
     gap: 0.75rem;
+    margin: 0;
     padding: 0 1rem;
   }
   .algo-num {

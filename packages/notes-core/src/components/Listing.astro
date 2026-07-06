@@ -30,22 +30,24 @@ const lbl = label ?? entry?.label ?? 'Listing';
 ---
 
 <figure id={id} class="listing">
+  <slot />
   <figcaption class="listing-cap">
     <strong>{lbl}{num ? ` ${num}` : ''}</strong>{caption ? <> — <span>{caption}</span></> : null}
   </figcaption>
-  <slot />
 </figure>
 
 <style>
   .listing {
     margin: 1.5rem 0;
   }
+  /* Caption sits below the code block as a centered footer. */
   .listing-cap {
-    margin-bottom: 0.4rem;
+    margin-top: 0.4rem;
+    text-align: center;
     font-family: var(--font-heading);
     font-size: 0.9rem;
   }
   .listing-cap span { font-weight: 400; }
-  /* Tighten the gap between the caption and the expressive-code frame. */
-  .listing :global(.expressive-code) { margin-top: 0; }
+  /* Tighten the gap between the expressive-code frame and the footer caption. */
+  .listing :global(.expressive-code) { margin-bottom: 0; }
 </style>
