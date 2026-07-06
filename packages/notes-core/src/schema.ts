@@ -108,6 +108,19 @@ export function docFrontmatterSchema(image?: ImageHelper) {
     coverImage: (image ? image() : z.string()).optional(),
     /** Hide the right-hand "On this page" table of contents. */
     tableOfContents: z.boolean().default(true),
+    /**
+     * Per-page caption alignment override. Any kind left unset inherits the
+     * site config (which defaults to `'center'`). `default` applies to kinds
+     * not listed. See the `captionAlign` site config option.
+     */
+    captionAlign: z
+      .object({
+        default: z.enum(['left', 'center', 'right']).optional(),
+        algorithm: z.enum(['left', 'center', 'right']).optional(),
+        listing: z.enum(['left', 'center', 'right']).optional(),
+        figure: z.enum(['left', 'center', 'right']).optional(),
+      })
+      .optional(),
   });
 }
 

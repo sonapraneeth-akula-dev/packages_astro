@@ -12,6 +12,42 @@ export type { NavLink, SocialProfile } from '@sonapraneeth/components/chrome';
 export type { PwaConfig } from '@sonapraneeth/components/pwa';
 export { activeSocials } from '@sonapraneeth/components/chrome';
 
+/** Horizontal alignment for a block/figure caption. */
+export type CaptionAlign = 'left' | 'center' | 'right';
+
+/** Block kinds that render a caption and honour {@link CaptionAlignConfig}. */
+export type CaptionKind = 'algorithm' | 'listing' | 'figure';
+
+/**
+ * Per-kind caption alignment. Any kind left unset falls back to `default`,
+ * which itself defaults to `'center'`. Set site-wide via {@link DocsConfig} and
+ * override per page via the `captionAlign` frontmatter field.
+ */
+export interface CaptionAlignConfig {
+  /** Fallback for kinds not listed below. Defaults to `'center'`. */
+  default?: CaptionAlign;
+  /** `<Algorithm>` captions. */
+  algorithm?: CaptionAlign;
+  /** `<Listing>` (code) captions. */
+  listing?: CaptionAlign;
+  /** `<DocImage>` figure captions. */
+  figure?: CaptionAlign;
+}
+
+/**
+ * Resolve the effective caption alignment for a kind. Page overrides win over
+ * the site config; each level falls back to its `default`, then to `'center'`.
+ */
+export function resolveCaptionAlign(
+  kind: CaptionKind,
+  site?: CaptionAlignConfig,
+  page?: CaptionAlignConfig,
+): CaptionAlign {
+  return (
+    page?.[kind] ?? page?.default ?? site?.[kind] ?? site?.default ?? 'center'
+  );
+}
+
 export interface DocsConfig extends SiteChrome {
   /** Full site name used in <title> and metadata. */
   title: string;
@@ -50,6 +86,13 @@ export interface DocsConfig extends SiteChrome {
    * so the site is installable and works offline once visited.
    */
   pwa?: PwaConfig;
+  /**
+   * Alignment of numbered-block and figure captions (Algorithm, Listing,
+   * DocImage). Each kind falls back to `default`, which itself defaults to
+   * `'center'`. Pages may override any kind via the `captionAlign` frontmatter
+   * field.
+   */
+  captionAlign?: CaptionAlignConfig;
 }
 
 const ICON_HOME =
@@ -89,6 +132,7 @@ export const defaultDocsConfig: DocsConfig = {
   search: true,
   notebooks: false,
   theme: {},
+  captionAlign: { default: 'center' },
 };
 
 export { ICON_BOOK };

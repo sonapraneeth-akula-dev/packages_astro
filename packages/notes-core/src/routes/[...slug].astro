@@ -9,6 +9,7 @@ import { getCollection, render } from 'astro:content';
 import DocLayout from '../layouts/DocLayout.astro';
 import { buildDocRoutes, editUrl } from '../utils/docs';
 import { readingTime } from '../utils/format';
+import { resolveCaptionAlign } from '../config';
 import { docsConfig } from 'virtual:notes-core/config';
 import { components } from 'virtual:notes-core/components';
 import { sidebar } from 'virtual:notes-core/sidebar';
@@ -30,6 +31,14 @@ const { Content, headings } = await render(entry);
 // Ship KaTeX CSS only when the note has math: `math: true` in frontmatter, or an
 // unescaped `$` in the body (remark-math's delimiter).
 const needsKatex = entry.data.math || /(?<!\\)\$/.test(entry.body ?? '');
+
+// Resolve caption alignment (site default + per-page override) once and expose
+// it to the caption components rendered inside <Content> via Astro.locals.
+Astro.locals.captionAlign = {
+  algorithm: resolveCaptionAlign('algorithm', docsConfig.captionAlign, entry.data.captionAlign),
+  listing: resolveCaptionAlign('listing', docsConfig.captionAlign, entry.data.captionAlign),
+  figure: resolveCaptionAlign('figure', docsConfig.captionAlign, entry.data.captionAlign),
+};
 ---
 
 <DocLayout

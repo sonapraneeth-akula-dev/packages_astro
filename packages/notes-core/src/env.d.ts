@@ -1,15 +1,15 @@
 /**
- * Ambient type for the build-time numbering map provided by the `numbering`
- * integration (see numbering.ts). Consumed by the numbered block components and
- * <Ref>.
+ * Per-request caption alignment, resolved by the notes doc route from site
+ * config + page frontmatter and read by caption components (Algorithm, Listing,
+ * DocImage). The `virtual:numbering` ambient type lives in the shared
+ * `@sonapraneeth/components` package, alongside the numbered-block components.
  */
-declare module 'virtual:numbering' {
-  interface NumberEntry {
-    number: string;
-    label: string;
-    url: string;
-    type: 'Callout' | 'Algorithm' | 'Listing';
+declare namespace App {
+  interface Locals {
+    captionAlign?: {
+      algorithm: 'left' | 'center' | 'right';
+      listing: 'left' | 'center' | 'right';
+      figure: 'left' | 'center' | 'right';
+    };
   }
-  const map: { byId: Record<string, NumberEntry> };
-  export default map;
 }
