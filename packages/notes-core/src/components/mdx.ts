@@ -15,10 +15,10 @@
  */
 import { baseMdxComponents } from '@sonapraneeth/components/mdx';
 import { Code } from 'astro-expressive-code/components';
-import Algorithm from './Algorithm.astro';
-import Listing from './Listing.astro';
-import Ref from './Ref.astro';
-import Callout from './Callout.astro';
+import Algorithm from '@sonapraneeth/components/Algorithm.astro';
+import Listing from '@sonapraneeth/components/Listing.astro';
+import Ref from '@sonapraneeth/components/Ref.astro';
+import Callout from '@sonapraneeth/components/CalloutNumbered.astro';
 
 export * from '@sonapraneeth/components/mdx';
 export { Code, Algorithm, Listing, Ref };

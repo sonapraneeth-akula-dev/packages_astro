@@ -15,14 +15,25 @@
  */
 import { baseMdxComponents } from '@sonapraneeth/components/mdx';
 import { Code } from 'astro-expressive-code/components';
+import Algorithm from '@sonapraneeth/components/Algorithm.astro';
+import Listing from '@sonapraneeth/components/Listing.astro';
+import Ref from '@sonapraneeth/components/Ref.astro';
+import Callout from '@sonapraneeth/components/CalloutNumbered.astro';
 
 export * from '@sonapraneeth/components/mdx';
-export { Code };
+export { Code, Algorithm, Listing, Ref };
 
 /** Components auto-injected into every MDX post via <Content components={...} />. */
 export const mdxComponents = {
   ...baseMdxComponents,
   Code,
+  // Numbered, referenceable blocks (see the numbering integration). `Callout`
+  // overrides the shared one so it can carry an auto-number when given an `id`.
+  // Blog posts have no part/chapter, so numbers are heading-based.
+  Algorithm,
+  Listing,
+  Ref,
+  Callout,
 };
 
 /** Merge site-specific components onto the shared map (site values win). */

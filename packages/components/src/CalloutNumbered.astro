@@ -9,7 +9,7 @@
  *
  * `id` must be the FIRST attribute so the build-time parser can find it.
  */
-import { Callout as CoreCallout } from '@sonapraneeth/components/mdx';
+import CoreCallout from './Callout.astro';
 import numbering from 'virtual:numbering';
 
 type CalloutType = 'note' | 'tip' | 'important' | 'caution' | 'warning' | 'danger';

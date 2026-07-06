@@ -11,7 +11,7 @@ import { execSync } from 'node:child_process';
 import { resolveTheme, themeFontEntries } from '@sonapraneeth/components/theme';
 import { pwa } from '@sonapraneeth/components/pwa';
 import { notesRoutes } from './routes-integration';
-import { numbering } from './numbering';
+import { numbering } from '@sonapraneeth/components/numbering';
 import type { DocsConfig } from './config';
 import type { SidebarConfig } from './schema';
 

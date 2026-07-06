@@ -27,11 +27,15 @@ const { id, caption, label } = Astro.props;
 const entry = numbering.byId[id];
 const num = entry?.number;
 const lbl = label ?? entry?.label ?? 'Listing';
+
+// Caption alignment resolved per page by the doc route (site config +
+// frontmatter); defaults to centered when rendered outside the doc route.
+const capAlign = Astro.locals.captionAlign?.listing ?? 'center';
 ---
 
 <figure id={id} class="listing">
   <slot />
-  <figcaption class="listing-cap">
+  <figcaption class="listing-cap" style={`text-align: ${capAlign};`}>
     <strong>{lbl}{num ? ` ${num}` : ''}</strong>{caption ? <> — <span>{caption}</span></> : null}
   </figcaption>
 </figure>
@@ -40,10 +44,10 @@ const lbl = label ?? entry?.label ?? 'Listing';
   .listing {
     margin: 1.5rem 0;
   }
-  /* Caption sits below the code block as a centered footer. */
+  /* Caption sits below the code block as a footer. Alignment is set inline
+     from the resolved per-page caption alignment (defaults to centered). */
   .listing-cap {
     margin-top: 0.4rem;
-    text-align: center;
     font-family: var(--font-heading);
     font-size: 0.9rem;
   }

@@ -75,10 +75,14 @@ const lines = code.replace(/\t/g, '    ').split('\n');
 while (lines.length && lines[0].trim() === '') lines.shift();
 while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
 const rows = lines.map((line, i) => ({ n: startLine + i, html: formatCode(line) }));
+
+// Caption alignment resolved per page by the doc route (site config +
+// frontmatter); defaults to centered when rendered outside the doc route.
+const capAlign = Astro.locals.captionAlign?.algorithm ?? 'center';
 ---
 
 <figure id={id} class="algo" role="group" aria-label={`${label} ${shownNumber ?? ''} ${title}`.trim()}>
-  <figcaption class="algo-cap">
+  <figcaption class="algo-cap" style={`text-align: ${capAlign};`}>
     <strong>{label}{shownNumber ? ` ${shownNumber}` : ''}</strong>{' '}
     <span class="algo-title">{title}</span>
   </figcaption>
