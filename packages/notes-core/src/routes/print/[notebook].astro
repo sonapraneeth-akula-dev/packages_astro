@@ -21,16 +21,22 @@ export async function getStaticPaths() {
   return buildNotebookPrintRoutes(entries);
 }
 
-const { notebook, entries } = Astro.props;
+const { notebook, parts } = Astro.props;
 
-// Render every page up front so they can be laid out sequentially below.
-const pages = await Promise.all(
-  entries.map(async (entry) => ({ entry, Content: (await render(entry)).Content })),
+// Flatten to every chapter, then render each page's Content up front, keyed by
+// entry id so the part/chapter structure below can lay them out in order.
+const chapters = parts.flatMap((part) => part.chapters);
+const rendered = new Map(
+  await Promise.all(
+    chapters.map(
+      async (ch) => [ch.entry.id, (await render(ch.entry)).Content] as const,
+    ),
+  ),
 );
 
 // Ship KaTeX CSS only when at least one page has math.
-const needsKatex = entries.some(
-  (e) => e.data.math || /(?<!\\)\$/.test(e.body ?? ''),
+const needsKatex = chapters.some(
+  ({ entry }) => entry.data.math || /(?<!\\)\$/.test(entry.body ?? ''),
 );
 ---
 
@@ -54,30 +60,42 @@ const needsKatex = entries.some(
       </p>
     </header>
 
-    {pages.map(({ entry, Content }) => {
-      // Per-page caption alignment (site default + per-page override).
-      Astro.locals.captionAlign = {
-        algorithm: resolveCaptionAlign('algorithm', docsConfig.captionAlign, entry.data.captionAlign),
-        listing: resolveCaptionAlign('listing', docsConfig.captionAlign, entry.data.captionAlign),
-        figure: resolveCaptionAlign('figure', docsConfig.captionAlign, entry.data.captionAlign),
-      };
-      return (
-        <section class="print-doc">
-          <article class="doc">
-            <header class="doc-head">
-              <h1>
-                {entry.data.cover && <span class="doc-cover" aria-hidden="true">{entry.data.cover} </span>}
-                {entry.data.title}
-              </h1>
-              {entry.data.description && <p class="doc-lede">{entry.data.description}</p>}
-            </header>
-            <div class="doc-body">
-              <Content components={components} />
-            </div>
-          </article>
-        </section>
-      );
-    })}
+    {parts.map((part) => (
+      <>
+        {part.label && (
+          <header class="print-part">
+            {part.number && <p class="print-part-kicker">Part {part.number}</p>}
+            <h2>{part.label}</h2>
+          </header>
+        )}
+        {part.chapters.map(({ entry, number }) => {
+          const Content = rendered.get(entry.id)!;
+          // Per-page caption alignment (site default + per-page override).
+          Astro.locals.captionAlign = {
+            algorithm: resolveCaptionAlign('algorithm', docsConfig.captionAlign, entry.data.captionAlign),
+            listing: resolveCaptionAlign('listing', docsConfig.captionAlign, entry.data.captionAlign),
+            figure: resolveCaptionAlign('figure', docsConfig.captionAlign, entry.data.captionAlign),
+          };
+          return (
+            <section class="print-doc">
+              <article class="doc">
+                <header class="doc-head">
+                  <h1>
+                    {number && <span class="print-chapter-no">{number}. </span>}
+                    {entry.data.cover && <span class="doc-cover" aria-hidden="true">{entry.data.cover} </span>}
+                    {entry.data.title}
+                  </h1>
+                  {entry.data.description && <p class="doc-lede">{entry.data.description}</p>}
+                </header>
+                <div class="doc-body">
+                  <Content components={components} />
+                </div>
+              </article>
+            </section>
+          );
+        })}
+      </>
+    ))}
   </div>
 </BaseLayout>
 
@@ -127,6 +145,26 @@ const needsKatex = entries.some(
   .doc-head { margin-bottom: 1.5rem; }
   .doc-head h1 { margin: 0 0 0.5rem; }
 
+  /* Part divider (from a top-level sidebar group). */
+  .print-part {
+    margin-top: 3.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--text);
+  }
+  .print-part-kicker {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-text, var(--text-muted));
+  }
+  .print-part h2 {
+    margin: 0.25rem 0 0;
+    font-size: clamp(1.6rem, 3.5vw, 2.25rem);
+  }
+  .print-chapter-no { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
   /* Screen-only: no dialog on print, so drop the hint from the PDF. */
   @media print {
     .print-hint { display: none !important; }
@@ -134,5 +172,9 @@ const needsKatex = entries.some(
     /* Start each chapter on a fresh page in the exported PDF. */
     .print-doc { break-before: page; }
     .print-cover { break-after: page; border-bottom: 0; }
+    /* Begin every part on its own page, and never orphan its heading. */
+    .print-part { break-before: page; break-after: avoid; }
+    /* The part already forces a page break, so its first chapter shouldn't. */
+    .print-part + .print-doc { break-before: auto; }
   }
 </style>

@@ -574,16 +574,51 @@ export interface NotebookPrintRoute {
   props: {
     /** The notebook being printed. */
     notebook: Notebook;
-    /** Every page of the notebook, in reading (sidebar) order. */
-    entries: DocEntry[];
+    /** The notebook's pages grouped into parts, in reading order. */
+    parts: PrintPart[];
   };
+}
+
+/** A numbered chapter (one page) in the print view. */
+export interface PrintChapter {
+  entry: DocEntry;
+  /** Running chapter number (`'1'`, `'2'`, …); `null` for the overview page. */
+  number: string | null;
+}
+
+/** A part (a top-level sidebar group) in the print view. */
+export interface PrintPart {
+  /** Part name (the group label); `null` for the ungrouped lead-in chapters. */
+  label: string | null;
+  /** Part number as a Roman numeral (`'I'`, `'II'`, …); `null` when unlabelled. */
+  number: string | null;
+  chapters: PrintChapter[];
+}
+
+/** Small Roman-numeral formatter for part numbers (1 → I, 4 → IV). */
+function toRoman(n: number): string {
+  const map: Array<[number, string]> = [
+    [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'],
+    [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'],
+    [5, 'V'], [4, 'IV'], [1, 'I'],
+  ];
+  let out = '';
+  for (const [value, sym] of map) {
+    while (n >= value) {
+      out += sym;
+      n -= value;
+    }
+  }
+  return out;
 }
 
 /**
  * Compute one print route per notebook (`/print/<id>`), gathering all of that
  * notebook's pages in reading order so a whole handbook can be rendered on a
- * single page and saved as one PDF. Notebooks mode only; a curated
- * `sidebar.json` (single-tree mode) yields no print routes.
+ * single page and saved as one PDF. Top-level sidebar groups become numbered
+ * "parts" and each page a running-numbered chapter, so the printed book reads
+ * with part names and chapter numbers the on-screen note pages don't show.
+ * Notebooks mode only; a curated `sidebar.json` (single-tree mode) yields none.
  */
 export function buildNotebookPrintRoutes(
   entries: DocEntry[],
@@ -592,12 +627,40 @@ export function buildNotebookPrintRoutes(
   const bySlug = new Map(live.map((e) => [entrySlug(e), e]));
   return getNotebooks(live).map((notebook) => {
     const tree = buildNotebookSidebar(live, notebook);
-    const ordered: DocEntry[] = [];
-    for (const link of flattenSidebar(tree)) {
-      const entry = bySlug.get(link.href);
-      if (entry && notebookSegment(entry) === notebook.id) ordered.push(entry);
+    const parts: PrintPart[] = [];
+    let chapterNo = 0;
+    let partNo = 0;
+    let lead: PrintPart | null = null; // open run of ungrouped top-level chapters
+
+    const toChapter = (href: string, isOverview: boolean): PrintChapter | null => {
+      const entry = bySlug.get(href);
+      if (!entry || notebookSegment(entry) !== notebook.id) return null;
+      return { entry, number: isOverview ? null : String(++chapterNo) };
+    };
+
+    for (const node of tree) {
+      if (node.type === 'group') {
+        lead = null; // a part closes any preceding ungrouped run
+        partNo += 1;
+        const chapters: PrintChapter[] = [];
+        for (const link of flattenSidebar([node])) {
+          const chapter = toChapter(link.href, false);
+          if (chapter) chapters.push(chapter);
+        }
+        if (chapters.length > 0) {
+          parts.push({ label: node.label, number: toRoman(partNo), chapters });
+        }
+      } else {
+        const chapter = toChapter(node.href, node.href === notebook.href);
+        if (!chapter) continue;
+        if (!lead) {
+          lead = { label: null, number: null, chapters: [] };
+          parts.push(lead);
+        }
+        lead.chapters.push(chapter);
+      }
     }
-    return { params: { notebook: notebook.id }, props: { notebook, entries: ordered } };
+    return { params: { notebook: notebook.id }, props: { notebook, parts } };
   });
 }
 
