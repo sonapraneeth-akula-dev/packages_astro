@@ -77,7 +77,7 @@ const needsKatex = chapters.some(
             figure: resolveCaptionAlign('figure', docsConfig.captionAlign, entry.data.captionAlign),
           };
           return (
-            <section class="print-doc">
+            <section class:list={['print-doc', { 'is-numbered': number }]}>
               <article class="doc">
                 <header class="doc-head">
                   <h1>
@@ -164,6 +164,32 @@ const needsKatex = chapters.some(
     font-size: clamp(1.6rem, 3.5vw, 2.25rem);
   }
   .print-chapter-no { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+  /* Hierarchical section numbering for the in-page headings of numbered
+     chapters (##/### → 1.1, 1.1.1 …), tracking each chapter's number. The
+     content headings come from MDX (unscoped), so the descendant selectors are
+     :global; the counters live on the scoped chapter wrappers. */
+  .print-view { counter-reset: chap; }
+  .print-doc.is-numbered { counter-increment: chap; }
+  .print-doc.is-numbered :global(.doc-body) { counter-reset: sec; }
+  .print-doc.is-numbered :global(.doc-body h2) { counter-increment: sec; counter-reset: sub; }
+  .print-doc.is-numbered :global(.doc-body h3) { counter-increment: sub; counter-reset: subsub; }
+  .print-doc.is-numbered :global(.doc-body h4) { counter-increment: subsub; }
+  .print-doc.is-numbered :global(.doc-body h2)::before {
+    content: counter(chap) '.' counter(sec) '\2002';
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .print-doc.is-numbered :global(.doc-body h3)::before {
+    content: counter(chap) '.' counter(sec) '.' counter(sub) '\2002';
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .print-doc.is-numbered :global(.doc-body h4)::before {
+    content: counter(chap) '.' counter(sec) '.' counter(sub) '.' counter(subsub) '\2002';
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
 
   /* Screen-only: no dialog on print, so drop the hint from the PDF. */
   @media print {
