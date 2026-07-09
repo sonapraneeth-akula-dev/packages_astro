@@ -10,6 +10,21 @@ version. The headings below summarise changes across all workspaces.
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-07-08
+
+### Changed
+
+- Upgrade the Expressive Code catalog dependencies `astro-expressive-code` and
+  `@expressive-code/plugin-line-numbers` `^0.43.1` → `^0.44.0`. Verified against
+  `astro check` across all sites (0 errors). (`chore(deps)`)
+
+### Notes
+
+- Held `typescript` at `^6.0.3`: TypeScript 7 (the native compiler) is not yet
+  supported by `@astrojs/check` / the Astro language server, which crashes on
+  `astro check` (`Cannot read properties of undefined (reading 'fileExists')`).
+  Revisit once the Astro tooling adds TS 7 support.
+
 ## [2.1.0] - 2026-07-08
 
 ### Changed
