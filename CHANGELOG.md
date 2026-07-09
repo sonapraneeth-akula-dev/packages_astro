@@ -10,6 +10,26 @@ version. The headings below summarise changes across all workspaces.
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-07-08
+
+### Changed
+
+- Bump catalog and root dependencies within their existing semver ranges:
+  `astro` `^7.0.2` → `^7.0.7`, `@types/node` `^26.0.1` → `^26.1.1`,
+  `@astrojs/rss` `^4.0.18` → `^4.0.19`, `@astrojs/markdown-remark` `^7.2.0` →
+  `^7.2.1`, `@astrojs/mdx` `^7.0.0` → `^7.0.2`. (`chore(deps)`)
+- Point the default Bun install registry at the Microsoft CFS proxy
+  (`https://packagefeedproxy.microsoft.io/npm/`) in `bunfig.toml`, required on
+  Microsoft-managed devices where direct `registry.npmjs.org` access is blocked.
+  (`chore(build)`)
+- Bump every workspace package a minor version to release the dependency
+  refresh together.
+
+### Added
+
+- Root `README.md` documenting the package-registry configuration and how to
+  switch back to the public registry on non-Microsoft devices. (`docs`)
+
 ## [2.0.0] - 2026-06-25
 
 ### Changed

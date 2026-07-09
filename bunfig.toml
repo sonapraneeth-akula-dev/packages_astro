@@ -15,3 +15,15 @@
 #   standalone blog (a single hoisted package).
 [install]
 linker = "hoisted"
+
+# Package registry.
+#
+# Points at the Microsoft CFS (Central Feed Services) proxy, which is required
+# on Microsoft-managed devices where direct access to registry.npmjs.org is
+# blocked by policy. CFS transparently proxies public npm, so it serves the
+# full npm catalog plus the quarantine/vetting protection.
+#
+# NOTE: When developing OUTSIDE a Microsoft-managed device, switch this back to
+# the public registry (or comment it out to use Bun's default):
+#   registry = "https://registry.npmjs.org/"
+registry = "https://packagefeedproxy.microsoft.io/npm/"
