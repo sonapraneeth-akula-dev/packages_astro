@@ -12,8 +12,9 @@ import { buildNotebookPrintRoutes } from '../../utils/docs';
 import { resolveCaptionAlign } from '../../config';
 import { docsConfig } from 'virtual:notes-core/config';
 import { components } from 'virtual:notes-core/components';
-// KaTeX stylesheet URL (emitted as a cached file, not inlined) for LaTeX math.
-import katexHref from 'katex/dist/katex.min.css?url';
+// KaTeX stylesheet for LaTeX math. Side-effect import (approach 1) so it works
+// in dev and prod alike — see docs/math-rendering.md.
+import 'katex/dist/katex.min.css';
 
 export async function getStaticPaths() {
   if (!docsConfig.notebooks) return [];
@@ -33,11 +34,6 @@ const rendered = new Map(
     ),
   ),
 );
-
-// Ship KaTeX CSS only when at least one page has math.
-const needsKatex = chapters.some(
-  ({ entry }) => entry.data.math || /(?<!\\)\$/.test(entry.body ?? ''),
-);
 ---
 
 <BaseLayout
@@ -45,7 +41,6 @@ const needsKatex = chapters.some(
   title={`Print · ${notebook.label}`}
   description={notebook.description}
 >
-  {needsKatex && <link rel="stylesheet" href={katexHref} />}
   <div class="print-view container">
     <header class="print-cover">
       <h1>

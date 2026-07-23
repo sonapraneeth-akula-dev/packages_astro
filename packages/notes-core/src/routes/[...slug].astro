@@ -28,10 +28,6 @@ export async function getStaticPaths() {
 const { entry, tree, prev, next, breadcrumbs, notebook, backLink } = Astro.props;
 const { Content, headings } = await render(entry);
 
-// Ship KaTeX CSS only when the note has math: `math: true` in frontmatter, or an
-// unescaped `$` in the body (remark-math's delimiter).
-const needsKatex = entry.data.math || /(?<!\\)\$/.test(entry.body ?? '');
-
 // Resolve caption alignment (site default + per-page override) once and expose
 // it to the caption components rendered inside <Content> via Astro.locals.
 Astro.locals.captionAlign = {
@@ -56,7 +52,6 @@ Astro.locals.captionAlign = {
   editUrl={editUrl(entry, docsConfig.editUrlBase)}
   cover={entry.data.cover}
   tableOfContents={entry.data.tableOfContents}
-  needsKatex={needsKatex}
   notebookLabel={notebook?.label}
   backLink={backLink ?? undefined}
   printHref={notebook ? `/print/${notebook.id}` : undefined}
