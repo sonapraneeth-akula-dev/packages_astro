@@ -5,6 +5,21 @@ All notable changes to `@sonapraneeth/notes-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-07-24
+
+### Added
+
+- `printSectionNumbers` config option (default `true`) that toggles the notebook
+  print view's automatic in-page section numbering (chapter.section on
+  `##`/`###`/`####`). Set `false` for notebooks whose headings carry their own
+  numbering. Implemented via a `.number-sections` class on the print view.
+
+### Fixed
+
+- Tables in the notebook print view rendered without borders: the print route
+  uses `BaseLayout` (not `DocLayout`) and so never inherited its table styles.
+  The bordered table styling is now restated in the print route.
+
 ## [2.7.0] - 2026-07-22
 
 ### Changed

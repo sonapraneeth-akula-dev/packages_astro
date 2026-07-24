@@ -41,7 +41,7 @@ const rendered = new Map(
   title={`Print · ${notebook.label}`}
   description={notebook.description}
 >
-  <div class="print-view container">
+  <div class:list={['print-view container', { 'number-sections': docsConfig.printSectionNumbers !== false }]}>
     <header class="print-cover">
       <h1>
         {notebook.cover && <span class="print-cover-glyph" aria-hidden="true">{notebook.cover} </span>}
@@ -140,6 +140,22 @@ const rendered = new Map(
   .doc-head { margin-bottom: 1.5rem; }
   .doc-head h1 { margin: 0 0 0.5rem; }
 
+  /* Tables: the print layout uses BaseLayout (not DocLayout), so it doesn't
+     inherit DocLayout's bordered table styles — restate them here. */
+  .print-doc :global(.doc-body table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+  }
+  .print-doc :global(.doc-body th),
+  .print-doc :global(.doc-body td) {
+    border: 1px solid var(--border);
+    padding: 0.6rem 0.85rem;
+    text-align: left;
+  }
+  .print-doc :global(.doc-body th) { background: var(--bg-subtle); }
+
   /* Part divider (from a top-level sidebar group). */
   .print-part {
     margin-top: 3.5rem;
@@ -170,17 +186,17 @@ const rendered = new Map(
   .print-doc.is-numbered :global(.doc-body h2) { counter-increment: sec; counter-reset: sub; }
   .print-doc.is-numbered :global(.doc-body h3) { counter-increment: sub; counter-reset: subsub; }
   .print-doc.is-numbered :global(.doc-body h4) { counter-increment: subsub; }
-  .print-doc.is-numbered :global(.doc-body h2)::before {
+  .number-sections .print-doc.is-numbered :global(.doc-body h2)::before {
     content: counter(chap) '.' counter(sec) '\2002';
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
   }
-  .print-doc.is-numbered :global(.doc-body h3)::before {
+  .number-sections .print-doc.is-numbered :global(.doc-body h3)::before {
     content: counter(chap) '.' counter(sec) '.' counter(sub) '\2002';
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
   }
-  .print-doc.is-numbered :global(.doc-body h4)::before {
+  .number-sections .print-doc.is-numbered :global(.doc-body h4)::before {
     content: counter(chap) '.' counter(sec) '.' counter(sub) '.' counter(subsub) '\2002';
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;

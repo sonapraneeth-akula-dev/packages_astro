@@ -65,6 +65,13 @@ export interface DocsConfig extends SiteChrome {
    * field.
    */
   captionAlign?: CaptionAlignConfig;
+  /**
+   * Number in-page section headings (##/###/#### → 1.1, 1.1.1 …) inside each
+   * numbered chapter of the notebook print view. Chapter and part numbers are
+   * unaffected. Set `false` for notebooks whose headings already carry their own
+   * numbering (e.g. manually numbered patterns). Defaults to `true`.
+   */
+  printSectionNumbers?: boolean;
 }
 
 const ICON_HOME =
