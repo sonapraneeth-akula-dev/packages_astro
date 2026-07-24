@@ -1,5 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { connect } from 'node:net';
+import { rmSync } from 'node:fs';
 import chokidar from 'chokidar';
 
 /**
@@ -69,7 +70,28 @@ let startedAt = 0;
 let failedProbes = 0;
 let shuttingDown = false;
 
+/**
+ * Astro writes a lock file (`.astro/dev.json`) recording the dev server's PID
+ * and refuses to boot if that PID still looks alive. When this watchdog kills a
+ * hung server with SIGKILL, Astro never runs its `server.stop` cleanup, so the
+ * lock is left behind. On the next boot Astro's liveness check
+ * (`process.kill(pid, 0)`) can hit a *reused* PID inside the container's PID
+ * namespace and treat the dead server as still running — an endless
+ * "Another astro dev server is already running" restart loop that leaves Caddy
+ * returning 502. Since this watchdog is the sole supervisor of the dev server,
+ * there is never a legitimately-running instance at (re)start time that it did
+ * not just kill, so clearing the stale lock before each launch is always safe.
+ */
+function removeStaleLock(): void {
+  try {
+    rmSync('.astro/dev.json', { force: true });
+  } catch {
+    /* nothing to clean up */
+  }
+}
+
 function start(): void {
+  removeStaleLock();
   failedProbes = 0;
   startedAt = Date.now();
   console.log(`[dev-server] Starting Astro dev server on port ${PORT}…`);
