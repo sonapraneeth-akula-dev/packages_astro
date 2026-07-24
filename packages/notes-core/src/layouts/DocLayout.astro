@@ -40,6 +40,10 @@ interface Props {
   tags?: string[];
   /** Search-only keywords/aliases (indexed by Pagefind, hidden on the page). */
   keywords?: string[];
+  /** Optional Chapter number/label for auto-numbering. */
+  chapter?: string;
+  /** Optional Part number/label for auto-numbering. */
+  part?: string;
 }
 
 const {
@@ -63,6 +67,8 @@ const {
   category,
   tags = [],
   keywords = [],
+  chapter,
+  part,
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
@@ -155,7 +161,11 @@ const showToc = tableOfContents && headings.length > 0;
       </header>
 
       <div class="doc-grid">
-        <div class:list={['doc-body', { 'has-toc': showToc }]}>
+        <div
+          class:list={['doc-body', { 'has-toc': showToc }]}
+          data-chapter={chapter}
+          style={chapter ? `--chapter-number: "${chapter}";` : undefined}
+        >
           <slot />
           {keywords.length > 0 && (
             <span class="doc-keywords" aria-hidden="true" data-pagefind-weight="0.5">{keywords.join(' ')}</span>

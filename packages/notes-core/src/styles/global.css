@@ -460,6 +460,61 @@ a.chip:hover {
       1.56rem 0 0 #27c93f;
   }
 
+  /* In-page heading numbering for single-page print views (##/###/####) */
+  .docs .doc-body {
+    counter-reset: sec;
+  }
+
+  .docs .doc-body h2 {
+    counter-increment: sec;
+    counter-reset: sub;
+  }
+
+  .docs .doc-body h3 {
+    counter-increment: sub;
+    counter-reset: subsub;
+  }
+
+  .docs .doc-body h4 {
+    counter-increment: subsub;
+  }
+
+  .docs .doc-body[data-chapter] h2::before {
+    content: var(--chapter-number) '.' counter(sec) '\2002';
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .docs .doc-body:not([data-chapter]) h2::before {
+    content: counter(sec) '.' '\2002';
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .docs .doc-body[data-chapter] h3::before {
+    content: var(--chapter-number) '.' counter(sec) '.' counter(sub) '\2002';
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .docs .doc-body:not([data-chapter]) h3::before {
+    content: counter(sec) '.' counter(sub) '\2002';
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .docs .doc-body[data-chapter] h4::before {
+    content: var(--chapter-number) '.' counter(sec) '.' counter(sub) '.' counter(subsub) '\2002';
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .docs .doc-body:not([data-chapter]) h4::before {
+    content: counter(sec) '.' counter(sub) '.' counter(subsub) '\2002';
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
   @page {
     margin: 1.5cm;
   }
