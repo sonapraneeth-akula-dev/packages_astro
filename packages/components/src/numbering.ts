@@ -2,8 +2,9 @@
  * Build-time auto-numbering for referenceable blocks (notes engine).
  *
  * Parses every note under a site's `content/` directory and assigns each labeled
- * block (`<Callout id>`, `<Algorithm id>`, `<Listing id>`) a hierarchical number
- * of the form `[part.][chapter.]section[.subsection].n`, where:
+ * block (`<Callout id>`, `<Algorithm id>`, `<Listing id>`, `<DocImage id>`) a
+ * hierarchical number of the form `[part.][chapter.]section[.subsection].n`,
+ * where:
  *
  * - `part` / `chapter` come from the page's frontmatter (`part:` / `chapter:`),
  * - `section` / `subsection` are auto-derived from `##` / `###` headings,
@@ -28,7 +29,7 @@ export interface NumberEntry {
   number: string;
   label: string;
   url: string;
-  type: 'Callout' | 'Algorithm' | 'Listing';
+  type: 'Callout' | 'Algorithm' | 'Listing' | 'Figure';
 }
 export interface NumberingMap {
   byId: Record<string, NumberEntry>;
@@ -36,10 +37,19 @@ export interface NumberingMap {
 
 type BlockType = NumberEntry['type'];
 
+/** MDX tag name → the block type it is numbered as. */
+const TAG_TYPE: Record<string, BlockType> = {
+  Callout: 'Callout',
+  Algorithm: 'Algorithm',
+  Listing: 'Listing',
+  DocImage: 'Figure',
+};
+
 const DEFAULT_LABEL: Record<BlockType, string> = {
   Callout: 'Note',
   Algorithm: 'Algorithm',
   Listing: 'Listing',
+  Figure: 'Figure',
 };
 const CALLOUT_TYPE_LABEL: Record<string, string> = {
   note: 'Note',
@@ -95,7 +105,7 @@ function walk(dir: string): string[] {
 }
 
 const TOKEN =
-  /(?:^|\n)(#{2,6})[ \t]+[^\n]*|<(Callout|Algorithm|Listing)\s+id=["']([^"']+)["']([^>]*?)\/?>/g;
+  /(?:^|\n)(#{2,6})[ \t]+[^\n]*|<(Callout|Algorithm|Listing|DocImage)\s+id=["']([^"']+)["']([^>]*?)\/?>/g;
 
 /** Parse all notes and compute the id → number map. */
 export function buildNumberingMap(contentDir: string): NumberingMap {
@@ -111,11 +121,17 @@ export function buildNumberingMap(contentDir: string): NumberingMap {
 
     let section = 0;
     let subsection = 0;
-    const counters: Record<BlockType, number> = { Callout: 0, Algorithm: 0, Listing: 0 };
+    const counters: Record<BlockType, number> = {
+      Callout: 0,
+      Algorithm: 0,
+      Listing: 0,
+      Figure: 0,
+    };
     const resetCounters = () => {
       counters.Callout = 0;
       counters.Algorithm = 0;
       counters.Listing = 0;
+      counters.Figure = 0;
     };
 
     TOKEN.lastIndex = 0;
@@ -134,7 +150,7 @@ export function buildNumberingMap(contentDir: string): NumberingMap {
         }
       } else if (m[2]) {
         // A numbered block.
-        const type = m[2] as BlockType;
+        const type = TAG_TYPE[m[2]];
         const id = m[3];
         const attrs = m[4] ?? '';
         counters[type] += 1;
