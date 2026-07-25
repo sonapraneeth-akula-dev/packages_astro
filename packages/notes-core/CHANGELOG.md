@@ -5,6 +5,22 @@ All notable changes to `@sonapraneeth/notes-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.0] - 2026-07-25
+
+### Added
+
+- Mermaid diagram rendering in the docs engine, via the theme-aware renderer in
+  `@sonapraneeth/components` and the `remark-mermaid` transform in the satteri
+  plugin.
+
+### Changed
+
+- Upgrade catalog dependencies to their latest published versions: `astro`
+  `^7.0.2` → `^7.1.1`, `katex` `^0.17.0` → `^0.18.0`. KaTeX rendering was
+  verified in the browser (0 `.katex-error` nodes) after the upgrade.
+- `mermaid` is now a resolvable catalog entry (`^11.16.0`); it was previously
+  referenced as `catalog:` with no matching catalog definition.
+
 ## [2.9.0] - 2026-07-24
 
 ### Added

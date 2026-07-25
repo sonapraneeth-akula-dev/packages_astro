@@ -10,6 +10,67 @@ version. The headings below summarise changes across all workspaces.
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-07-25
+
+### Added
+
+- Mermaid diagram support across the platform: a theme-aware client-side
+  renderer in `@sonapraneeth/components`, a `remark-mermaid` transform in the
+  satteri plugin that rewrites ```` ```mermaid ```` fences to `<pre>` elements,
+  and wiring in both the notes and blog engines. (`feat(mermaid)`)
+- `printSectionNumbers` config option (default `true`) toggling the notebook
+  print view's automatic `chapter.section` numbering on `##`/`###`/`####`.
+  (`feat(notes-core/print)`)
+- In-page heading numbering for single-page print views, mapping to
+  `--chapter-number` when `data-chapter` exists and falling back to raw
+  numerals. (`feat(notes-core/print)`)
+
+### Changed
+
+- Add `mermaid` to the root catalog (`^11.16.0`). `@sonapraneeth/components`
+  already declared `"mermaid": "catalog:"` but the catalog had no matching
+  entry, so `bun update` failed to resolve it and mermaid was never installed —
+  the lazy `import('mermaid')` in `mermaid-client.ts` would have failed at
+  runtime. (`fix(deps)`)
+- Upgrade catalog and root dependencies to their latest published versions:
+  `astro` `^7.0.2` → `^7.1.1`, `katex` `^0.17.0` → `^0.18.0`, `pagefind`
+  `^1.3.0` → `^1.5.2`, `@types/node` `^26.0.1` → `^26.1.1`, `@astrojs/mdx`
+  `^7.0.2` → `^7.0.3`. (`chore(deps)`)
+- Align every workspace's literal dependency range with the installed latest:
+  `@astrojs/rss` `^4.0.18` → `^4.0.19` (blog-core), `@astrojs/markdown-remark`
+  `^7.2.0` → `^7.2.1`, `@astrojs/mdx` `^7.0.0` → `^7.0.3`, `unist-util-visit`
+  `^5.0.0` → `^5.1.0`, `@types/hast` `^3.0.4` → `^3.0.5` (satteri).
+  (`chore(deps)`)
+- Raise the satteri plugin's `astro` peer range `^7.0.0` → `^7.1.1` to match
+  the version every workspace now resolves. (`chore(deps)`)
+- Bump every workspace package a minor version to release the Mermaid support
+  and dependency refresh together.
+
+### Fixed
+
+- KaTeX stylesheet is now loaded via a global side-effect import
+  (`import 'katex/dist/katex.min.css'`) instead of a `?url` import plus a
+  conditional `<link>`, which `astro dev` served as a JavaScript module — the
+  stylesheet never applied and math rendered twice (e.g. `O(n)O(n)`).
+  (`fix(astro/katex)`)
+- Tables in the notebook print view rendered without borders: the print route
+  uses `BaseLayout` (not `DocLayout`) and never inherited its table styles.
+  (`fix(notes-core/print)`)
+- Dev server no longer aborts on a stale lock file. (`fix(scripts)`)
+
+### Notes
+
+- Held `typescript` at `^6.0.3` again. TypeScript 7 (7.0.2) is available but
+  crashes `astro check` via `@astrojs/check` / `@volar/kit`
+  (`Cannot read properties of undefined (reading 'useCaseSensitiveFileNames')`).
+  Revisit once the Astro language server supports TS 7.
+- Docker base images were checked and are already current:
+  `oven/bun:1.3.14-alpine` and `caddy:2.11-alpine`.
+- `app/package.json` is an orphaned copy of `app/notes/go/package.json`; it
+  matches no `workspaces` glob and is not part of the install graph. Its
+  dependency ranges were refreshed for consistency but its `version` was left
+  untouched. It should probably be deleted.
+
 ## [2.1.1] - 2026-07-08
 
 ### Changed
@@ -81,5 +142,6 @@ version. The headings below summarise changes across all workspaces.
   (`fix(blog-core)`)
 - Tighten search excerpt highlights to the matched word. (`fix(search)`)
 
-[Unreleased]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.1.1...v2.2.0
 [2.0.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v1.1.0...v2.0.0

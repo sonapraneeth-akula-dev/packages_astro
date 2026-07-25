@@ -1,6 +1,6 @@
 {
   "name": "@sonapraneeth/blog-core",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "type": "module",
   "description": "Shared blog engine for Astro + MDX: components, layouts, injected routes, posts collection, config schema and an Astro config factory.",
   "exports": {
@@ -17,7 +17,7 @@
     "./utils/*": "./src/utils/*"
   },
   "dependencies": {
-    "@astrojs/rss": "^4.0.18",
+    "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "catalog:",
     "@expressive-code/plugin-line-numbers": "catalog:",
     "@sonapraneeth/components": "workspace:*",
