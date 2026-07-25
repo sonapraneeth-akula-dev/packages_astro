@@ -10,6 +10,7 @@ import {
 import { execSync } from 'node:child_process';
 import { resolveTheme, themeFontEntries } from '@sonapraneeth/components/theme';
 import { pwa } from '@sonapraneeth/components/pwa';
+import { mermaid } from '@sonapraneeth/components/mermaid';
 import { blogRoutes } from './routes-integration';
 import { numbering } from '@sonapraneeth/components/numbering';
 import type { BlogConfig } from './config';
@@ -99,6 +100,10 @@ export function defineBlogAstroConfig(options: BlogAstroConfigOptions) {
       // <Listing>, numbered <Callout>) + <Ref>. Blog posts carry no
       // `part`/`chapter`, so numbers are heading-based (`section.subsection.n`).
       numbering(),
+      // Client runtime for ```mermaid diagrams: the satteri processor rewrites
+      // those fences into <pre class="mermaid"> (bypassing Expressive Code), and
+      // this injects the lazy, theme-aware renderer. No-op on diagram-free pages.
+      mermaid(),
       // The engine owns all page routing/search: this injects the home feed,
       // posts, categories, tags, search, RSS and 404 so sites need no
       // `src/pages/` of their own.
