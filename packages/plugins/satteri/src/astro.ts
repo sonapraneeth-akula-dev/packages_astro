@@ -12,6 +12,7 @@ import rehypeSlug from 'rehype-slug';
 import remarkMath from 'remark-math';
 import rehypeSatteriAutolinkHeadings from './index';
 import { remarkCodeSource, type CodeSourceOptions } from './remark-code-source';
+import { remarkMermaid } from './remark-mermaid';
 
 /** Options shared by the satteri Markdown/MDX preset functions. */
 export interface SatteriPresetOptions {
@@ -56,7 +57,7 @@ export function satteriMdx() {
  */
 export function satteriMarkdownProcessor(options: SatteriPresetOptions = {}) {
   return unified({
-    remarkPlugins: [remarkMath, [remarkCodeSource, options.codeSource ?? {}]],
+    remarkPlugins: [remarkMath, [remarkCodeSource, options.codeSource ?? {}], remarkMermaid],
     rehypePlugins: [rehypeSlug, rehypeSatteriAutolinkHeadings, rehypeKatex],
   });
 }

@@ -17,7 +17,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./astro": "./src/astro.ts",
-    "./remark-code-source": "./src/remark-code-source.ts"
+    "./remark-code-source": "./src/remark-code-source.ts",
+    "./remark-mermaid": "./src/remark-mermaid.ts"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.2.0",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",
+    "@types/mdast": "^4.0.4",
     "@types/node": "catalog:",
     "typescript": "catalog:"
   }
