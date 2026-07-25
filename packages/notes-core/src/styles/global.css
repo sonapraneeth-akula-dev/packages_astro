@@ -498,6 +498,12 @@ pre.mermaid>svg {
     display: none !important;
   }
 
+  /* Content opt-out: wrap anything screen-only (collapsed accordions, copyable
+     tool prompts, …) in `<div class="no-print">` to drop it from the PDF. */
+  .no-print {
+    display: none !important;
+  }
+
   .container {
     width: 100%;
     max-width: none;
