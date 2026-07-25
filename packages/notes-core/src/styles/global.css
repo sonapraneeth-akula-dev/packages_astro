@@ -449,7 +449,8 @@ pre.mermaid>svg {
   margin-inline: auto;
 }
 
-/* Click-to-enlarge overlay for Mermaid diagrams. */
+/* Click-to-enlarge overlay, shared by Mermaid diagrams and <DocImage> figures. */
+.lightbox,
 .mermaid-lightbox {
   position: fixed;
   inset: 0;
@@ -462,6 +463,7 @@ pre.mermaid>svg {
   cursor: zoom-out;
 }
 
+.lightbox__content,
 .mermaid-lightbox__content {
   padding: 1.5rem;
   background: var(--surface);
@@ -473,6 +475,15 @@ pre.mermaid>svg {
 .mermaid-lightbox__content svg {
   display: block;
   height: auto;
+}
+
+/* The enlarged figure fills the viewport rather than the article column. */
+.lightbox__content img {
+  display: block;
+  width: min(92vw - 3rem, 100%);
+  max-height: calc(86vh - 3rem);
+  height: auto;
+  object-fit: contain;
 }
 
 /* Print / Save as PDF. Hide the site chrome and print the page in colour. */
