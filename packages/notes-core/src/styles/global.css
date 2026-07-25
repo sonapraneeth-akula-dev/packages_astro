@@ -417,6 +417,64 @@ a.chip:hover {
   }
 }
 
+/* Mermaid diagrams. The remark-mermaid transform emits `<pre class="mermaid">`
+   with the raw definition as text; the client runtime (components/mermaid) swaps
+   it for an <svg>. Hide the raw source until it is processed to avoid a flash of
+   unrendered diagram code, and let the finished SVG scale to the content width. */
+pre.mermaid {
+  margin: 1.5rem 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: center;
+  line-height: normal;
+  /* Click a diagram to open a large, readable copy (see components/mermaid). */
+  cursor: zoom-in;
+}
+
+pre.mermaid:not([data-processed]) {
+  visibility: hidden;
+}
+
+pre.mermaid>svg {
+  /* Scale the diagram to the column. `max-width` must beat Mermaid's inline
+     `style="max-width: …px"`, which would otherwise cap a diagram below the
+     column width and leave dead space beside it. Height follows the
+     (client-normalized) aspect ratio; capping it would letterbox a tall diagram
+     and reintroduce that whitespace. Click opens the enlarged overlay. */
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none !important;
+  margin-inline: auto;
+}
+
+/* Click-to-enlarge overlay for Mermaid diagrams. */
+.mermaid-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  overflow: auto;
+  background: rgb(0 0 0 / 0.72);
+  cursor: zoom-out;
+}
+
+.mermaid-lightbox__content {
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.35);
+}
+
+.mermaid-lightbox__content svg {
+  display: block;
+  height: auto;
+}
+
 /* Print / Save as PDF. Hide the site chrome and print the page in colour. */
 @media print {
 
