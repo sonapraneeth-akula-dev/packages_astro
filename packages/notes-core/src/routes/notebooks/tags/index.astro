@@ -2,25 +2,42 @@
 /**
  * Injected per-notebook tags index route (`/<notebook>/tags`). The same
  * frequency-scaled cloud as the global `/tags`, but counting only the notes
- * inside one notebook. Registered in notebooks mode only.
+ * inside one notebook, followed by those notes and the tags they carry.
+ * Registered in notebooks mode only.
  */
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Icon from '@sonapraneeth/components/Icon.astro';
 import { getLiveDocs, getTags, docsInNotebook } from '../../../utils/taxonomy';
-import { getNotebooks, type Notebook } from '../../../utils/docs';
+import { getNotebooks, entrySlug, entryLabel, type Notebook } from '../../../utils/docs';
+import { slugify } from '../../../utils/format';
 import type { Taxonomy } from '../../../utils/taxonomy';
+import type { DocEntry } from '../../../content';
 import { docsConfig } from 'virtual:notes-core/config';
 
 export const getStaticPaths = (async () => {
   const docs = await getLiveDocs();
-  return getNotebooks(docs).map((notebook) => ({
-    params: { notebook: notebook.id },
-    props: { notebook, tags: getTags(docsInNotebook(docs, notebook.id)) },
-  }));
+  return getNotebooks(docs).map((notebook) => {
+    const scoped = docsInNotebook(docs, notebook.id);
+    return {
+      params: { notebook: notebook.id },
+      props: {
+        notebook,
+        tags: getTags(scoped),
+        // The reverse view of the cloud: each note with the tags it carries.
+        tagged: scoped
+          .filter((doc) => doc.data.tags.length > 0)
+          .sort((a, b) => entryLabel(a).localeCompare(entryLabel(b))),
+      },
+    };
+  });
 }) satisfies GetStaticPaths;
 
-const { notebook, tags } = Astro.props as { notebook: Notebook; tags: Taxonomy[] };
+const { notebook, tags, tagged } = Astro.props as {
+  notebook: Notebook;
+  tags: Taxonomy[];
+  tagged: DocEntry[];
+};
 
 // Scale chip size by relative frequency for a tag-cloud feel.
 const max = Math.max(1, ...tags.map((t) => t.count));
@@ -56,6 +73,30 @@ function scale(count: number): number {
       </a>
     ))}
   </div>
+
+  {tagged.length > 0 && (
+    <div class="container notes">
+      <h2>Notes</h2>
+      <ul class="rows">
+        {tagged.map((doc) => (
+          <li class="card note-row">
+            <a class="note-title" href={entrySlug(doc)}>
+              {doc.data.cover && <span aria-hidden="true">{doc.data.cover} </span>}
+              {entryLabel(doc)}
+            </a>
+            {doc.data.description && <p class="note-desc">{doc.data.description}</p>}
+            <div class="note-taxonomy">
+              {doc.data.tags.map((tag: string) => (
+                <a class="chip" href={`${notebook.href}/tags/${slugify(tag)}`}>
+                  <Icon name="tag" />{tag}
+                </a>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
 </BaseLayout>
 
 <style>
@@ -63,7 +104,7 @@ function scale(count: number): number {
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;
-    padding-bottom: 3rem;
+    padding-bottom: 2.5rem;
     align-items: center;
   }
   .cloud-tag {
@@ -96,5 +137,40 @@ function scale(count: number): number {
   .page-head .eyebrow a,
   .page-head .lede a {
     color: var(--accent-text);
+  }
+  .notes h2 {
+    font-size: 1.15rem;
+    margin: 0 0 1rem;
+  }
+  .rows {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .note-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1rem 1.25rem;
+  }
+  .note-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+  .note-title:hover { color: var(--accent-text); }
+  .note-desc {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .note-taxonomy {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
   }
 </style>

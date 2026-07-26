@@ -2,27 +2,41 @@
 /**
  * Injected per-notebook categories index route (`/<notebook>/categories`). The
  * same card grid as the global `/categories`, but counting only the notes
- * inside one notebook. Registered in notebooks mode only.
+ * inside one notebook, followed by those notes and the category each one
+ * belongs to. Registered in notebooks mode only.
  */
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Icon from '@sonapraneeth/components/Icon.astro';
 import { getLiveDocs, getCategories, docsInNotebook } from '../../../utils/taxonomy';
 import type { Taxonomy } from '../../../utils/taxonomy';
-import { getNotebooks, type Notebook } from '../../../utils/docs';
+import { getNotebooks, entrySlug, entryLabel, type Notebook } from '../../../utils/docs';
+import { slugify } from '../../../utils/format';
+import type { DocEntry } from '../../../content';
 import { docsConfig } from 'virtual:notes-core/config';
 
 export const getStaticPaths = (async () => {
   const docs = await getLiveDocs();
-  return getNotebooks(docs).map((notebook) => ({
-    params: { notebook: notebook.id },
-    props: { notebook, categories: getCategories(docsInNotebook(docs, notebook.id)) },
-  }));
+  return getNotebooks(docs).map((notebook) => {
+    const scoped = docsInNotebook(docs, notebook.id);
+    return {
+      params: { notebook: notebook.id },
+      props: {
+        notebook,
+        categories: getCategories(scoped),
+        // The reverse view of the grid: each note with the category it declares.
+        categorised: scoped
+          .filter((doc) => doc.data.category)
+          .sort((a, b) => entryLabel(a).localeCompare(entryLabel(b))),
+      },
+    };
+  });
 }) satisfies GetStaticPaths;
 
-const { notebook, categories } = Astro.props as {
+const { notebook, categories, categorised } = Astro.props as {
   notebook: Notebook;
   categories: Taxonomy[];
+  categorised: DocEntry[];
 };
 ---
 
@@ -48,6 +62,31 @@ const { notebook, categories } = Astro.props as {
       </a>
     ))}
   </div>
+
+  {categorised.length > 0 && (
+    <div class="container notes">
+      <h2>Notes</h2>
+      <ul class="rows">
+        {categorised.map((doc) => (
+          <li class="card note-row">
+            <a class="note-title" href={entrySlug(doc)}>
+              {doc.data.cover && <span aria-hidden="true">{doc.data.cover} </span>}
+              {entryLabel(doc)}
+            </a>
+            {doc.data.description && <p class="note-desc">{doc.data.description}</p>}
+            <div class="note-taxonomy">
+              <a
+                class="chip chip--accent"
+                href={`${notebook.href}/categories/${slugify(doc.data.category!)}`}
+              >
+                <Icon name="category" />{doc.data.category}
+              </a>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
 </BaseLayout>
 
 <style>
@@ -55,7 +94,7 @@ const { notebook, categories } = Astro.props as {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
     gap: 1.25rem;
-    padding-bottom: 3rem;
+    padding-bottom: 2.5rem;
   }
   .cat-card {
     display: flex;
@@ -70,5 +109,40 @@ const { notebook, categories } = Astro.props as {
   .page-head .eyebrow a,
   .page-head .lede a {
     color: var(--accent-text);
+  }
+  .notes h2 {
+    font-size: 1.15rem;
+    margin: 0 0 1rem;
+  }
+  .rows {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .note-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1rem 1.25rem;
+  }
+  .note-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+  .note-title:hover { color: var(--accent-text); }
+  .note-desc {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .note-taxonomy {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
   }
 </style>

@@ -1,15 +1,23 @@
 ---
 /**
  * Injected tags index route (`/tags`). A frequency-scaled tag cloud linking to
- * each tag's listing page.
+ * each tag's listing page, followed by every tagged note and the tags it
+ * carries.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '@sonapraneeth/components/Icon.astro';
 import { getLiveDocs, getTags } from '../../utils/taxonomy';
+import { entrySlug, entryLabel } from '../../utils/docs';
+import { slugify } from '../../utils/format';
 import { docsConfig } from 'virtual:notes-core/config';
 
 const docs = await getLiveDocs();
 const tags = getTags(docs);
+
+// The reverse view of the cloud: each note with the tags it carries.
+const tagged = docs
+  .filter((doc) => doc.data.tags.length > 0)
+  .sort((a, b) => entryLabel(a).localeCompare(entryLabel(b)));
 
 // Scale chip size by relative frequency for a tag-cloud feel.
 const max = Math.max(1, ...tags.map((t) => t.count));
@@ -34,6 +42,30 @@ function scale(count: number): number {
       </a>
     ))}
   </div>
+
+  {tagged.length > 0 && (
+    <div class="container notes">
+      <h2>Notes</h2>
+      <ul class="rows">
+        {tagged.map((doc) => (
+          <li class="card note-row">
+            <a class="note-title" href={entrySlug(doc)}>
+              {doc.data.cover && <span aria-hidden="true">{doc.data.cover} </span>}
+              {entryLabel(doc)}
+            </a>
+            {doc.data.description && <p class="note-desc">{doc.data.description}</p>}
+            <div class="note-taxonomy">
+              {doc.data.tags.map((tag: string) => (
+                <a class="chip" href={`/tags/${slugify(tag)}`}>
+                  <Icon name="tag" />{tag}
+                </a>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
 </BaseLayout>
 
 <style>
@@ -41,7 +73,7 @@ function scale(count: number): number {
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;
-    padding-bottom: 3rem;
+    padding-bottom: 2.5rem;
     align-items: center;
   }
   .cloud-tag {
@@ -70,5 +102,40 @@ function scale(count: number): number {
     background: var(--bg-subtle);
     padding: 0.05rem 0.4rem;
     border-radius: var(--radius-sm);
+  }
+  .notes h2 {
+    font-size: 1.15rem;
+    margin: 0 0 1rem;
+  }
+  .rows {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .note-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1rem 1.25rem;
+  }
+  .note-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+  .note-title:hover { color: var(--accent-text); }
+  .note-desc {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .note-taxonomy {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
   }
 </style>

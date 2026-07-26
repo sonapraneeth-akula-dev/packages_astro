@@ -1,15 +1,23 @@
 ---
 /**
  * Injected categories index route (`/categories`). Lists every category that
- * at least one note declares in its frontmatter, with note counts.
+ * at least one note declares in its frontmatter, with note counts, followed by
+ * the notes themselves and the category each one belongs to.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '@sonapraneeth/components/Icon.astro';
 import { getLiveDocs, getCategories } from '../../utils/taxonomy';
+import { entrySlug, entryLabel } from '../../utils/docs';
+import { slugify } from '../../utils/format';
 import { docsConfig } from 'virtual:notes-core/config';
 
 const docs = await getLiveDocs();
 const categories = getCategories(docs);
+
+// The reverse view of the grid: each note with the category it declares.
+const categorised = docs
+  .filter((doc) => doc.data.category)
+  .sort((a, b) => entryLabel(a).localeCompare(entryLabel(b)));
 ---
 
 <BaseLayout config={docsConfig} title="Categories" description="Browse notes by category.">
@@ -27,6 +35,28 @@ const categories = getCategories(docs);
       </a>
     ))}
   </div>
+
+  {categorised.length > 0 && (
+    <div class="container notes">
+      <h2>Notes</h2>
+      <ul class="rows">
+        {categorised.map((doc) => (
+          <li class="card note-row">
+            <a class="note-title" href={entrySlug(doc)}>
+              {doc.data.cover && <span aria-hidden="true">{doc.data.cover} </span>}
+              {entryLabel(doc)}
+            </a>
+            {doc.data.description && <p class="note-desc">{doc.data.description}</p>}
+            <div class="note-taxonomy">
+              <a class="chip chip--accent" href={`/categories/${slugify(doc.data.category!)}`}>
+                <Icon name="category" />{doc.data.category}
+              </a>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
 </BaseLayout>
 
 <style>
@@ -34,7 +64,7 @@ const categories = getCategories(docs);
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
     gap: 1.25rem;
-    padding-bottom: 3rem;
+    padding-bottom: 2.5rem;
   }
   .cat-card {
     display: flex;
@@ -46,4 +76,39 @@ const categories = getCategories(docs);
   .cat-card:hover { color: var(--text); }
   .cat-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 0.45rem; }
   .cat-count { color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-mono); }
+  .notes h2 {
+    font-size: 1.15rem;
+    margin: 0 0 1rem;
+  }
+  .rows {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .note-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1rem 1.25rem;
+  }
+  .note-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+  .note-title:hover { color: var(--accent-text); }
+  .note-desc {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .note-taxonomy {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
 </style>
