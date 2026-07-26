@@ -1,0 +1,136 @@
+---
+/**
+ * Reading mode: a floating toggle that strips the page down to the article.
+ *
+ * The button only flips `data-reading` on `<html>` and mirrors it into
+ * `localStorage`; every layout change is pure CSS (see the `html[data-reading]`
+ * rules in each engine's `global.css` plus the article layouts). The attribute
+ * is re-applied before paint in `BaseLayout`, so a stored preference never
+ * flashes the full chrome first.
+ *
+ * Render it only on article pages — outside them the stripped layout would hide
+ * the site's only navigation.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  /**
+   * Lift the button clear of the bottom-right `ThemeSwitcher` FAB. Production
+   * sites usually ship without the switcher, in which case this stays false and
+   * the button takes the corner slot itself.
+   */
+  raised?: boolean;
+}
+
+const { raised = false } = Astro.props;
+---
+
+<button
+  type="button"
+  class:list={['reading-fab', { 'reading-fab--raised': raised }]}
+  data-reading-toggle
+  aria-pressed="false"
+  aria-label="Enter reading mode"
+  title="Reading mode"
+>
+  <span class="reading-fab__enter"><Icon name="book-open" size="1.15rem" /></span>
+  <span class="reading-fab__exit"><Icon name="x" size="1.15rem" /></span>
+</button>
+
+<script>
+  const STORAGE_KEY = 'reading-mode';
+  const html = document.documentElement;
+  const button = document.querySelector<HTMLButtonElement>('[data-reading-toggle]');
+
+  if (button) {
+    const sync = () => {
+      const on = html.hasAttribute('data-reading');
+      const label = on ? 'Exit reading mode' : 'Enter reading mode';
+      button.setAttribute('aria-pressed', String(on));
+      button.setAttribute('aria-label', label);
+      button.title = label;
+    };
+
+    // The pre-paint script may already have turned it on from a stored value.
+    sync();
+
+    button.addEventListener('click', () => {
+      if (html.toggleAttribute('data-reading')) {
+        localStorage.setItem(STORAGE_KEY, 'on');
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+      sync();
+    });
+  }
+</script>
+
+<style>
+  .reading-fab {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    box-shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.35);
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+  .reading-fab:hover {
+    color: var(--accent-text);
+    border-color: var(--border-hover);
+  }
+
+  /* Stack above the ThemeSwitcher FAB, which owns the bottom-right corner when
+     `theme.switcher` is enabled (demo sites). 2.75rem button + 0.6rem gap. */
+  .reading-fab--raised {
+    bottom: 4.35rem;
+  }
+
+  @media (max-width: 40rem) {
+    /* Clear the mobile bottom tab bar. */
+    .reading-fab {
+      bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+    }
+    .reading-fab--raised {
+      bottom: calc(7.6rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  /* Active state: the accent fill makes it obvious the page is deliberately
+     stripped rather than broken. */
+  :global(html[data-reading]) .reading-fab {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-contrast);
+  }
+  :global(html[data-reading]) .reading-fab:hover {
+    color: var(--accent-contrast);
+  }
+
+  .reading-fab__enter,
+  .reading-fab__exit {
+    display: flex;
+  }
+  .reading-fab__exit,
+  :global(html[data-reading]) .reading-fab__enter {
+    display: none;
+  }
+  :global(html[data-reading]) .reading-fab__exit {
+    display: flex;
+  }
+
+  @media print {
+    .reading-fab {
+      display: none !important;
+    }
+  }
+</style>

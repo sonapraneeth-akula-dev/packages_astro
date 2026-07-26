@@ -26,7 +26,7 @@ const { title, description, pubDate, updatedDate, category, tags, keywords, cove
   post.data;
 ---
 
-<BaseLayout title={title} description={description} article>
+<BaseLayout title={title} description={description} article readingMode>
   <ProgressBar />
   <article
     class="post container"
@@ -460,6 +460,26 @@ const { title, description, pubDate, updatedDate, category, tags, keywords, cove
     border-color: var(--border-hover);
     color: var(--accent-text);
     transform: translateY(-1px);
+  }
+
+  /* Reading mode. The site chrome is hidden globally (see global.css); these
+     rules drop the post's own furniture and collapse the TOC column.
+     `html[data-reading]` outranks the plain-class rules above, so ordering
+     against the breakpoints doesn't matter. */
+  :global(html[data-reading]) .post {
+    padding-block: 1.5rem 4rem;
+  }
+  :global(html[data-reading]) .post-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  :global(html[data-reading]) .crumbs,
+  :global(html[data-reading]) .post-actions,
+  :global(html[data-reading]) .post-tags,
+  :global(html[data-reading]) .post-hero,
+  :global(html[data-reading]) .post-foot,
+  :global(html[data-reading]) .post-aside {
+    display: none;
   }
 
   /* Print / Save as PDF: keep only the article, with the table of contents

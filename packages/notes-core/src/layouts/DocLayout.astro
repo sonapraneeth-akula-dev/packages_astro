@@ -75,7 +75,7 @@ const currentPath = Astro.url.pathname;
 const showToc = tableOfContents && headings.length > 0;
 ---
 
-<BaseLayout config={config} title={title} description={description} article>
+<BaseLayout config={config} title={title} description={description} article readingMode>
   <ProgressBar />
   <div class="docs container">
     <DocsSidebar
@@ -471,6 +471,26 @@ const showToc = tableOfContents && headings.length > 0;
 
   @media (min-width: 100rem) {
     .doc-grid { grid-template-columns: minmax(0, 1fr) 18rem; gap: 4.5rem; }
+  }
+
+  /* Reading mode. The sidebar, TOC rail and site chrome are hidden globally
+     (see global.css); these rules collapse what's left to a single column.
+     `html[data-reading]` outranks the plain-class rules above, so ordering
+     against the breakpoints doesn't matter. */
+  :global(html[data-reading]) .docs {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding-block: 1.5rem 4rem;
+  }
+  :global(html[data-reading]) .doc-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  :global(html[data-reading]) .crumbs,
+  :global(html[data-reading]) .doc-taxonomy,
+  :global(html[data-reading]) .doc-actions,
+  :global(html[data-reading]) .doc-aside {
+    display: none;
   }
 
   /* Print / Save as PDF */
