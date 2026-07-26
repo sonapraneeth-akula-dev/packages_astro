@@ -112,23 +112,38 @@ function entryOrder(entry: DocEntry): number {
   return entry.data.sidebar?.order ?? Number.POSITIVE_INFINITY;
 }
 
+/** Strip a markdown/MDX extension from a collection id. */
+function stripExt(id: string): string {
+  return id.replace(/\.(mdx?|markdown)$/i, '');
+}
+
 /** True for the root landing note (`index.mdx` at the collection root). */
 export function isRootIndex(entry: DocEntry): boolean {
   const id = entry.id.replace(/\.(mdx?|markdown)$/i, '');
   return id === 'index' || id === '';
 }
 
-/** Folder-landing index (e.g. `basics/index`) — represents its parent folder. */
+/**
+ * Folder-landing index (`<folder>/index.mdx`) — represents the folder it lives in.
+ *
+ * Astro's glob loader strips a trailing `/index` from ids, so `a/b/index.mdx`
+ * arrives with id `a/b`, which by itself is indistinguishable from a leaf note
+ * `a/b.mdx`. `filePath` keeps the original basename and is therefore the only
+ * reliable signal; the id regex is a fallback for loaders that set no filePath.
+ */
 function isFolderIndex(entry: DocEntry): boolean {
-  const id = entry.id.replace(/\.(mdx?|markdown)$/i, '');
-  return /\/index$/i.test(id);
+  const filePath = (entry as { filePath?: string }).filePath;
+  if (filePath) return /(?:^|[\\/])index\.(?:mdx?|markdown)$/i.test(filePath);
+  return /\/index$/i.test(stripExt(entry.id));
 }
 
-/** id split into folder segments (path without the file basename). */
+/** id split into folder segments (the group path this entry lives under). */
 function folderSegments(entry: DocEntry): string[] {
-  const id = entry.id.replace(/\.(mdx?|markdown)$/i, '');
+  const id = stripExt(entry.id);
   const parts = id.split('/');
-  if (isFolderIndex(entry)) return parts.slice(0, -1);
+  // When the loader has already stripped `/index`, the id *is* the folder path,
+  // so every segment is kept rather than dropping a basename it never had.
+  if (isFolderIndex(entry) && !/\/index$/i.test(id)) return parts;
   return parts.slice(0, -1);
 }
 
