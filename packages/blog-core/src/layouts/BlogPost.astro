@@ -178,10 +178,10 @@ const { title, description, pubDate, updatedDate, category, tags, keywords, cove
 
 <style>
   /* The post uses the full --container width. Readable text inside is capped to
-     a comfortable measure (see .post-body text children) while code blocks,
-     tables and images stretch to the full article column so large screens are
-     used well on this code-heavy blog. */
-  .post { padding-block: 2.5rem 4rem; }
+     a comfortable measure (`--measure`) while code blocks, tables and images
+     stretch to the full article column so large screens are used well on this
+     code-heavy blog. Reading mode widens the measure (see below). */
+  .post { padding-block: 2.5rem 4rem; --measure: 48rem; }
 
   /* Off-screen carrier for the per-tag Pagefind filter facets. Clipped rather
      than `display:none` so it stays in the DOM for the static index. */
@@ -228,7 +228,7 @@ const { title, description, pubDate, updatedDate, category, tags, keywords, cove
   .crumbs a { color: var(--text-muted); font-weight: 600; }
   .crumbs a:hover { color: var(--accent-text); }
 
-  .post-head { max-width: 48rem; }
+  .post-head { max-width: var(--measure); }
   .post-head h1 { margin: 0 0 0.75rem; }
   .post-lede {
     font-size: 1.2rem;
@@ -308,7 +308,7 @@ const { title, description, pubDate, updatedDate, category, tags, keywords, cove
   .post-body :global(h2),
   .post-body :global(h3),
   .post-body :global(h4) {
-    max-width: 48rem;
+    max-width: var(--measure);
   }
   .post-body :global(h2) {
     margin-top: 2.75rem;
@@ -470,6 +470,7 @@ const { title, description, pubDate, updatedDate, category, tags, keywords, cove
      matter. */
   :global(html[data-reading]) .post {
     padding-block: 1.5rem 4rem;
+    --measure: 56rem;
   }
   :global(html[data-reading]) .post-aside {
     top: 1.5rem;

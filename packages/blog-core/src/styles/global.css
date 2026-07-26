@@ -516,10 +516,11 @@ html[data-reading] .bottom-nav {
 }
 
 /* Without the site chrome the article would stretch to the full container (up
-   to 210rem on a 4K display). Cap it so the body column stays at a readable
-   measure once the on-this-page rail (16–18rem plus gap) is subtracted. */
+   to 210rem on a 4K display). Cap it so the body column fits the widened
+   reading-mode measure (56rem) plus the on-this-page rail (16–18rem and gap)
+   without running away on very large displays. */
 html[data-reading] .container {
-  max-width: 78rem;
+  max-width: 86rem;
 }
 
 /* Print / Save as PDF. Hide the site chrome and print the page in colour with
