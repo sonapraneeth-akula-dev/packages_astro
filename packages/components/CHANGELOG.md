@@ -9,6 +9,13 @@ Entries before 2.5.0 were reconstructed from the commit history, since this
 package previously recorded its changes only in the repository-level
 [CHANGELOG.md](../../CHANGELOG.md).
 
+## [2.6.0] - 2026-07-26
+
+### Added
+
+- `tag` and `category` entries in the curated icon set, matching the glyphs the
+  Pagefind search facets already draw inline.
+
 ## [2.5.0] - 2026-07-26
 
 ### Added

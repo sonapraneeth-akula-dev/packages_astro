@@ -26,6 +26,14 @@ version. The headings below summarise changes across all workspaces.
   demo nav. (`feat(notes-core/sidebar)`, `feat(notebooks-demo/nav)`)
 - Categories and tags on the notebooks demo notes, so the taxonomy pages have
   something to show. (`feat(notebooks-demo/content)`)
+- `tag` and `category` entries in the shared icon set. (`feat(components/icons)`)
+
+### Changed
+
+- Tags and categories in the notes engine are labelled with their own icon
+  rather than a bare `#` prefix, and their pills take the corner radius from
+  `theme.radius` instead of hard-coding a stadium shape.
+  (`feat(notes-core/taxonomy)`)
 
 ## [2.3.0] - 2026-07-26
 

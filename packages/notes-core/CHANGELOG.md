@@ -22,6 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   indexes for the current scope. Until now the listings were reachable only
   through a note's own chips.
 
+### Changed
+
+- Tags and categories are labelled with their own icon, on the doc-page chips,
+  the tag cloud, the category cards, the listing headings and the sidebar
+  Browse links. Tags previously used a bare `#` prefix and categories had no
+  marker at all.
+- Taxonomy pills take their corner radius from `var(--radius)` instead of a
+  hard-coded `999px`, so they follow the site's `theme.radius`.
+
 ## [2.11.0] - 2026-07-26
 
 ### Added
