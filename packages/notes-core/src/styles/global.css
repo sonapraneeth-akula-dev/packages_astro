@@ -490,7 +490,8 @@ pre.mermaid>svg {
    flips `data-reading` on <html>; BaseLayout re-applies a stored preference
    before paint. Only article pages render the toggle, so hiding the site's
    navigation here never leaves a page without a way out. Deliberately kept:
-   the skip link, the reading-progress bar and the floating buttons. */
+   the skip link, the on-this-page rail, the reading-progress bar and the
+   floating buttons. */
 html[data-reading] .env-banner,
 html[data-reading] .site-header,
 html[data-reading] .site-footer,
@@ -499,10 +500,11 @@ html[data-reading] .docs-sidebar {
   display: none !important;
 }
 
-/* Without the sidebar and TOC rails the article would stretch to the full
-   container (up to 210rem on a 4K display), so cap it at a readable measure. */
+/* Without the nav sidebar the article would stretch to the full container (up
+   to 210rem on a 4K display). Cap it so the body column stays at a readable
+   measure once the on-this-page rail (16–18rem plus gap) is subtracted. */
 html[data-reading] .container {
-  max-width: 56rem;
+  max-width: 78rem;
 }
 
 /* Print / Save as PDF. Hide the site chrome and print the page in colour. */
