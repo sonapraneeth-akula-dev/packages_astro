@@ -4,6 +4,10 @@ const ICON_HOME =
   '<path d="M3 9.5 12 3l9 6.5"></path><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"></path><path d="M9 21v-6h6v6"></path>';
 const ICON_SEARCH =
   '<circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>';
+const ICON_TAG =
+  '<path d="M20.59 13.41 12 4.83A2 2 0 0 0 10.59 4H4v6.59a2 2 0 0 0 .59 1.41l8.58 8.59a2 2 0 0 0 2.83 0l4.59-4.59a2 2 0 0 0 0-2.83Z"></path><line x1="7.5" y1="7.5" x2="7.51" y2="7.5"></line>';
+const ICON_CATEGORY =
+  '<rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect>';
 
 export const docsConfig = defineDocsConfig({
   // Numbered-block / figure caption alignment (Algorithm, Listing, DocImage).
@@ -17,6 +21,8 @@ export const docsConfig = defineDocsConfig({
   subject: 'Notebooks',
   nav: [
     { href: '/', label: 'Home', icon: ICON_HOME },
+    { href: '/categories', label: 'Categories', icon: ICON_CATEGORY },
+    { href: '/tags', label: 'Tags', icon: ICON_TAG },
     { href: '/search', label: 'Search', icon: ICON_SEARCH },
   ],
   socials: [
