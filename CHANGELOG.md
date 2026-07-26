@@ -10,6 +10,23 @@ version. The headings below summarise changes across all workspaces.
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-07-26
+
+### Added
+
+- Notebook-scoped tag and category pages in the notes engine. Each notebook now
+  carries its own `/<notebook>/tags` and `/<notebook>/categories` listings
+  beside the site-wide ones, counting only its own notes and linking across to
+  the global listing, so both scopes stay reachable. The routes are injected
+  only in notebooks mode, leaving single-tree sites untouched.
+  (`feat(notes-core/taxonomy)`)
+- Entry points for the taxonomy pages, which were prerendered and in the sitemap
+  but linked from nowhere: a Browse block at the foot of the docs sidebar
+  (scoped to the current notebook) and Categories/Tags entries in the notebooks
+  demo nav. (`feat(notes-core/sidebar)`, `feat(notebooks-demo/nav)`)
+- Categories and tags on the notebooks demo notes, so the taxonomy pages have
+  something to show. (`feat(notebooks-demo/content)`)
+
 ## [2.3.0] - 2026-07-26
 
 ### Added
@@ -181,7 +198,8 @@ version. The headings below summarise changes across all workspaces.
   (`fix(blog-core)`)
 - Tighten search excerpt highlights to the matched word. (`fix(search)`)
 
-[Unreleased]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.1.1...v2.2.0
 [2.0.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v1.1.0...v2.0.0

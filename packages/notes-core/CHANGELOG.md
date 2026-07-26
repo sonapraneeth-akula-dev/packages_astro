@@ -5,6 +5,23 @@ All notable changes to `@sonapraneeth/notes-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.12.0] - 2026-07-26
+
+### Added
+
+- Notebook-scoped taxonomy pages, injected only in notebooks mode:
+  `/<notebook>/tags`, `/<notebook>/tags/<tag>`, `/<notebook>/categories` and
+  `/<notebook>/categories/<category>`. They count only the notes in that
+  notebook and link across to the site-wide listing, which is unchanged.
+- `docsInNotebook(docs, notebookId)` in the taxonomy helpers, filtering a note
+  set to a single notebook by its top-level folder id.
+- `tagBase` and `categoryBase` props on `DocLayout`, so a note's taxonomy chips
+  link to its own notebook's listings. Both fall back to `/tags` and
+  `/categories` outside notebooks mode.
+- A Browse block at the end of `DocsSidebar`, linking the tag and category
+  indexes for the current scope. Until now the listings were reachable only
+  through a note's own chips.
+
 ## [2.11.0] - 2026-07-26
 
 ### Added
