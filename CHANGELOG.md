@@ -27,6 +27,9 @@ version. The headings below summarise changes across all workspaces.
 - Categories and tags on the notebooks demo notes, so the taxonomy pages have
   something to show. (`feat(notebooks-demo/content)`)
 - `tag` and `category` entries in the shared icon set. (`feat(components/icons)`)
+- A Notes list on every taxonomy index in the notes engine, pairing each note
+  with the tags or category it declares, so the mapping reads in both
+  directions. (`feat(notes-core/taxonomy)`)
 
 ### Changed
 

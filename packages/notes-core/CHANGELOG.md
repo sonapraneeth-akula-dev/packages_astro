@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A Browse block at the end of `DocsSidebar`, linking the tag and category
   indexes for the current scope. Until now the listings were reachable only
   through a note's own chips.
+- A Notes list on every taxonomy index, site-wide and notebook-scoped alike.
+  The tag cloud and category grid answer "which terms exist"; the list answers
+  "which note holds which term", showing each note with chips for the terms it
+  declares. Notes with no tag (or no category) are omitted from the respective
+  list.
 
 ### Changed
 
