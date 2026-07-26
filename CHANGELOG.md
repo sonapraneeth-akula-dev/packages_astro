@@ -10,6 +10,41 @@ version. The headings below summarise changes across all workspaces.
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-07-26
+
+### Added
+
+- Native reading mode in the notes and blog engines. A floating toggle strips
+  the page down to the article, hiding the env banner, sticky header, mobile tab
+  bar, footer, docs sidebar, breadcrumbs, taxonomy chips, print/edit actions,
+  blog hero and post footer. The on-this-page rail, reading-progress bar and
+  skip link are deliberately kept. Every layout change is pure CSS behind a
+  `data-reading` attribute on `<html>`, so there is no runtime cost beyond the
+  toggle itself. The preference persists in `localStorage` and is re-applied
+  before paint (matching the existing theme-flash preventer), so a stored choice
+  never flashes the full chrome first. Only article layouts opt in, so an index
+  page can never be left without navigation. (`feat(components)`)
+- `book-open` and `x` entries in the shared icon set.
+  (`feat(components/icons)`)
+
+### Changed
+
+- `ThemeSwitcher` accepts a `raised` prop and stacks above the reading-mode
+  toggle, which takes the bottom-right corner slot on article pages. Production
+  sites ship without the switcher, so the toggle owns that corner there either
+  way. Both offsets clear the mobile bottom tab bar. (`feat(components)`)
+- Prose line length is now a `--measure` custom property on the article root
+  rather than a `48rem` literal repeated across the header and every text child,
+  giving a single override point. Reading mode widens it to `56rem` and raises
+  the container cap to `86rem`, growing the body column from 840px to 968px at
+  1440px so wide tables and code blocks fit without horizontal scrolling. Note
+  this does not meaningfully reduce vertical scrolling: measured on the demo
+  Configuration page, height is 31% tables, 25% headings, 23% code/figures and
+  only 15% paragraphs. (`feat(notes-core)`, `feat(blog-core)`)
+- Bump `@sonapraneeth/components`, `@sonapraneeth/notes-core` and
+  `@sonapraneeth/blog-core` a minor version. The satteri plugin, demos and apps
+  are untouched by this release and keep their current versions.
+
 ## [2.2.0] - 2026-07-25
 
 ### Added
@@ -142,6 +177,7 @@ version. The headings below summarise changes across all workspaces.
   (`fix(blog-core)`)
 - Tighten search excerpt highlights to the matched word. (`fix(search)`)
 
-[Unreleased]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.1.1...v2.2.0
 [2.0.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v1.1.0...v2.0.0

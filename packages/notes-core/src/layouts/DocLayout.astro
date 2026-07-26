@@ -75,7 +75,7 @@ const currentPath = Astro.url.pathname;
 const showToc = tableOfContents && headings.length > 0;
 ---
 
-<BaseLayout config={config} title={title} description={description} article>
+<BaseLayout config={config} title={title} description={description} article readingMode>
   <ProgressBar />
   <div class="docs container">
     <DocsSidebar
@@ -228,7 +228,10 @@ const showToc = tableOfContents && headings.length > 0;
     padding-block: 2.5rem 4rem;
     align-items: start;
   }
-  .doc { min-width: 0; padding-block: 0; }
+  /* `--measure` is the readable line length for running text. Code blocks,
+     tables and diagrams ignore it and use the full column. Reading mode widens
+     it (see below) since there is more room once the nav sidebar is gone. */
+  .doc { min-width: 0; padding-block: 0; --measure: 48rem; }
 
   /* Search-only keywords: indexed by Pagefind but visually removed. */
   .doc-keywords {
@@ -264,7 +267,7 @@ const showToc = tableOfContents && headings.length > 0;
   .crumbs a { color: var(--text-muted); font-weight: 600; }
   .crumbs a:hover { color: var(--accent-text); }
 
-  .doc-head { max-width: 48rem; }
+  .doc-head { max-width: var(--measure); }
   .doc-head h1 { margin: 0 0 0.75rem; }
   .doc-cover { font-size: 1.1em; }
   .doc-lede {
@@ -355,7 +358,7 @@ const showToc = tableOfContents && headings.length > 0;
   .doc-body :global(blockquote),
   .doc-body :global(h2),
   .doc-body :global(h3),
-  .doc-body :global(h4) { max-width: 48rem; }
+  .doc-body :global(h4) { max-width: var(--measure); }
   .doc-body :global(h2) {
     margin-top: 2.75rem;
     padding-top: 0.5rem;
@@ -471,6 +474,29 @@ const showToc = tableOfContents && headings.length > 0;
 
   @media (min-width: 100rem) {
     .doc-grid { grid-template-columns: minmax(0, 1fr) 18rem; gap: 4.5rem; }
+  }
+
+  /* Reading mode. The nav sidebar and site chrome are hidden globally (see
+     global.css); these rules collapse what's left. The on-this-page rail keeps
+     its normal two-column layout and breakpoints — only its sticky offset
+     changes, since there's no longer a header for it to clear.
+     `html[data-reading]` outranks the plain-class rules above, so ordering
+     against the breakpoints doesn't matter. */
+  :global(html[data-reading]) .docs {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding-block: 1.5rem 4rem;
+  }
+  :global(html[data-reading]) .doc {
+    --measure: 56rem;
+  }
+  :global(html[data-reading]) .doc-aside {
+    top: 1.5rem;
+  }
+  :global(html[data-reading]) .crumbs,
+  :global(html[data-reading]) .doc-taxonomy,
+  :global(html[data-reading]) .doc-actions {
+    display: none;
   }
 
   /* Print / Save as PDF */

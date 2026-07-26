@@ -486,6 +486,28 @@ pre.mermaid>svg {
   object-fit: contain;
 }
 
+/* Reading mode. Toggled by the floating button in ReadingMode.astro, which
+   flips `data-reading` on <html>; BaseLayout re-applies a stored preference
+   before paint. Only article pages render the toggle, so hiding the site's
+   navigation here never leaves a page without a way out. Deliberately kept:
+   the skip link, the on-this-page rail, the reading-progress bar and the
+   floating buttons. */
+html[data-reading] .env-banner,
+html[data-reading] .site-header,
+html[data-reading] .site-footer,
+html[data-reading] .bottom-nav,
+html[data-reading] .docs-sidebar {
+  display: none !important;
+}
+
+/* Without the nav sidebar the article would stretch to the full container (up
+   to 210rem on a 4K display). Cap it so the body column fits the widened
+   reading-mode measure (56rem) plus the on-this-page rail (16–18rem and gap)
+   without running away on very large displays. */
+html[data-reading] .container {
+  max-width: 86rem;
+}
+
 /* Print / Save as PDF. Hide the site chrome and print the page in colour. */
 @media print {
 

@@ -5,6 +5,30 @@ All notable changes to `@sonapraneeth/notes-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.0] - 2026-07-26
+
+### Added
+
+- Reading mode on doc pages. A floating toggle hides the site chrome and the
+  nav sidebar, along with the breadcrumbs, taxonomy chips and print/edit
+  actions, leaving the article, its on-this-page rail and the reading-progress
+  bar. `DocLayout` opts in through the new `readingMode` prop on `BaseLayout`,
+  which also emits the pre-paint script that restores a stored preference.
+  Index and listing pages do not opt in, since stripping their chrome would
+  leave no navigation.
+
+### Changed
+
+- Prose line length moves to a `--measure` custom property on `.doc`, replacing
+  the `48rem` literal repeated on `.doc-head` and the `.doc-body` text children.
+  Reading mode widens it to `56rem`.
+- The reading-mode container cap is `86rem`, so the body column can hold the
+  wider measure alongside the 16-18rem on-this-page rail. At 1440px the column
+  grows from 840px to 968px.
+- The on-this-page rail keeps its normal layout and breakpoints in reading mode
+  (sticky right rail, collapsing above the content at 75rem). Only its sticky
+  offset changes, 5.5rem to 1.5rem, since there is no header left to clear.
+
 ## [2.10.0] - 2026-07-25
 
 ### Added

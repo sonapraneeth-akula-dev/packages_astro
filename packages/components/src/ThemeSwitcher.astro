@@ -17,8 +17,13 @@ import {
 
 interface Props {
   theme: ResolvedTheme;
+  /**
+   * Lift the panel clear of the bottom-right reading-mode FAB, which takes the
+   * corner slot on article pages.
+   */
+  raised?: boolean;
 }
-const { theme } = Astro.props;
+const { theme, raised = false } = Astro.props;
 
 const APPEARANCE_OPTIONS = [
   { value: 'system', label: 'System' },
@@ -28,7 +33,7 @@ const APPEARANCE_OPTIONS = [
 ---
 
 <div
-  class="theme-switcher"
+  class:list={['theme-switcher', { 'theme-switcher--raised': raised }]}
   data-default-palette={theme.palette}
   data-default-font={theme.fonts}
   data-default-radius={theme.radius}
@@ -195,10 +200,18 @@ const APPEARANCE_OPTIONS = [
     bottom: 1rem;
     z-index: 200;
   }
+  /* Stack above the reading-mode FAB, which owns the bottom-right corner on
+     article pages. 2.75rem button + 0.6rem gap. */
+  .theme-switcher--raised {
+    bottom: 4.35rem;
+  }
   @media (max-width: 40rem) {
     /* Clear the mobile bottom tab bar. */
     .theme-switcher {
       bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+    }
+    .theme-switcher--raised {
+      bottom: calc(7.6rem + env(safe-area-inset-bottom, 0px));
     }
   }
 

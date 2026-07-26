@@ -5,6 +5,7 @@ import Header from '@sonapraneeth/components/Header.astro';
 import Footer from '@sonapraneeth/components/Footer.astro';
 import EnvBanner from '@sonapraneeth/components/EnvBanner.astro';
 import ThemeSwitcher from '@sonapraneeth/components/ThemeSwitcher.astro';
+import ReadingMode from '@sonapraneeth/components/ReadingMode.astro';
 import PwaHead from '@sonapraneeth/components/PwaHead.astro';
 import PwaInstall from '@sonapraneeth/components/PwaInstall.astro';
 import {
@@ -22,6 +23,12 @@ interface Props {
   ogImage?: string;
   /** Set to true on article pages for og:type=article. */
   article?: boolean;
+  /**
+   * Offer the reading-mode toggle on this page. Article layouts opt in; index
+   * and listing pages must not, since stripping their chrome would leave the
+   * reader with no navigation at all.
+   */
+  readingMode?: boolean;
 }
 
 const {
@@ -29,6 +36,7 @@ const {
   description = blogConfig.description,
   ogImage,
   article = false,
+  readingMode = false,
 } = Astro.props;
 
 const fullTitle = !title || title === blogConfig.title
@@ -97,6 +105,17 @@ const fontVars = themeFontVars(theme);
 
     {/* Apply stored switcher selections (palette/font/radius) before paint. */}
     {theme.switcher && <script is:inline set:html={renderThemeInitScript()} />}
+
+    {/* Reading-mode flag, applied before paint so a stored preference renders
+        the stripped layout directly instead of flashing the full chrome. */}
+    {readingMode && (
+      <script is:inline>
+        (() => {
+          const stored = typeof localStorage !== 'undefined' && localStorage.getItem('reading-mode');
+          if (stored === 'on') document.documentElement.setAttribute('data-reading', '');
+        })();
+      </script>
+    )}
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -106,7 +125,10 @@ const fontVars = themeFontVars(theme);
       <slot />
     </main>
     <Footer config={blogConfig} />
-    {theme.switcher && <ThemeSwitcher theme={theme} />}
+    {/* Reading mode takes the bottom-right corner slot; the switcher (demo
+        sites only) stacks above it so both stay reachable. */}
+    {readingMode && <ReadingMode />}
+    {theme.switcher && <ThemeSwitcher theme={theme} raised={readingMode} />}
     <PwaInstall
       pwa={blogConfig.pwa}
       title={blogConfig.title}
