@@ -177,6 +177,32 @@ function emptyGroup(segment: string): BuildGroup {
   };
 }
 
+/**
+ * Fold a folder's `index` note into the group it describes.
+ *
+ * The note names the group (via `sidebar.label`, falling back to the humanised
+ * folder segment) and supplies its badge and sort order — but it is filed as the
+ * group's *first child* rather than as the heading's link. That keeps the
+ * heading a plain expand/collapse toggle and gives the landing note a row of its
+ * own, labelled by its `title` (e.g. "Introduction").
+ */
+function applyFolderIndex(group: BuildGroup, entry: DocEntry): void {
+  const explicit = entry.data.sidebar?.label;
+  if (explicit) {
+    group.label = explicit;
+    group.hasExplicitLabel = true;
+  }
+  group.badge = entry.data.sidebar?.badge;
+  group.order = entryOrder(entry);
+  group.leaves.push({
+    label: entry.data.title,
+    href: entrySlug(entry),
+    id: entry.id,
+    // Always the first stop inside its group, whatever the siblings declare.
+    order: Number.NEGATIVE_INFINITY,
+  });
+}
+
 function buildAutoSidebar(entries: DocEntry[]): SidebarNode[] {
   const root = emptyGroup('');
 
@@ -195,12 +221,7 @@ function buildAutoSidebar(entries: DocEntry[]): SidebarNode[] {
     }
 
     if (isFolderIndex(entry)) {
-      // This entry describes the group it lives in.
-      group.label = entryLabel(entry);
-      group.hasExplicitLabel = true;
-      group.href = entrySlug(entry);
-      group.badge = entry.data.sidebar?.badge;
-      group.order = entryOrder(entry);
+      applyFolderIndex(group, entry);
     } else {
       group.leaves.push({
         label: entryLabel(entry),
@@ -360,11 +381,7 @@ function buildNotebookSidebar(
     }
 
     if (isFolderIndex(entry)) {
-      group.label = entryLabel(entry);
-      group.hasExplicitLabel = true;
-      group.href = entrySlug(entry);
-      group.badge = entry.data.sidebar?.badge;
-      group.order = entryOrder(entry);
+      applyFolderIndex(group, entry);
     } else {
       group.leaves.push({
         label: entryLabel(entry),
