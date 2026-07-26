@@ -26,6 +26,10 @@ version. The headings below summarise changes across all workspaces.
   page can never be left without navigation. (`feat(components)`)
 - `book-open` and `x` entries in the shared icon set.
   (`feat(components/icons)`)
+- `Figure` as a numbered block type in the numbering module.
+  (`feat(components/numbering)`)
+- Numbered figure captions and click-to-enlarge on `DocImage`.
+  (`feat(components/doc-image)`)
 
 ### Changed
 
