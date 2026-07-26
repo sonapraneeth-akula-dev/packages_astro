@@ -4,6 +4,7 @@
  * at least one note declares in its frontmatter, with note counts.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '@sonapraneeth/components/Icon.astro';
 import { getLiveDocs, getCategories } from '../../utils/taxonomy';
 import { docsConfig } from 'virtual:notes-core/config';
 
@@ -21,7 +22,7 @@ const categories = getCategories(docs);
   <div class="container cat-grid">
     {categories.map((cat) => (
       <a class="card cat-card" href={`/categories/${cat.slug}`}>
-        <span class="cat-name">{cat.name}</span>
+        <span class="cat-name"><Icon name="category" />{cat.name}</span>
         <span class="cat-count">{cat.count} {cat.count === 1 ? 'note' : 'notes'}</span>
       </a>
     ))}
@@ -43,6 +44,6 @@ const categories = getCategories(docs);
     color: var(--text);
   }
   .cat-card:hover { color: var(--text); }
-  .cat-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; }
+  .cat-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 0.45rem; }
   .cat-count { color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-mono); }
 </style>

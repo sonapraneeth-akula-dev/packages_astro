@@ -6,6 +6,8 @@
  */
 import type { SidebarNode } from '../utils/docs';
 import SidebarTree from './SidebarTree.astro';
+import Icon from '@sonapraneeth/components/Icon.astro';
+import type { IconName } from '@sonapraneeth/components/icons';
 
 interface Props {
   tree: SidebarNode[];
@@ -15,7 +17,7 @@ interface Props {
   /** Optional link back to the notebook hub (notebooks mode). */
   backLink?: { label: string; href: string };
   /** Taxonomy entry points rendered under the tree (tags, categories). */
-  browse?: Array<{ label: string; href: string }>;
+  browse?: Array<{ label: string; href: string; icon: IconName }>;
 }
 
 const { tree, currentPath, label = 'Contents', backLink, browse = [] } = Astro.props;
@@ -47,7 +49,7 @@ const { tree, currentPath, label = 'Contents', backLink, browse = [] } = Astro.p
           {browse.map((link) => (
             <li>
               <a href={link.href} aria-current={currentPath.startsWith(link.href) ? 'page' : undefined}>
-                {link.label}
+                <Icon name={link.icon} />{link.label}
               </a>
             </li>
           ))}
@@ -116,10 +118,12 @@ const { tree, currentPath, label = 'Contents', backLink, browse = [] } = Astro.p
     gap: 0.4rem;
   }
   .docs-sidebar-browse a {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     padding: 0.3rem 0.7rem;
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: var(--radius);
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-muted);

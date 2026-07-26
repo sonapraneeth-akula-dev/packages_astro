@@ -5,6 +5,7 @@
  */
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Icon from '@sonapraneeth/components/Icon.astro';
 import { getLiveDocs, getTags, docsWithTag, docsInNotebook } from '../../../utils/taxonomy';
 import { entrySlug, entryLabel, getNotebooks, type Notebook } from '../../../utils/docs';
 import type { DocEntry } from '../../../content';
@@ -31,7 +32,7 @@ const sorted = [...docs].sort((a, b) => entryLabel(a).localeCompare(entryLabel(b
 
 <BaseLayout
   config={docsConfig}
-  title={`#${name} · ${notebook.label}`}
+  title={`${name} · ${notebook.label}`}
   description={`${notebook.label} notes tagged ${name}.`}
 >
   <div class="container page-head">
@@ -39,7 +40,7 @@ const sorted = [...docs].sort((a, b) => entryLabel(a).localeCompare(entryLabel(b
       <a href={notebook.href}>{notebook.label}</a> /
       <a href={`${notebook.href}/tags`}>Tags</a> /
     </p>
-    <h1>#{name}</h1>
+    <h1><Icon name="tag" />{name}</h1>
     <p class="lede">
       {sorted.length} {sorted.length === 1 ? 'note' : 'notes'} in this notebook ·
       <a href={`/tags/${Astro.params.tag}`}>site-wide</a>
@@ -79,5 +80,10 @@ const sorted = [...docs].sort((a, b) => entryLabel(a).localeCompare(entryLabel(b
   .page-head .eyebrow a,
   .page-head .lede a {
     color: var(--accent-text);
+  }
+  .page-head h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 </style>

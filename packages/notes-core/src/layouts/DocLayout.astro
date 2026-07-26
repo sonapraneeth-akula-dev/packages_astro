@@ -90,8 +90,8 @@ const showToc = tableOfContents && headings.length > 0;
       label={notebookLabel ?? config.subject}
       backLink={backLink}
       browse={[
-        { label: 'Tags', href: tagBase },
-        { label: 'Categories', href: categoryBase },
+        { label: 'Tags', href: tagBase, icon: 'tag' },
+        { label: 'Categories', href: categoryBase, icon: 'category' },
       ]}
     />
 
@@ -146,10 +146,14 @@ const showToc = tableOfContents && headings.length > 0;
         {(category || tags.length > 0) && (
           <div class="doc-taxonomy" data-pagefind-ignore>
             {category && (
-              <a class="chip chip--accent" href={`${categoryBase}/${slugify(category)}`}>{category}</a>
+              <a class="chip chip--accent" href={`${categoryBase}/${slugify(category)}`}>
+                <Icon name="category" />{category}
+              </a>
             )}
             {tags.map((tag) => (
-              <a class="chip" href={`${tagBase}/${slugify(tag)}`}>#{tag}</a>
+              <a class="chip" href={`${tagBase}/${slugify(tag)}`}>
+                <Icon name="tag" />{tag}
+              </a>
             ))}
           </div>
         )}

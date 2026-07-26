@@ -5,6 +5,7 @@
  */
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '@sonapraneeth/components/Icon.astro';
 import { getLiveDocs, getCategories, docsInCategory } from '../../utils/taxonomy';
 import { entrySlug, entryLabel } from '../../utils/docs';
 import type { DocEntry } from '../../content';
@@ -25,7 +26,7 @@ const sorted = [...docs].sort((a, b) => entryLabel(a).localeCompare(entryLabel(b
 <BaseLayout config={docsConfig} title={`${name} · Category`} description={`Notes in the ${name} category.`}>
   <div class="container page-head">
     <p class="eyebrow"><a href="/categories">Categories</a> /</p>
-    <h1>{name}</h1>
+    <h1><Icon name="category" />{name}</h1>
     <p class="lede">{sorted.length} {sorted.length === 1 ? 'note' : 'notes'} in this category.</p>
   </div>
 
@@ -60,4 +61,9 @@ const sorted = [...docs].sort((a, b) => entryLabel(a).localeCompare(entryLabel(b
   .doc-row-title { font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; }
   .doc-row-desc { color: var(--text-muted); font-size: 0.9rem; }
   .page-head .eyebrow a { color: var(--accent-text); }
+  .page-head h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
 </style>

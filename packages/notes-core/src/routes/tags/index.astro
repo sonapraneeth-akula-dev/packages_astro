@@ -4,6 +4,7 @@
  * each tag's listing page.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '@sonapraneeth/components/Icon.astro';
 import { getLiveDocs, getTags } from '../../utils/taxonomy';
 import { docsConfig } from 'virtual:notes-core/config';
 
@@ -27,6 +28,7 @@ function scale(count: number): number {
   <div class="container cloud">
     {tags.map((tag) => (
       <a class="cloud-tag" href={`/tags/${tag.slug}`} style={`font-size:${scale(tag.count)}rem`}>
+        <Icon name="tag" />
         {tag.name}
         <span class="ct">{tag.count}</span>
       </a>
@@ -48,7 +50,7 @@ function scale(count: number): number {
     gap: 0.3rem;
     padding: 0.4rem 0.85rem;
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: var(--radius);
     background: var(--surface);
     color: var(--text);
     font-weight: 600;
@@ -67,6 +69,6 @@ function scale(count: number): number {
     color: var(--text-muted);
     background: var(--bg-subtle);
     padding: 0.05rem 0.4rem;
-    border-radius: 999px;
+    border-radius: var(--radius-sm);
   }
 </style>

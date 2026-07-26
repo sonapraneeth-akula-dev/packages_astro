@@ -6,6 +6,7 @@
  */
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Icon from '@sonapraneeth/components/Icon.astro';
 import { getLiveDocs, getCategories, docsInNotebook } from '../../../utils/taxonomy';
 import type { Taxonomy } from '../../../utils/taxonomy';
 import { getNotebooks, type Notebook } from '../../../utils/docs';
@@ -42,7 +43,7 @@ const { notebook, categories } = Astro.props as {
   <div class="container cat-grid">
     {categories.map((cat) => (
       <a class="card cat-card" href={`${notebook.href}/categories/${cat.slug}`}>
-        <span class="cat-name">{cat.name}</span>
+        <span class="cat-name"><Icon name="category" />{cat.name}</span>
         <span class="cat-count">{cat.count} {cat.count === 1 ? 'note' : 'notes'}</span>
       </a>
     ))}
@@ -64,7 +65,7 @@ const { notebook, categories } = Astro.props as {
     color: var(--text);
   }
   .cat-card:hover { color: var(--text); }
-  .cat-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; }
+  .cat-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 0.45rem; }
   .cat-count { color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-mono); }
   .page-head .eyebrow a,
   .page-head .lede a {

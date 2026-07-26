@@ -6,6 +6,7 @@
  */
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Icon from '@sonapraneeth/components/Icon.astro';
 import { getLiveDocs, getTags, docsInNotebook } from '../../../utils/taxonomy';
 import { getNotebooks, type Notebook } from '../../../utils/docs';
 import type { Taxonomy } from '../../../utils/taxonomy';
@@ -49,6 +50,7 @@ function scale(count: number): number {
         href={`${notebook.href}/tags/${tag.slug}`}
         style={`font-size:${scale(tag.count)}rem`}
       >
+        <Icon name="tag" />
         {tag.name}
         <span class="ct">{tag.count}</span>
       </a>
@@ -70,7 +72,7 @@ function scale(count: number): number {
     gap: 0.3rem;
     padding: 0.4rem 0.85rem;
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: var(--radius);
     background: var(--surface);
     color: var(--text);
     font-weight: 600;
@@ -89,7 +91,7 @@ function scale(count: number): number {
     color: var(--text-muted);
     background: var(--bg-subtle);
     padding: 0.05rem 0.4rem;
-    border-radius: 999px;
+    border-radius: var(--radius-sm);
   }
   .page-head .eyebrow a,
   .page-head .lede a {
