@@ -14,9 +14,11 @@ interface Props {
   label?: string;
   /** Optional link back to the notebook hub (notebooks mode). */
   backLink?: { label: string; href: string };
+  /** Taxonomy entry points rendered under the tree (tags, categories). */
+  browse?: Array<{ label: string; href: string }>;
 }
 
-const { tree, currentPath, label = 'Contents', backLink } = Astro.props;
+const { tree, currentPath, label = 'Contents', backLink, browse = [] } = Astro.props;
 ---
 
 <nav class="docs-sidebar" aria-label="Documentation navigation" data-pagefind-ignore>
@@ -38,6 +40,20 @@ const { tree, currentPath, label = 'Contents', backLink } = Astro.props;
     <div class="docs-sidebar-scroll">
       <SidebarTree items={tree} currentPath={currentPath} />
     </div>
+    {browse.length > 0 && (
+      <div class="docs-sidebar-browse">
+        <p class="docs-sidebar-label">Browse</p>
+        <ul>
+          {browse.map((link) => (
+            <li>
+              <a href={link.href} aria-current={currentPath.startsWith(link.href) ? 'page' : undefined}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
   </div>
 </nav>
 
@@ -85,6 +101,34 @@ const { tree, currentPath, label = 'Contents', backLink } = Astro.props;
   }
   .docs-sidebar-scroll {
     overflow-y: auto;
+  }
+  .docs-sidebar-browse {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .docs-sidebar-browse ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .docs-sidebar-browse a {
+    display: inline-block;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .docs-sidebar-browse a:hover,
+  .docs-sidebar-browse a[aria-current='page'] {
+    color: var(--accent-text);
+    border-color: var(--accent);
+    background: var(--accent-soft);
   }
 
   /* Desktop: sticky rail. The layout grid gives it the left column. */

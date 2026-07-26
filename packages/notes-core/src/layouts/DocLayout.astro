@@ -89,6 +89,10 @@ const showToc = tableOfContents && headings.length > 0;
       currentPath={currentPath}
       label={notebookLabel ?? config.subject}
       backLink={backLink}
+      browse={[
+        { label: 'Tags', href: tagBase },
+        { label: 'Categories', href: categoryBase },
+      ]}
     />
 
     <article
