@@ -30,6 +30,8 @@ version. The headings below summarise changes across all workspaces.
 - A Notes list on every taxonomy index in the notes engine, pairing each note
   with the tags or category it declares, so the mapping reads in both
   directions. (`feat(notes-core/taxonomy)`)
+- The same Posts list on the blog engine's `/tags` and `/categories` indexes,
+  reusing `PostRow`. (`feat(blog-core/taxonomy)`)
 
 ### Changed
 
@@ -37,6 +39,8 @@ version. The headings below summarise changes across all workspaces.
   rather than a bare `#` prefix, and their pills take the corner radius from
   `theme.radius` instead of hard-coding a stadium shape.
   (`feat(notes-core/taxonomy)`)
+- Taxonomy pills in the blog engine likewise take their radius from
+  `theme.radius`. (`feat(blog-core/taxonomy)`)
 
 ## [2.3.0] - 2026-07-26
 

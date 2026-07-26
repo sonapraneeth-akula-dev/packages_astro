@@ -5,6 +5,22 @@ All notable changes to `@sonapraneeth/blog-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-07-26
+
+### Added
+
+- A Posts list on the `/tags` and `/categories` indexes, matching the notes
+  engine. The cloud and grid answer "which terms exist"; the list answers
+  "which post holds which term", reusing `PostRow` so each post shows the
+  category and tags it declares. Posts with no tag are omitted from the tags
+  index.
+
+### Changed
+
+- Chips, cloud pills and count badges take their corner radius from
+  `var(--radius)` instead of a hard-coded `999px`, so they follow the site's
+  `theme.radius`.
+
 ## [2.5.0] - 2026-07-26
 
 ### Added
