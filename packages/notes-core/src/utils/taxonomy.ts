@@ -1,6 +1,7 @@
 import { getCollection } from 'astro:content';
 import type { DocEntry } from '../content';
 import { slugify } from './format';
+import { notebookSegment } from './docs';
 
 /** Drafts are only visible outside production builds. */
 const includeDrafts = import.meta.env.DEV;
@@ -51,4 +52,9 @@ export function docsInCategory(docs: DocEntry[], categorySlug: string): DocEntry
 /** Notes carrying a tag (matched by slug). */
 export function docsWithTag(docs: DocEntry[], tagSlug: string): DocEntry[] {
   return docs.filter((d) => d.data.tags.some((t: string) => slugify(t) === tagSlug));
+}
+
+/** Notes belonging to a notebook (notebooks mode), matched by its folder id. */
+export function docsInNotebook(docs: DocEntry[], notebookId: string): DocEntry[] {
+  return docs.filter((d) => notebookSegment(d) === notebookId);
 }

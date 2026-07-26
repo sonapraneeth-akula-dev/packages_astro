@@ -1,0 +1,73 @@
+---
+/**
+ * Injected per-notebook categories index route (`/<notebook>/categories`). The
+ * same card grid as the global `/categories`, but counting only the notes
+ * inside one notebook. Registered in notebooks mode only.
+ */
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getLiveDocs, getCategories, docsInNotebook } from '../../../utils/taxonomy';
+import type { Taxonomy } from '../../../utils/taxonomy';
+import { getNotebooks, type Notebook } from '../../../utils/docs';
+import { docsConfig } from 'virtual:notes-core/config';
+
+export const getStaticPaths = (async () => {
+  const docs = await getLiveDocs();
+  return getNotebooks(docs).map((notebook) => ({
+    params: { notebook: notebook.id },
+    props: { notebook, categories: getCategories(docsInNotebook(docs, notebook.id)) },
+  }));
+}) satisfies GetStaticPaths;
+
+const { notebook, categories } = Astro.props as {
+  notebook: Notebook;
+  categories: Taxonomy[];
+};
+---
+
+<BaseLayout
+  config={docsConfig}
+  title={`Categories · ${notebook.label}`}
+  description={`Browse ${notebook.label} notes by category.`}
+>
+  <div class="container page-head">
+    <p class="eyebrow"><a href={notebook.href}>{notebook.label}</a> /</p>
+    <h1>Categories</h1>
+    <p class="lede">
+      {categories.length} {categories.length === 1 ? 'topic' : 'topics'} in this notebook ·
+      <a href="/categories">all categories across the site</a>
+    </p>
+  </div>
+
+  <div class="container cat-grid">
+    {categories.map((cat) => (
+      <a class="card cat-card" href={`${notebook.href}/categories/${cat.slug}`}>
+        <span class="cat-name">{cat.name}</span>
+        <span class="cat-count">{cat.count} {cat.count === 1 ? 'note' : 'notes'}</span>
+      </a>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1.25rem;
+    padding-bottom: 3rem;
+  }
+  .cat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.25rem;
+    color: var(--text);
+  }
+  .cat-card:hover { color: var(--text); }
+  .cat-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; }
+  .cat-count { color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-mono); }
+  .page-head .eyebrow a,
+  .page-head .lede a {
+    color: var(--accent-text);
+  }
+</style>

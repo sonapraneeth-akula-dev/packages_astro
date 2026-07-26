@@ -36,8 +36,12 @@ const ROUTES = {
   print: '@sonapraneeth/notes-core/routes/print/[notebook].astro',
   categories: '@sonapraneeth/notes-core/routes/categories/index.astro',
   category: '@sonapraneeth/notes-core/routes/categories/[category].astro',
+  notebookCategories: '@sonapraneeth/notes-core/routes/notebooks/categories/index.astro',
+  notebookCategory: '@sonapraneeth/notes-core/routes/notebooks/categories/[category].astro',
   tags: '@sonapraneeth/notes-core/routes/tags/index.astro',
   tag: '@sonapraneeth/notes-core/routes/tags/[tag].astro',
+  notebookTags: '@sonapraneeth/notes-core/routes/notebooks/tags/index.astro',
+  notebookTag: '@sonapraneeth/notes-core/routes/notebooks/tags/[tag].astro',
   search: '@sonapraneeth/notes-core/routes/search.astro',
   notFound: '@sonapraneeth/notes-core/routes/404.astro',
 } as const;
@@ -94,6 +98,29 @@ export function notesRoutes(options: NotesRoutesOptions): AstroIntegration {
         injectRoute({ pattern: '/categories/[category]', entrypoint: ROUTES.category, prerender: true });
         injectRoute({ pattern: '/tags', entrypoint: ROUTES.tags, prerender: true });
         injectRoute({ pattern: '/tags/[tag]', entrypoint: ROUTES.tag, prerender: true });
+        // Notebook-scoped taxonomy pages sit alongside the site-wide ones.
+        if (options.docsConfig.notebooks) {
+          injectRoute({
+            pattern: '/[notebook]/tags',
+            entrypoint: ROUTES.notebookTags,
+            prerender: true,
+          });
+          injectRoute({
+            pattern: '/[notebook]/tags/[tag]',
+            entrypoint: ROUTES.notebookTag,
+            prerender: true,
+          });
+          injectRoute({
+            pattern: '/[notebook]/categories',
+            entrypoint: ROUTES.notebookCategories,
+            prerender: true,
+          });
+          injectRoute({
+            pattern: '/[notebook]/categories/[category]',
+            entrypoint: ROUTES.notebookCategory,
+            prerender: true,
+          });
+        }
         if (options.docsConfig.search) {
           injectRoute({ pattern: '/search', entrypoint: ROUTES.search, prerender: true });
         }

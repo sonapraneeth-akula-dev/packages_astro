@@ -36,8 +36,12 @@ interface Props {
   printHref?: string;
   /** Optional category, rendered as a chip linking to its taxonomy page. */
   category?: string;
+  /** Base path for the category chip link — `/<notebook>/categories` in notebooks mode. */
+  categoryBase?: string;
   /** Optional tags, rendered as chips linking to their taxonomy pages. */
   tags?: string[];
+  /** Base path for tag chip links — `/<notebook>/tags` in notebooks mode. */
+  tagBase?: string;
   /** Search-only keywords/aliases (indexed by Pagefind, hidden on the page). */
   keywords?: string[];
   /** Optional Chapter number/label for auto-numbering. */
@@ -65,7 +69,9 @@ const {
   backLink,
   printHref,
   category,
+  categoryBase = '/categories',
   tags = [],
+  tagBase = '/tags',
   keywords = [],
   chapter,
   part,
@@ -136,10 +142,10 @@ const showToc = tableOfContents && headings.length > 0;
         {(category || tags.length > 0) && (
           <div class="doc-taxonomy" data-pagefind-ignore>
             {category && (
-              <a class="chip chip--accent" href={`/categories/${slugify(category)}`}>{category}</a>
+              <a class="chip chip--accent" href={`${categoryBase}/${slugify(category)}`}>{category}</a>
             )}
             {tags.map((tag) => (
-              <a class="chip" href={`/tags/${slugify(tag)}`}>#{tag}</a>
+              <a class="chip" href={`${tagBase}/${slugify(tag)}`}>#{tag}</a>
             ))}
           </div>
         )}
