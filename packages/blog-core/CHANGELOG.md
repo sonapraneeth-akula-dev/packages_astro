@@ -5,6 +5,29 @@ All notable changes to `@sonapraneeth/blog-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-07-26
+
+### Added
+
+- Reading mode on post pages. A floating toggle hides the site chrome along
+  with the breadcrumbs, tag chips, print action, hero image and post footer,
+  leaving the article, its on-this-page rail and the reading-progress bar.
+  `BlogPost` opts in through the new `readingMode` prop on `BaseLayout`, which
+  also emits the pre-paint script that restores a stored preference. Index and
+  listing pages do not opt in, since stripping their chrome would leave no
+  navigation.
+
+### Changed
+
+- Prose line length moves to a `--measure` custom property on `.post`,
+  replacing the `48rem` literal repeated on `.post-head` and the `.post-body`
+  text children. Reading mode widens it to `56rem`.
+- The reading-mode container cap is `86rem`, so the body column can hold the
+  wider measure alongside the 16-18rem on-this-page rail.
+- The on-this-page rail keeps its normal layout and breakpoints in reading mode
+  (sticky right rail, collapsing above the content at 60rem). Only its sticky
+  offset changes, 5.5rem to 1.5rem, since there is no header left to clear.
+
 ## [2.4.0] - 2026-07-25
 
 ### Added
