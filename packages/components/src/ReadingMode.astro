@@ -12,22 +12,11 @@
  * the site's only navigation.
  */
 import Icon from './Icon.astro';
-
-interface Props {
-  /**
-   * Lift the button clear of the bottom-right `ThemeSwitcher` FAB. Production
-   * sites usually ship without the switcher, in which case this stays false and
-   * the button takes the corner slot itself.
-   */
-  raised?: boolean;
-}
-
-const { raised = false } = Astro.props;
 ---
 
 <button
   type="button"
-  class:list={['reading-fab', { 'reading-fab--raised': raised }]}
+  class="reading-fab"
   data-reading-toggle
   aria-pressed="false"
   aria-label="Enter reading mode"
@@ -89,19 +78,10 @@ const { raised = false } = Astro.props;
     border-color: var(--border-hover);
   }
 
-  /* Stack above the ThemeSwitcher FAB, which owns the bottom-right corner when
-     `theme.switcher` is enabled (demo sites). 2.75rem button + 0.6rem gap. */
-  .reading-fab--raised {
-    bottom: 4.35rem;
-  }
-
   @media (max-width: 40rem) {
     /* Clear the mobile bottom tab bar. */
     .reading-fab {
       bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
-    }
-    .reading-fab--raised {
-      bottom: calc(7.6rem + env(safe-area-inset-bottom, 0px));
     }
   }
 

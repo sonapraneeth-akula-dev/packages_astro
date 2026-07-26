@@ -125,10 +125,10 @@ const fontVars = themeFontVars(theme);
       <slot />
     </main>
     <Footer config={blogConfig} />
-    {/* Rendered before the switcher so the switcher's upward panel paints over
-        this button rather than under it. */}
-    {readingMode && <ReadingMode raised={!!theme.switcher} />}
-    {theme.switcher && <ThemeSwitcher theme={theme} />}
+    {/* Reading mode takes the bottom-right corner slot; the switcher (demo
+        sites only) stacks above it so both stay reachable. */}
+    {readingMode && <ReadingMode />}
+    {theme.switcher && <ThemeSwitcher theme={theme} raised={readingMode} />}
     <PwaInstall
       pwa={blogConfig.pwa}
       title={blogConfig.title}
