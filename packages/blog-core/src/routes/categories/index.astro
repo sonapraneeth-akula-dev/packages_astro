@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPublishedPosts, getCategories } from '../../utils/posts';
+import PostRow from '../../components/PostRow.astro';
+import { getPublishedPosts, getCategories, readingTime } from '../../utils/posts';
 
 const posts = await getPublishedPosts();
 const categories = getCategories(posts);
@@ -27,6 +28,17 @@ const categories = getCategories(posts);
       </a>
     ))}
   </div>
+
+  {posts.length > 0 && (
+    <div class="container posts">
+      <h2>Posts</h2>
+      <div class="rows">
+        {posts.map((post) => (
+          <PostRow post={post} readingTime={readingTime(post.body)} headingLevel={3} />
+        ))}
+      </div>
+    </div>
+  )}
 </BaseLayout>
 
 <style>
@@ -57,4 +69,14 @@ const categories = getCategories(posts);
   }
   .cat-name { font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; }
   .cat-count { color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-mono); }
+  .posts h2 {
+    font-size: 1.15rem;
+    margin: 0 0 1rem;
+  }
+  .rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding-bottom: 2rem;
+  }
 </style>

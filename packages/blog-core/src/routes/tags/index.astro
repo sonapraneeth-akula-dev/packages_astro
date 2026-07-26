@@ -1,9 +1,13 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPublishedPosts, getTags } from '../../utils/posts';
+import PostRow from '../../components/PostRow.astro';
+import { getPublishedPosts, getTags, readingTime } from '../../utils/posts';
 
 const posts = await getPublishedPosts();
 const tags = getTags(posts);
+
+// The reverse view of the cloud: each post with the tags it carries.
+const tagged = posts.filter((post) => post.data.tags.length > 0);
 
 // Scale chip size by relative frequency for a tag-cloud feel.
 const max = Math.max(1, ...tags.map((t) => t.count));
@@ -31,6 +35,17 @@ function scale(count: number): number {
       </a>
     ))}
   </div>
+
+  {tagged.length > 0 && (
+    <div class="container posts">
+      <h2>Posts</h2>
+      <div class="rows">
+        {tagged.map((post) => (
+          <PostRow post={post} readingTime={readingTime(post.body)} headingLevel={3} />
+        ))}
+      </div>
+    </div>
+  )}
 </BaseLayout>
 
 <style>
@@ -47,7 +62,7 @@ function scale(count: number): number {
     gap: 0.3rem;
     padding: 0.4rem 0.85rem;
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: var(--radius);
     background: var(--surface);
     color: var(--text);
     font-weight: 600;
@@ -67,6 +82,16 @@ function scale(count: number): number {
     color: var(--text-muted);
     background: var(--bg-subtle);
     padding: 0.05rem 0.4rem;
-    border-radius: 999px;
+    border-radius: var(--radius-sm);
+  }
+  .posts h2 {
+    font-size: 1.15rem;
+    margin: 0 0 1rem;
+  }
+  .rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding-bottom: 2rem;
   }
 </style>
