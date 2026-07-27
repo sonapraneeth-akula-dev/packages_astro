@@ -10,6 +10,18 @@ version. The headings below summarise changes across all workspaces.
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-07-27
+
+### Added
+
+- `printInNotebook` frontmatter field in the notes engine, letting a note opt
+  out of the whole-notebook print view (`/print/<notebook>`) while staying on
+  the site and in the sidebar. Defaults to `true`, so existing books are
+  unchanged. (`feat(notes-core/print)`)
+- An empty-book notice on the print route: when every page of a notebook opts
+  out, a modal explains why there is nothing to print instead of opening an
+  empty print dialog. (`feat(notes-core/print)`)
+
 ## [2.4.0] - 2026-07-26
 
 ### Added
@@ -213,7 +225,8 @@ version. The headings below summarise changes across all workspaces.
   (`fix(blog-core)`)
 - Tighten search excerpt highlights to the matched word. (`fix(search)`)
 
-[Unreleased]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.1.1...v2.2.0
