@@ -265,14 +265,27 @@ const { title, description, pubDate, updatedDate, category, tags, keywords, cove
     margin-top: 2.5rem;
     align-items: start;
   }
+  /* Bound to the viewport so the rail's own three zones work: the title stays
+     put, the heading list scrolls, and "Back to top" pins to the bottom (see
+     TableOfContents.astro). */
   .post-aside {
     position: sticky;
-    top: 5.5rem;
+    top: var(--sticky-top);
+    max-height: calc(100dvh - var(--sticky-top) - 1.5rem);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
+  .post-aside > :global(.toc) { flex: 1 1 auto; min-height: 0; }
 
   @media (max-width: 60rem) {
     .post-grid { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
-    .post-aside { position: static; order: -1; }
+    .post-aside {
+      position: static;
+      display: block;
+      max-height: none;
+      order: -1;
+    }
   }
 
   /* Prose. The body fills its column; individual text elements are capped to a
@@ -455,6 +468,7 @@ const { title, description, pubDate, updatedDate, category, tags, keywords, cove
   }
   :global(html[data-reading]) .post-aside {
     top: 1.5rem;
+    max-height: calc(100dvh - 3rem);
   }
   :global(html[data-reading]) .crumbs,
   :global(html[data-reading]) .post-actions,
@@ -485,6 +499,8 @@ const { title, description, pubDate, updatedDate, category, tags, keywords, cove
     .post-aside {
       order: -1;
       position: static;
+      display: block;
+      max-height: none;
       margin-bottom: 2rem;
       break-inside: avoid;
     }

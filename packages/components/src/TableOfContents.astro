@@ -23,7 +23,7 @@ for (const h of items) {
 {items.length > 0 && (
   <nav class="toc" aria-labelledby="toc-title">
     <p class="toc-title" id="toc-title">On this page</p>
-    <ul>
+    <ul class="toc-list">
       {items.map((h) => (
         <li class:list={[`toc-l${h.depth}`]}>
           <a
@@ -34,6 +34,11 @@ for (const h of items) {
         </li>
       ))}
     </ul>
+    {/* Pinned to the bottom of the rail, so it stays reachable no matter how
+        long the heading list is or how far down the article you are. */}
+    <button type="button" class="toc-top" data-scroll-top>
+      <span aria-hidden="true">↑</span> Back to top
+    </button>
   </nav>
 )}
 
@@ -68,15 +73,29 @@ for (const h of items) {
     );
     headings.forEach((h) => observer.observe(h));
   }
+
+  document.querySelector('[data-scroll-top]')?.addEventListener('click', () => {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  });
 </script>
 
 <style>
+  /* A three-zone column: the title stays put, the heading list takes the
+     remaining height and scrolls on its own when it doesn't fit, and "Back to
+     top" pins to the bottom. The parent (`.doc-aside` / `.post-aside`) supplies
+     the sticky position and the viewport-bound max-height. */
   .toc {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
     border-left: 2px solid var(--border);
     padding-left: 1rem;
     font-size: 0.88rem;
   }
   .toc-title {
+    flex: 0 0 auto;
     font-family: var(--font-mono);
     font-size: 0.72rem;
     font-weight: 600;
@@ -85,7 +104,19 @@ for (const h of items) {
     color: var(--text-muted);
     margin: 0 0 0.75rem;
   }
-  .toc ul { list-style: none; margin: 0; padding: 0; }
+  /* Pulled back to the rail's border so the active-item indicator lands on it,
+     then padded again — which keeps the links inside the scroller's padding box
+     and avoids the horizontal overflow a negative margin would otherwise cause. */
+  .toc-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    list-style: none;
+    margin: 0 0 0 -1rem;
+    padding: 0 0 0 1rem;
+  }
   .toc li { margin: 0; }
   .toc-l3 { padding-left: 0.85rem; }
   .toc-l4 { padding-left: 1.7rem; }
@@ -107,6 +138,24 @@ for (const h of items) {
     font-weight: 600;
   }
 
+  .toc-top {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    align-self: flex-start;
+    margin-top: 0.85rem;
+    padding: 0.35rem 0;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .toc-top:hover { color: var(--accent-text); }
+
   @media (max-width: 60rem) {
     .toc {
       border-left: none;
@@ -115,8 +164,19 @@ for (const h of items) {
       padding: 1rem 1.25rem;
       background: var(--surface);
     }
+    .toc-list { margin-left: 0; padding-left: 0; }
     .toc a { margin-left: 0; padding-left: 0.5rem; border-left: none; }
     .toc a.active,
     .toc a.parent-active { border-left: none; }
+  }
+
+  /* Below the rail breakpoint the TOC is a card above the article, where a
+     "back to top" control would sit at the top of the page and be pointless. */
+  @media (max-width: 75rem) {
+    .toc-top { display: none; }
+  }
+
+  @media print {
+    .toc-top { display: none; }
   }
 </style>
