@@ -27,6 +27,9 @@ const { notebook, parts } = Astro.props;
 // Flatten to every chapter, then render each page's Content up front, keyed by
 // entry id so the part/chapter structure below can lay them out in order.
 const chapters = parts.flatMap((part) => part.chapters);
+// Every page opted out via `printInNotebook: false` — there is nothing to print,
+// so the page explains that instead of opening an empty print dialog.
+const isEmpty = chapters.length === 0;
 const rendered = new Map(
   await Promise.all(
     chapters.map(
@@ -49,11 +52,32 @@ const rendered = new Map(
       </h1>
       {notebook.description && <p class="print-lede">{notebook.description}</p>}
       {notebook.author && <p class="print-author">{notebook.author}</p>}
-      <p class="print-hint" data-pagefind-ignore>
-        The print dialog opens automatically — choose “Save as PDF” to export
-        the whole notebook, or close it to keep reading on screen.
-      </p>
+      {!isEmpty && (
+        <p class="print-hint" data-pagefind-ignore>
+          The print dialog opens automatically — choose “Save as PDF” to export
+          the whole notebook, or close it to keep reading on screen.
+        </p>
+      )}
     </header>
+
+    {isEmpty && (
+      <dialog class="print-empty" data-print-empty data-pagefind-ignore>
+        <h2>Nothing to print</h2>
+        <p>
+          Every page in <strong>{notebook.label}</strong> sets
+          <code>printInNotebook: false</code> in its frontmatter, so this
+          notebook has no printable pages and the print dialog was not opened.
+        </p>
+        <p>
+          Remove that field (it defaults to <code>true</code>) from the pages you
+          want in the PDF, then reload.
+        </p>
+        <form method="dialog" class="print-empty-actions">
+          <a href={notebook.href}>Back to {notebook.label}</a>
+          <button type="submit">Dismiss</button>
+        </form>
+      </dialog>
+    )}
 
     {parts.map((part) => (
       <>
@@ -95,8 +119,13 @@ const rendered = new Map(
 </BaseLayout>
 
 <script>
-  // Open the print dialog once the page (fonts, math, images) has loaded.
-  addEventListener('load', () => window.print());
+  // Open the print dialog once the page (fonts, math, images) has loaded — or,
+  // when every page opted out of the book, explain that instead of printing.
+  addEventListener('load', () => {
+    const empty = document.querySelector<HTMLDialogElement>('[data-print-empty]');
+    if (empty) empty.showModal();
+    else window.print();
+  });
 </script>
 
 <style>
@@ -135,6 +164,40 @@ const rendered = new Map(
     margin-top: 3rem;
     padding-top: 3rem;
     border-top: 1px solid var(--border);
+  }
+
+  /* Empty-book notice, shown modally when no page opted into the print view. */
+  .print-empty {
+    max-width: 32rem;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+  }
+  .print-empty::backdrop { background: rgb(0 0 0 / 0.5); }
+  .print-empty h2 { margin: 0 0 0.75rem; font-size: 1.25rem; }
+  .print-empty p { margin: 0 0 0.75rem; color: var(--text-muted); }
+  .print-empty code {
+    background: var(--bg-subtle);
+    border-radius: 0.25rem;
+    padding: 0.1em 0.35em;
+  }
+  .print-empty-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 1.25rem;
+  }
+  .print-empty-actions button {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-subtle);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
   }
   .doc { min-width: 0; }
   .doc-head { margin-bottom: 1.5rem; }
