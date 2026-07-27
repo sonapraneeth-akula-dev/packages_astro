@@ -480,26 +480,57 @@ export function flattenSidebar(nodes: SidebarNode[]): DocLink[] {
   return out;
 }
 
-/** Trail of nodes (top → target) whose href matches `href`. */
-function findTrail(
-  nodes: SidebarNode[],
-  href: string,
-  trail: SidebarNode[] = [],
-): SidebarNode[] | null {
-  for (const node of nodes) {
-    if (node.href === href) return [...trail, node];
-    if (node.type === 'group') {
-      const found = findTrail(node.items, href, [...trail, node]);
-      if (found) return found;
-    }
-  }
-  return null;
+/**
+ * Per-tree lookup tables, built in a single walk and reused across every route
+ * that shares the tree.
+ *
+ * Without this, each route re-flattened the whole tree (for prev/next) and
+ * re-searched it (for breadcrumbs), making route generation O(pages × nodes).
+ * The cache is keyed on the tree array itself, so a notebook's shared tree is
+ * indexed once no matter how many pages it contains.
+ */
+interface TreeIndex {
+  /** Depth-first reading order of internal doc stops. */
+  flat: DocLink[];
+  /** href → position in {@link flat}, for prev/next lookups. */
+  position: Map<string, number>;
+  /** href → breadcrumb trail (top → target). */
+  breadcrumbs: Map<string, Breadcrumb[]>;
 }
 
-function breadcrumbsFor(tree: SidebarNode[], href: string): Breadcrumb[] {
-  const trail = findTrail(tree, href);
-  if (!trail) return [];
-  return trail.map((n) => ({ label: n.label, href: n.href }));
+const treeIndexCache = new WeakMap<SidebarNode[], TreeIndex>();
+
+function indexTree(tree: SidebarNode[]): TreeIndex {
+  const cached = treeIndexCache.get(tree);
+  if (cached) return cached;
+
+  const flat: DocLink[] = [];
+  const position = new Map<string, number>();
+  const breadcrumbs = new Map<string, Breadcrumb[]>();
+
+  const walk = (list: SidebarNode[], trail: Breadcrumb[]) => {
+    for (const node of list) {
+      const crumb: Breadcrumb = { label: node.label, href: node.href };
+      if (node.type === 'group') {
+        const nested = [...trail, crumb];
+        if (node.href) {
+          if (!breadcrumbs.has(node.href)) breadcrumbs.set(node.href, nested);
+          if (!position.has(node.href)) position.set(node.href, flat.length);
+          flat.push({ label: node.label, href: node.href });
+        }
+        walk(node.items, nested);
+      } else if (!node.isExternal) {
+        if (!breadcrumbs.has(node.href)) breadcrumbs.set(node.href, [...trail, crumb]);
+        if (!position.has(node.href)) position.set(node.href, flat.length);
+        flat.push({ label: node.label, href: node.href });
+      }
+    }
+  };
+  walk(tree, []);
+
+  const index: TreeIndex = { flat, position, breadcrumbs };
+  treeIndexCache.set(tree, index);
+  return index;
 }
 
 // ─── Route building ──────────────────────────────────────────────────────────
@@ -528,9 +559,8 @@ function makeRoute(
   breadcrumbs: Breadcrumb[],
   notebook?: { id: string; label: string },
 ): DocRoute {
-  const flat = flattenSidebar(tree);
-  const href = entrySlug(entry);
-  const i = flat.findIndex((l) => l.href === href);
+  const { flat, position } = indexTree(tree);
+  const i = position.get(entrySlug(entry)) ?? -1;
   const props: DocRouteProps = {
     entry,
     tree,
@@ -581,7 +611,7 @@ export function buildDocRoutes(
       }
       const breadcrumbs: Breadcrumb[] = [
         { label: 'Home', href: '/' },
-        ...breadcrumbsFor(tree, entrySlug(entry)),
+        ...(indexTree(tree).breadcrumbs.get(entrySlug(entry)) ?? []),
       ];
       return makeRoute(entry, tree, breadcrumbs, {
         id: notebook.id,
@@ -591,8 +621,9 @@ export function buildDocRoutes(
   }
 
   const tree = buildSidebar(live, options.sidebarConfig);
+  const { breadcrumbs } = indexTree(tree);
   return docs.map((entry) =>
-    makeRoute(entry, tree, breadcrumbsFor(tree, entrySlug(entry))),
+    makeRoute(entry, tree, breadcrumbs.get(entrySlug(entry)) ?? []),
   );
 }
 
@@ -712,10 +743,10 @@ export function buildHomeData(
 ): HomeData {
   const live = entries.filter((e) => !e.data.draft || includeDrafts);
   const tree = buildSidebar(live, options.sidebarConfig);
-  const flat = flattenSidebar(tree);
+  const { flat, position } = indexTree(tree);
   const rootEntry = live.find((e) => isRootIndex(e)) ?? null;
   // The first stop after "/" (or the very first stop if there is no root).
-  const rootIdx = flat.findIndex((l) => l.href === '/');
+  const rootIdx = position.get('/') ?? -1;
   const next =
     rootIdx >= 0 ? flat[rootIdx + 1] ?? null : flat[0] ?? null;
   const notebooks =
