@@ -109,6 +109,12 @@ export function docFrontmatterSchema(image?: ImageHelper) {
     /** Hide the right-hand "On this page" table of contents. */
     tableOfContents: z.boolean().default(true),
     /**
+     * Include this page in the whole-notebook print view (`/print/<id>`). Set
+     * `false` to keep a page on the site but out of the printed book — useful
+     * for screen-only pages such as changelogs or link indexes.
+     */
+    printInNotebook: z.boolean().default(true),
+    /**
      * Per-page caption alignment override. Any kind left unset inherits the
      * site config (which defaults to `'center'`). `default` applies to kinds
      * not listed. See the `captionAlign` site config option.

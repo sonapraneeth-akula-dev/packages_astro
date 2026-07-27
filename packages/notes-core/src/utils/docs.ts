@@ -650,13 +650,19 @@ function toRoman(n: number): string {
  * single page and saved as one PDF. Top-level sidebar groups become numbered
  * "parts" and each page a running-numbered chapter, so the printed book reads
  * with part names and chapter numbers the on-screen note pages don't show.
- * Notebooks mode only; a curated `sidebar.json` (single-tree mode) yields none.
+ * Pages with `printInNotebook: false` in their frontmatter are left out of the
+ * book. Notebooks mode only; a curated `sidebar.json` (single-tree mode) yields
+ * none.
  */
 export function buildNotebookPrintRoutes(
   entries: DocEntry[],
 ): NotebookPrintRoute[] {
   const live = entries.filter((e) => !e.data.draft || includeDrafts);
-  const bySlug = new Map(live.map((e) => [entrySlug(e), e]));
+  const bySlug = new Map(
+    live
+      .filter((e) => e.data.printInNotebook !== false)
+      .map((e) => [entrySlug(e), e]),
+  );
   return getNotebooks(live).map((notebook) => {
     const tree = buildNotebookSidebar(live, notebook);
     const parts: PrintPart[] = [];
