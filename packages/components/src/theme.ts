@@ -395,14 +395,9 @@ export function themeFontEntries(theme: ResolvedTheme): ThemeFontEntry[] {
     entries.push(...allFamilyEntries());
   } else {
     const combo = FONT_COMBOS[theme.fonts];
-    const seen = new Set<string>();
     for (const role of FONT_ROLES) {
       const fam = combo[role];
-      if (!fam) continue;
-      const cssVariable = ROLE_VAR[role];
-      if (seen.has(cssVariable)) continue;
-      seen.add(cssVariable);
-      entries.push(fontEntry(fam.name, cssVariable, fam.weights));
+      if (fam) entries.push(fontEntry(fam.name, ROLE_VAR[role], fam.weights));
     }
   }
   // Site-declared script fonts self-host alongside the combo (any mode).
@@ -432,14 +427,10 @@ export function themeFontVars(theme: ResolvedTheme): ThemeFontVar[] {
     );
   } else {
     const combo = FONT_COMBOS[theme.fonts];
-    const seen = new Set<string>();
     for (const role of FONT_ROLES) {
-      const fam = combo[role];
-      if (!fam) continue;
-      const cssVariable = ROLE_VAR[role];
-      if (seen.has(cssVariable)) continue;
-      seen.add(cssVariable);
-      vars.push({ cssVariable, preload: PRELOAD_ROLES.has(role) });
+      if (combo[role]) {
+        vars.push({ cssVariable: ROLE_VAR[role], preload: PRELOAD_ROLES.has(role) });
+      }
     }
   }
   // Script fonts render a (deferred) <Font> slot so their @font-face ships.
