@@ -274,6 +274,9 @@ function familySlug(name: string): string {
   return name.toLowerCase().replace(/\s+/g, '-');
 }
 
+/** Font styles Astro's Fonts API accepts. */
+type FontStyle = 'normal' | 'italic' | 'oblique';
+
 /**
  * A self-hosted font family to register with Astro's Fonts API. The engine adds
  * the provider (Google Fonts); this stays provider-agnostic so it can live in
@@ -286,7 +289,7 @@ export interface ThemeFontEntry {
   cssVariable: string;
   /** Variable-axis range or discrete weights (non-empty). */
   weights: [string, ...string[]];
-  styles: [string, ...string[]];
+  styles: [FontStyle, ...FontStyle[]];
   subsets: [string, ...string[]];
 }
 
