@@ -4,7 +4,6 @@ import { Font } from 'astro:assets';
 import Header from '@sonapraneeth/components/Header.astro';
 import Footer from '@sonapraneeth/components/Footer.astro';
 import EnvBanner from '@sonapraneeth/components/EnvBanner.astro';
-import ThemeSwitcher from '@sonapraneeth/components/ThemeSwitcher.astro';
 import ReadingMode from '@sonapraneeth/components/ReadingMode.astro';
 import PwaHead from '@sonapraneeth/components/PwaHead.astro';
 import PwaInstall from '@sonapraneeth/components/PwaInstall.astro';
@@ -49,10 +48,18 @@ const appEnv = __APP_ENV__;
 
 // Resolve the site's theme: accent palette + radius inline below, fonts loaded
 // per the selected combo (only those families are registered in the config).
-// With `theme.switcher`, every preset ships and the ThemeSwitcher panel renders.
+// `theme.switcher` is dev-server-only (see resolveTheme), so a production build
+// ships just the selected preset and never renders the ThemeSwitcher panel.
 const theme = resolveTheme(config.theme);
 const themeStyle = renderThemeStyle(theme);
 const fontVars = themeFontVars(theme);
+
+// Imported dynamically behind the (statically replaced) DEV flag so the panel's
+// markup *and* its stylesheet are dead code in a production build. A plain
+// top-level import would bundle the CSS even though the component never renders.
+const ThemeSwitcher = import.meta.env.DEV
+  ? (await import('@sonapraneeth/components/ThemeSwitcher.astro')).default
+  : null;
 ---
 
 <!doctype html>
@@ -124,10 +131,10 @@ const fontVars = themeFontVars(theme);
       <slot />
     </main>
     <Footer config={config} />
-    {/* Reading mode takes the bottom-right corner slot; the switcher (demo
-        sites only) stacks above it so both stay reachable. */}
+    {/* Reading mode takes the bottom-right corner slot; the switcher (dev
+        server only) stacks above it so both stay reachable. */}
     {readingMode && <ReadingMode />}
-    {theme.switcher && <ThemeSwitcher theme={theme} raised={readingMode} />}
+    {ThemeSwitcher && <ThemeSwitcher theme={theme} raised={readingMode} />}
     <PwaInstall
       pwa={config.pwa}
       title={config.title}

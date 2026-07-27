@@ -8,16 +8,17 @@
  *   - `fonts`   — a font combination (heading / body / mono).
  *   - `radius`  — corner roundedness.
  *
- * By default only the selected option ships:
+ * A build only ever ships the selected option:
  *   - Fonts are registered with Astro's Fonts API per combo (see
  *     {@link themeFontEntries}), so a build downloads only the chosen families.
  *   - Accent colours + radius are emitted as a tiny inline `<style>` per page
  *     (see {@link renderThemeStyle}), so no unused palette ever ships.
  *
- * Setting `switcher: true` opts into a live preview: every palette, font combo
- * and radius is shipped (as `data-*` presets) and the ThemeSwitcher panel flips
- * them at runtime. This is a design/preview aid — leave it off for production so
- * only the selected option ships.
+ * The live ThemeSwitcher is a design aid, not a site feature: it renders on the
+ * dev server only and is deliberately absent from {@link ThemeConfig}, so no
+ * site config can turn it on. In that mode every palette, font combo and radius
+ * ships as a `data-*` preset so the panel can flip them at runtime — which is
+ * exactly why it must never reach a production build.
  *
  * The engines keep their existing neutral surface tokens (`--bg`, `--surface`,
  * `--text`, …) in `global.css`; this module only overrides the per-config
@@ -42,12 +43,6 @@ export interface ThemeConfig {
   /** Corner roundedness. Default `default`. */
   radius?: RadiusName;
   /**
-   * Show the live theme switcher and ship every palette / font / radius so a
-   * visitor can preview them. Off by default (production ships only the
-   * selected option). Enable to evaluate which combination fits best.
-   */
-  switcher?: boolean;
-  /**
    * Extra non-Latin fonts to self-host for this site only (e.g. Devanagari).
    * Each registers a `.font-<id>` utility class for tagging foreign-script
    * spans. Empty by default — nothing extra ships unless a site opts in.
@@ -59,6 +54,10 @@ export interface ResolvedTheme {
   palette: PaletteName;
   fonts: FontComboName;
   radius: RadiusName;
+  /**
+   * Live-preview mode. Derived, never configured — see {@link resolveTheme}.
+   * When on, every preset ships so the ThemeSwitcher can flip them at runtime.
+   */
   switcher: boolean;
   scriptFonts: ScriptFontConfig[];
 }
@@ -361,9 +360,18 @@ export const RADIUS_OPTIONS: RadiusOption[] = [
 
 /* ─────────────────────────────── Resolution ─────────────────────────────── */
 
-/** Merge a partial theme selection onto the defaults. */
+/**
+ * Merge a partial theme selection onto the defaults.
+ *
+ * `switcher` is derived from the build mode rather than read from the config:
+ * previewing palettes/fonts/radii is a development activity, and enabling it
+ * ships every preset (all palettes, all radii, every font family) instead of
+ * just the selected one. Keeping it off {@link ThemeConfig} means a site cannot
+ * enable it by mistake, and a production build can never carry the extra
+ * payload — the panel exists on the dev server and nowhere else.
+ */
 export function resolveTheme(theme?: ThemeConfig): ResolvedTheme {
-  return { ...DEFAULT_THEME, ...theme };
+  return { ...DEFAULT_THEME, ...theme, switcher: import.meta.env.DEV };
 }
 
 /** Every unique family across all combos, registered under `--ff-<slug>`. */

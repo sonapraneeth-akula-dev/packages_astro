@@ -24,8 +24,9 @@ export const blogConfig = defineBlogConfig({
   search: true,
   pwa: { enabled: true, precache: 'all' },
   // Showcase the theme system: violet accent, the Inter "modern" font combo
-  // and large corner radius. `switcher` ships every preset and renders the live
-  // theme switcher so you can preview palette/font/radius combinations.
+  // and large corner radius. The live theme switcher is not configurable — it
+  // renders on the dev server only (`bun dev`), so use it there to preview
+  // palette/font/radius combinations.
   //
   // `scriptFonts` self-hosts Noto Serif Devanagari for this site only and emits
   // a `.font-devanagari` class. Tag a span with it plus `lang`, e.g.
@@ -34,7 +35,6 @@ export const blogConfig = defineBlogConfig({
     palette: 'violet',
     fonts: 'modern',
     radius: 'large',
-    switcher: true,
     scriptFonts: [
       {
         id: 'devanagari',
