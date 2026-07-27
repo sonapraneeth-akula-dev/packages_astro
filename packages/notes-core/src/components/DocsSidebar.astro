@@ -84,6 +84,7 @@ const { tree, currentPath, label = 'Contents', backLink, browse = [] } = Astro.p
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
+    flex: 0 0 auto;
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-muted);
@@ -92,6 +93,7 @@ const { tree, currentPath, label = 'Contents', backLink, browse = [] } = Astro.p
   }
   .docs-sidebar-back:hover { color: var(--accent-text); }
   .docs-sidebar-label {
+    flex: 0 0 auto;
     font-family: var(--font-mono);
     font-size: 0.72rem;
     font-weight: 600;
@@ -105,6 +107,7 @@ const { tree, currentPath, label = 'Contents', backLink, browse = [] } = Astro.p
     overflow-y: auto;
   }
   .docs-sidebar-browse {
+    flex: 0 0 auto;
     margin-top: 1.25rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border);
@@ -135,18 +138,30 @@ const { tree, currentPath, label = 'Contents', backLink, browse = [] } = Astro.p
     background: var(--accent-soft);
   }
 
-  /* Desktop: sticky rail. The layout grid gives it the left column. */
+  /* Desktop: sticky rail. The layout grid gives it the left column. The panel
+     is bound to the viewport, so the back link + heading stay at the top, the
+     Browse links stay at the bottom, and only the tree in between scrolls. */
   @media (min-width: 60.0625rem) {
     .docs-sidebar-toggle { display: none; }
+    /* Fill the layout row so the sticky panel below can travel the full length
+       of the article. Left at its content height, a short tree would scroll
+       away long before the reader reached the end of the page. */
+    .docs-sidebar { align-self: stretch; }
     .docs-sidebar-panel {
       position: sticky;
-      top: 5.5rem;
-      max-height: calc(100dvh - 7rem);
+      top: var(--sticky-top);
+      max-height: calc(100dvh - var(--sticky-top) - 1.5rem);
       display: flex;
       flex-direction: column;
     }
+    /* `min-height: 0` is what actually makes this scroll: without it a flex
+       item refuses to shrink below its content height, so the tree overflows
+       the panel (and pushes Browse off-screen) instead of scrolling. */
     .docs-sidebar-scroll {
-      flex: 1;
+      flex: 1 1 auto;
+      min-height: 0;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
       padding-right: 0.5rem;
     }
   }
