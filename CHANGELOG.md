@@ -10,6 +10,37 @@ version. The headings below summarise changes across all workspaces.
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-07-27
+
+### Added
+
+- Shared content-entry ID generation for Astro collections and numbered
+  references, with regression coverage for route prefixes, normalized
+  filenames, nested index entries and custom slugs.
+- A cross-package engineering reference recording the performance review,
+  validation, tradeoffs and troubleshooting guidance.
+
+### Changed
+
+- Notes route generation caches sidebar reading order, positions and
+  breadcrumbs once per tree instead of traversing it for every page.
+- Reading progress uses compositor transforms, Mermaid layout reads and writes
+  are batched, and UI transitions are limited to changed properties.
+- Release `@sonapraneeth/components` 2.7.0,
+  `@sonapraneeth/notes-core` 2.14.0 and `@sonapraneeth/blog-core` 2.7.0.
+
+### Fixed
+
+- Numbered references now use the same IDs as Astro routes, honor each site's
+  content directory, include the blog route prefix and fail fast on invalid
+  directories.
+- Correct Pagefind chip element typing, Astro font-style typing and standard
+  line clamping on blog cards.
+
+### Removed
+
+- Dead sidebar label state and ineffective theme-role deduplication.
+
 ## [2.5.0] - 2026-07-27
 
 ### Added
@@ -225,7 +256,8 @@ version. The headings below summarise changes across all workspaces.
   (`fix(blog-core)`)
 - Tighten search excerpt highlights to the matched word. (`fix(search)`)
 
-[Unreleased]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.5.0...HEAD
+[Unreleased]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.6.0...HEAD
+[2.6.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/sonapraneeth-akula-dev/packages_astro/compare/v2.2.0...v2.3.0
