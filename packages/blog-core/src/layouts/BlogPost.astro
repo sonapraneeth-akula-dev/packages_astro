@@ -304,14 +304,16 @@ const { title, description, pubDate, updatedDate, category, tags, keywords, cove
   .post-body :global(h4) {
     max-width: var(--measure);
   }
+  /* Anchor jumps clear the sticky header via `scroll-padding-top` on the
+     scrollport (see global.css). Deliberately not repeated as a per-heading
+     `scroll-margin-top`: the two add up, which would land the heading a full
+     header-height further down than intended. */
   .post-body :global(h2) {
     margin-top: 2.75rem;
     padding-top: 0.5rem;
-    scroll-margin-top: 5.5rem;
   }
   .post-body :global(h3) {
     margin-top: 2rem;
-    scroll-margin-top: 5.5rem;
   }
   .post-body :global(p),
   .post-body :global(ul),
@@ -470,6 +472,8 @@ const { title, description, pubDate, updatedDate, category, tags, keywords, cove
     top: 1.5rem;
     max-height: calc(100dvh - 3rem);
   }
+  /* No header left to clear. */
+  :global(html[data-reading]) { scroll-padding-top: 1.5rem; }
   :global(html[data-reading]) .crumbs,
   :global(html[data-reading]) .post-actions,
   :global(html[data-reading]) .post-tags,
