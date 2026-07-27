@@ -406,8 +406,8 @@ export async function initPagefindSearch(root: HTMLElement): Promise<void> {
     setChip(key, value, on);
   }
 
-  function findChip(key: string, value: string): HTMLButtonElement | null {
-    for (const chip of filtersEl.querySelectorAll<HTMLButtonElement>('.pf-chip')) {
+  function findChip(key: string, value: string): HTMLElement | null {
+    for (const chip of filtersEl.querySelectorAll<HTMLElement>('.pf-chip')) {
       if (chip.dataset.key === key && chip.dataset.value === value) return chip;
     }
     return null;
@@ -512,7 +512,7 @@ export async function initPagefindSearch(root: HTMLElement): Promise<void> {
 
   /** Update each chip's count from the live facet counts of the last search. */
   function refreshCounts(live: FilterGroups): void {
-    for (const chip of filtersEl.querySelectorAll<HTMLButtonElement>('.pf-chip')) {
+    for (const chip of filtersEl.querySelectorAll<HTMLElement>('.pf-chip')) {
       const key = chip.dataset.key!;
       const value = chip.dataset.value!;
       const count = live[key]?.[value] ?? 0;
