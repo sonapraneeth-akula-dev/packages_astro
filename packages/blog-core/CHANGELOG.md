@@ -5,6 +5,24 @@ All notable changes to `@sonapraneeth/blog-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-07-27
+
+### Changed
+
+- Numbering accepts the site's content directory and generates references under
+  the `/blog` route prefix.
+- Shared Pagefind hidden-carrier styles and taxonomy transitions are smaller
+  and limited to the properties that actually change.
+
+### Fixed
+
+- Blog collection IDs and numbered reference URLs now use the same shared
+  generator, including normalized filenames and custom slugs.
+- Post-card descriptions include the standard `line-clamp` property alongside
+  the WebKit fallback.
+- Math frontmatter documentation now accurately states that KaTeX CSS is loaded
+  on every post and the compatibility flag does not currently gate it.
+
 ## [2.6.0] - 2026-07-26
 
 ### Added
