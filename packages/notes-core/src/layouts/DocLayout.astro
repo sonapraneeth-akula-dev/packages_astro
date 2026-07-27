@@ -109,74 +109,79 @@ const showToc = tableOfContents && headings.length > 0;
         )}
         {readingTime && <span data-pagefind-meta={`reading:${readingTime}`}></span>}
       </div>
-      <header class="doc-head">
-        <nav class="crumbs" aria-label="Breadcrumb">
-          {breadcrumbs.map((crumb, i) => (
-            <>
-              {i > 0 && <span aria-hidden="true">/</span>}
-              {crumb.href ? <a href={crumb.href}>{crumb.label}</a> : <span>{crumb.label}</span>}
-            </>
-          ))}
-        </nav>
-        <h1>{cover && <span class="doc-cover" aria-hidden="true">{cover} </span>}{title}</h1>
-        {description && <p class="doc-lede" data-pagefind-weight="2">{description}</p>}
-        {(readingTime || publishedDate || lastUpdated) && (
-          <div class="doc-meta">
-            {publishedDate && (
-              <span class="meta-item">
-                <span class="meta-label">Published</span>
-                <time datetime={publishedDate.toISOString()}>
-                  {formatDateTime(publishedDate, config.timeZone, config.timeZoneLabel)}
-                </time>
-              </span>
-            )}
-            {publishedDate && lastUpdated && <span class="dot" aria-hidden="true">·</span>}
-            {lastUpdated && (
-              <span class="meta-item">
-                <span class="meta-label">Updated</span>
-                <time datetime={lastUpdated.toISOString()}>
-                  {formatDateTime(lastUpdated, config.timeZone, config.timeZoneLabel)}
-                </time>
-              </span>
-            )}
-            {readingTime && (publishedDate || lastUpdated) && <span class="dot" aria-hidden="true">·</span>}
-            {readingTime && <span>{readingTime}</span>}
-          </div>
-        )}
-        {(category || tags.length > 0) && (
-          <div class="doc-taxonomy" data-pagefind-ignore>
-            {category && (
-              <a class="chip chip--accent" href={`${categoryBase}/${slugify(category)}`}>
-                <Icon name="category" />{category}
-              </a>
-            )}
-            {tags.map((tag) => (
-              <a class="chip" href={`${tagBase}/${slugify(tag)}`}>
-                <Icon name="tag" />{tag}
-              </a>
-            ))}
-          </div>
-        )}
-        <div class="doc-actions" data-pagefind-ignore>
-          <button type="button" class="ghost-btn" data-print-doc>
-            <Icon name="printer" /><span>Print / Save as PDF</span>
-          </button>
-          {printHref && (
-            <a class="ghost-btn" href={printHref}>
-              <Icon name="book" /><span>Print notebook</span>
-            </a>
-          )}
-          {editUrl && (
-            <a class="ghost-btn" href={editUrl} target="_blank" rel="noopener">
-              <Icon name="pencil" /><span>Edit this page</span>
-            </a>
-          )}
-        </div>
-      </header>
+      {/* Pinned under the site header so the trail back up the tree stays
+          reachable without scrolling to the top of the note. */}
+      <nav class="crumbs" aria-label="Breadcrumb">
+        {breadcrumbs.map((crumb, i) => (
+          <>
+            {i > 0 && <span aria-hidden="true">/</span>}
+            {crumb.href ? <a href={crumb.href}>{crumb.label}</a> : <span>{crumb.label}</span>}
+          </>
+        ))}
+      </nav>
 
-      <div class="doc-grid">
+      {/* One grid for the whole article, so the on-this-page rail starts level
+          with the title instead of below the header block. */}
+      <div class:list={['doc-grid', { 'has-toc': showToc }]}>
+        <header class="doc-head">
+          <h1>{cover && <span class="doc-cover" aria-hidden="true">{cover} </span>}{title}</h1>
+          {description && <p class="doc-lede" data-pagefind-weight="2">{description}</p>}
+          {(readingTime || publishedDate || lastUpdated) && (
+            <div class="doc-meta">
+              {publishedDate && (
+                <span class="meta-item">
+                  <span class="meta-label">Published</span>
+                  <time datetime={publishedDate.toISOString()}>
+                    {formatDateTime(publishedDate, config.timeZone, config.timeZoneLabel)}
+                  </time>
+                </span>
+              )}
+              {publishedDate && lastUpdated && <span class="dot" aria-hidden="true">·</span>}
+              {lastUpdated && (
+                <span class="meta-item">
+                  <span class="meta-label">Updated</span>
+                  <time datetime={lastUpdated.toISOString()}>
+                    {formatDateTime(lastUpdated, config.timeZone, config.timeZoneLabel)}
+                  </time>
+                </span>
+              )}
+              {readingTime && (publishedDate || lastUpdated) && <span class="dot" aria-hidden="true">·</span>}
+              {readingTime && <span>{readingTime}</span>}
+            </div>
+          )}
+          {(category || tags.length > 0) && (
+            <div class="doc-taxonomy" data-pagefind-ignore>
+              {category && (
+                <a class="chip chip--accent" href={`${categoryBase}/${slugify(category)}`}>
+                  <Icon name="category" />{category}
+                </a>
+              )}
+              {tags.map((tag) => (
+                <a class="chip" href={`${tagBase}/${slugify(tag)}`}>
+                  <Icon name="tag" />{tag}
+                </a>
+              ))}
+            </div>
+          )}
+          <div class="doc-actions" data-pagefind-ignore>
+            <button type="button" class="ghost-btn" data-print-doc>
+              <Icon name="printer" /><span>Print / Save as PDF</span>
+            </button>
+            {printHref && (
+              <a class="ghost-btn" href={printHref}>
+                <Icon name="book" /><span>Print notebook</span>
+              </a>
+            )}
+            {editUrl && (
+              <a class="ghost-btn" href={editUrl} target="_blank" rel="noopener">
+                <Icon name="pencil" /><span>Edit this page</span>
+              </a>
+            )}
+          </div>
+        </header>
+
         <div
-          class:list={['doc-body', { 'has-toc': showToc }]}
+          class="doc-body"
           data-chapter={chapter}
           style={chapter ? `--chapter-number: "${chapter}";` : undefined}
         >
@@ -185,33 +190,34 @@ const showToc = tableOfContents && headings.length > 0;
             <span class="doc-keywords" aria-hidden="true" data-pagefind-weight="0.5">{keywords.join(' ')}</span>
           )}
         </div>
+
         {showToc && (
           <aside class="doc-aside" data-pagefind-ignore>
             <TableOfContents headings={headings} />
           </aside>
         )}
-      </div>
 
-      {(prev || next) && (
-        <nav class="doc-nav" aria-label="Pagination" data-pagefind-ignore>
-          {prev ? (
-            <a class="doc-nav-link prev" href={prev.href} rel="prev">
-              <span class="doc-nav-dir">← Previous</span>
-              <span class="doc-nav-title">{prev.label}</span>
-            </a>
-          ) : (
-            <span class="doc-nav-spacer"></span>
-          )}
-          {next ? (
-            <a class="doc-nav-link next" href={next.href} rel="next">
-              <span class="doc-nav-dir">Next →</span>
-              <span class="doc-nav-title">{next.label}</span>
-            </a>
-          ) : (
-            <span class="doc-nav-spacer"></span>
-          )}
-        </nav>
-      )}
+        {(prev || next) && (
+          <nav class="doc-nav" aria-label="Pagination" data-pagefind-ignore>
+            {prev ? (
+              <a class="doc-nav-link prev" href={prev.href} rel="prev">
+                <span class="doc-nav-dir">← Previous</span>
+                <span class="doc-nav-title">{prev.label}</span>
+              </a>
+            ) : (
+              <span class="doc-nav-spacer"></span>
+            )}
+            {next ? (
+              <a class="doc-nav-link next" href={next.href} rel="next">
+                <span class="doc-nav-dir">Next →</span>
+                <span class="doc-nav-title">{next.label}</span>
+              </a>
+            ) : (
+              <span class="doc-nav-spacer"></span>
+            )}
+          </nav>
+        )}
+      </div>
     </article>
   </div>
 </BaseLayout>
@@ -261,15 +267,30 @@ const showToc = tableOfContents && headings.length > 0;
     white-space: nowrap;
   }
 
+  /* Pinned under the site header. Kept to a single line that scrolls sideways
+     rather than wrapping, so the bar's height stays equal to --crumbs-height
+     (which the on-this-page rail offsets against). */
   .crumbs {
+    position: sticky;
+    top: var(--header-height);
+    z-index: 20;
     display: flex;
     gap: 0.5rem;
     align-items: center;
-    flex-wrap: wrap;
+    min-height: var(--crumbs-height);
+    margin-inline: -0.75rem;
+    padding-inline: 0.75rem;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
     font-size: 0.85rem;
     color: var(--text-muted);
-    margin-bottom: 1rem;
+    white-space: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
+  .crumbs::-webkit-scrollbar { display: none; }
   .crumbs a { color: var(--text-muted); font-weight: 600; }
   .crumbs a:hover { color: var(--accent-text); }
 
@@ -335,19 +356,52 @@ const showToc = tableOfContents && headings.length > 0;
     transform: translateY(-1px);
   }
 
+  /* Named areas rather than source order, so the on-this-page rail can sit
+     beside the whole article on wide screens (starting level with the title,
+     not below the header block) yet drop to a card *under* the title — never
+     above it — once the layout collapses to one column. */
   .doc-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 16rem;
-    gap: 3.5rem;
-    margin-top: 2.5rem;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'head' 'body' 'nav';
+    margin-top: 1.5rem;
     align-items: start;
   }
-  .doc-aside { position: sticky; top: 5.5rem; }
+  .doc-head { grid-area: head; }
+  .doc-body { grid-area: body; }
+  .doc-aside { grid-area: toc; }
+  .doc-nav { grid-area: nav; }
 
-  /* Tablet: drop the on-this-page TOC into a single column. */
+  @media (min-width: 75.0625rem) {
+    .doc-grid.has-toc {
+      grid-template-columns: minmax(0, 1fr) 16rem;
+      grid-template-areas: 'head toc' 'body toc' 'nav toc';
+      column-gap: 3.5rem;
+    }
+  }
+
+  /* Bound to the viewport so the rail's own three zones work: the title stays
+     put, the heading list scrolls, and "Back to top" pins to the bottom (see
+     TableOfContents.astro). Offset by --rail-top to clear the breadcrumb bar. */
+  .doc-aside {
+    position: sticky;
+    top: var(--rail-top);
+    max-height: calc(100dvh - var(--rail-top) - 1.5rem);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .doc-aside > :global(.toc) { flex: 1 1 auto; min-height: 0; }
+
+  /* Tablet: the rail becomes a card between the title and the prose. */
   @media (max-width: 75rem) {
-    .doc-grid { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
-    .doc-aside { position: static; order: -1; }
+    .doc-grid.has-toc { grid-template-areas: 'head' 'toc' 'body' 'nav'; }
+    .doc-aside {
+      position: static;
+      max-height: none;
+      display: block;
+      margin-top: 1.5rem;
+    }
   }
 
   /* Mobile: the nav sidebar becomes a collapsible drawer (handled inside
@@ -357,7 +411,7 @@ const showToc = tableOfContents && headings.length > 0;
   }
 
   /* Prose */
-  .doc-body { font-size: 1.05rem; }
+  .doc-body { margin-top: 2.5rem; font-size: 1.05rem; }
   .doc-body :global(p),
   .doc-body :global(ul),
   .doc-body :global(ol),
@@ -365,13 +419,17 @@ const showToc = tableOfContents && headings.length > 0;
   .doc-body :global(h2),
   .doc-body :global(h3),
   .doc-body :global(h4) { max-width: var(--measure); }
+  /* Anchor jumps have to clear the header *and* the breadcrumb bar. Set on the
+     scrollport rather than per-heading: scroll-padding and scroll-margin add
+     up, so doing both would land the heading a full extra bar-height down. */
+  :global(html) { scroll-padding-top: var(--rail-top); }
+
   .doc-body :global(h2) {
     margin-top: 2.75rem;
     padding-top: 0.5rem;
-    scroll-margin-top: 5.5rem;
   }
-  .doc-body :global(h3) { margin-top: 2rem; scroll-margin-top: 5.5rem; }
-  .doc-body :global(h4) { margin-top: 1.5rem; scroll-margin-top: 5.5rem; }
+  .doc-body :global(h3) { margin-top: 2rem; }
+  .doc-body :global(h4) { margin-top: 1.5rem; }
   .doc-body :global(p),
   .doc-body :global(ul),
   .doc-body :global(ol) { margin-block: 1rem; }
@@ -429,7 +487,7 @@ const showToc = tableOfContents && headings.length > 0;
   .doc-body :global(h4:hover .heading-anchor) { opacity: 1; }
   /* No "On this page" rail → the deep-link anchors have no companion, so hide
      them (landing pages, pages with tableOfContents: false or no headings). */
-  .doc-body:not(.has-toc) :global(.heading-anchor) { display: none; }
+  .doc-grid:not(.has-toc) .doc-body :global(.heading-anchor) { display: none; }
 
   /* Previous / next navigation */
   .doc-nav {
@@ -479,7 +537,7 @@ const showToc = tableOfContents && headings.length > 0;
   }
 
   @media (min-width: 100rem) {
-    .doc-grid { grid-template-columns: minmax(0, 1fr) 18rem; gap: 4.5rem; }
+    .doc-grid.has-toc { grid-template-columns: minmax(0, 1fr) 18rem; column-gap: 4.5rem; }
   }
 
   /* Reading mode. The nav sidebar and site chrome are hidden globally (see
@@ -498,7 +556,10 @@ const showToc = tableOfContents && headings.length > 0;
   }
   :global(html[data-reading]) .doc-aside {
     top: 1.5rem;
+    max-height: calc(100dvh - 3rem);
   }
+  /* No header and no breadcrumb bar left to clear. */
+  :global(html[data-reading]) { scroll-padding-top: 1.5rem; }
   :global(html[data-reading]) .crumbs,
   :global(html[data-reading]) .doc-taxonomy,
   :global(html[data-reading]) .doc-actions {
@@ -521,13 +582,16 @@ const showToc = tableOfContents && headings.length > 0;
       flex-direction: column;
       margin-top: 1.5rem;
     }
+    .doc-head { order: 0; }
     .doc-aside {
-      order: -1;
+      order: 1;
       position: static;
-      margin-bottom: 2rem;
+      display: block;
+      max-height: none;
+      margin: 0 0 2rem;
       break-inside: avoid;
     }
-    .doc-body { font-size: 11pt; }
+    .doc-body { order: 2; margin-top: 0; font-size: 11pt; }
     .doc-body :global(p),
     .doc-body :global(ul),
     .doc-body :global(ol),
