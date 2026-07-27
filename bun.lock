@@ -17,7 +17,7 @@
     },
     "app/blog": {
       "name": "@sonapraneeth/blog-app",
-      "version": "2.1.1",
+      "version": "2.2.0",
       "dependencies": {
         "@sonapraneeth/blog-core": "workspace:*",
         "astro": "catalog:",
@@ -32,7 +32,7 @@
     },
     "app/notes/go": {
       "name": "@sonapraneeth/notes-app",
-      "version": "2.1.1",
+      "version": "2.2.0",
       "dependencies": {
         "@sonapraneeth/components": "workspace:*",
         "@sonapraneeth/notes-core": "workspace:*",
@@ -48,7 +48,7 @@
     },
     "demo/blog": {
       "name": "@sonapraneeth/blog-demo",
-      "version": "2.1.1",
+      "version": "2.2.0",
       "dependencies": {
         "@sonapraneeth/blog-core": "workspace:*",
         "astro": "catalog:",
@@ -62,7 +62,7 @@
     },
     "demo/notebooks": {
       "name": "@sonapraneeth/notebooks-demo",
-      "version": "2.1.1",
+      "version": "2.3.0",
       "dependencies": {
         "@sonapraneeth/notes-core": "workspace:*",
         "astro": "catalog:",
@@ -76,7 +76,7 @@
     },
     "demo/notes": {
       "name": "@sonapraneeth/notes-demo",
-      "version": "2.1.1",
+      "version": "2.2.0",
       "dependencies": {
         "@sonapraneeth/notes-core": "workspace:*",
         "astro": "catalog:",
@@ -90,7 +90,7 @@
     },
     "packages/blog-core": {
       "name": "@sonapraneeth/blog-core",
-      "version": "2.3.0",
+      "version": "2.6.0",
       "dependencies": {
         "@astrojs/rss": "^4.0.19",
         "@astrojs/sitemap": "catalog:",
@@ -108,9 +108,10 @@
     },
     "packages/components": {
       "name": "@sonapraneeth/components",
-      "version": "2.3.1",
+      "version": "2.6.0",
       "dependencies": {
         "astro": "catalog:",
+        "github-slugger": "^2.0.0",
         "mermaid": "catalog:",
       },
       "devDependencies": {
@@ -120,7 +121,7 @@
     },
     "packages/notes-core": {
       "name": "@sonapraneeth/notes-core",
-      "version": "2.9.0",
+      "version": "2.13.0",
       "dependencies": {
         "@astrojs/sitemap": "catalog:",
         "@expressive-code/plugin-line-numbers": "catalog:",
@@ -137,7 +138,7 @@
     },
     "packages/plugins/satteri": {
       "name": "@sonapraneeth/rehype-satteri-autolink-headings",
-      "version": "2.1.1",
+      "version": "2.2.0",
       "dependencies": {
         "@astrojs/markdown-remark": "^7.2.1",
         "@astrojs/mdx": "^7.0.3",

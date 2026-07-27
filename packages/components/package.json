@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "astro": "catalog:",
+    "github-slugger": "^2.0.0",
     "mermaid": "catalog:"
   },
   "devDependencies": {

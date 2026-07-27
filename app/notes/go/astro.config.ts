@@ -10,4 +10,5 @@ export default defineDocsAstroConfig({
   port: 4320,
   docsConfig,
   sidebar: sidebar as SidebarConfig,
+  contentDir: './src/content/docs',
 });

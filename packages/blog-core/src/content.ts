@@ -1,5 +1,6 @@
 import { defineCollection, type CollectionEntry } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { contentEntryId } from '@sonapraneeth/components/numbering';
 import { postFrontmatterSchema } from './schema';
 
 /**
@@ -20,7 +21,11 @@ import { postFrontmatterSchema } from './schema';
  */
 export function postsCollection(base = './content') {
   return defineCollection({
-    loader: glob({ pattern: '**/*.{md,mdx}', base }),
+    loader: glob({
+      pattern: '**/*.{md,mdx}',
+      base,
+      generateId: ({ entry, data }) => contentEntryId(entry, data.slug),
+    }),
     schema: postFrontmatterSchema,
   });
 }

@@ -24,6 +24,7 @@ import type { AstroIntegration } from 'astro';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import path from 'node:path';
+import { slug as githubSlug } from 'github-slugger';
 
 export interface NumberEntry {
   number: string;
@@ -82,14 +83,36 @@ function stripNoise(src: string): string {
     .replace(/`[^`\n]*`/g, ''); // inline code
 }
 
+/**
+ * Generate the collection id Astro routes from a content-relative file path.
+ * Collection loaders and the numbering scanner both call this function so
+ * filenames, nested `index` entries and frontmatter slugs cannot diverge.
+ */
+export function contentEntryId(entry: string, customSlug?: unknown): string {
+  if (typeof customSlug === 'string' && customSlug.trim()) {
+    return customSlug.trim().replace(/^\/+|\/+$/g, '');
+  }
+
+  const withoutExtension = entry
+    .replace(/\\/g, '/')
+    .replace(/\.(mdx?|markdown)$/i, '');
+  return withoutExtension
+    .split('/')
+    .map((segment) => githubSlug(segment))
+    .join('/')
+    .replace(/\/index$/i, '');
+}
+
 /** Map a content file path to its route, honoring a frontmatter `slug`. */
-function toUrl(contentDir: string, file: string, fm: string): string {
-  const slug = frontmatterValue(fm, 'slug');
-  if (slug) return '/' + slug.replace(/^\/+/, '').replace(/\/+$/, '');
-  let rel = path.relative(contentDir, file).split(path.sep).join('/').replace(/\.(mdx|md)$/, '');
-  if (rel.endsWith('/index')) rel = rel.slice(0, -'/index'.length);
-  if (rel === 'index') rel = '';
-  return '/' + rel;
+function toUrl(
+  contentDir: string,
+  file: string,
+  fm: string,
+  urlPrefix: string,
+): string {
+  const relativePath = path.relative(contentDir, file).split(path.sep).join('/');
+  const id = contentEntryId(relativePath, frontmatterValue(fm, 'slug'));
+  return (urlPrefix + '/' + id).replace(/\/$/, '') || '/';
 }
 
 /** Recursively collect every `.md` / `.mdx` file under a directory. */
@@ -107,14 +130,20 @@ function walk(dir: string): string[] {
 const TOKEN =
   /(?:^|\n)(#{2,6})[ \t]+[^\n]*|<(Callout|Algorithm|Listing|DocImage)\s+id=["']([^"']+)["']([^>]*?)\/?>/g;
 
-/** Parse all notes and compute the id → number map. */
-export function buildNumberingMap(contentDir: string): NumberingMap {
+/**
+ * Parse all notes and compute the id → number map.
+ *
+ * @param contentDir Absolute path of the directory holding the content files.
+ * @param urlPrefix  Route prefix the collection is mounted under (e.g. `/blog`).
+ *                   Empty for engines that serve content at the site root.
+ */
+export function buildNumberingMap(contentDir: string, urlPrefix = ''): NumberingMap {
   const byId: Record<string, NumberEntry> = {};
 
   for (const file of walk(contentDir)) {
     const raw = fs.readFileSync(file, 'utf8');
     const fm = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? '';
-    const url = toUrl(contentDir, file, fm);
+    const url = toUrl(contentDir, file, fm, urlPrefix);
     const part = frontmatterValue(fm, 'part') ?? '';
     const chapter = frontmatterValue(fm, 'chapter') ?? '';
     const body = stripNoise(raw);
@@ -177,18 +206,41 @@ export function buildNumberingMap(contentDir: string): NumberingMap {
 const VIRTUAL_ID = 'virtual:numbering';
 const RESOLVED_ID = '\0' + VIRTUAL_ID;
 
+export interface NumberingOptions {
+  /**
+   * Project-root-relative directory holding the content files — it must match
+   * the `base` passed to the site's content collection, or the computed routes
+   * (and therefore every `<Ref>` link) will be wrong. Defaults to `content`.
+   */
+  contentDir?: string;
+  /**
+   * Route prefix the collection is mounted under. The notes engine serves notes
+   * at the site root (`''`, the default); the blog engine serves posts under
+   * `/blog`.
+   */
+  urlPrefix?: string;
+}
+
 /**
  * Astro integration that serves the computed numbering map as `virtual:numbering`
  * and refreshes it whenever a note changes in dev. Added by default to every
  * notes site through {@link defineDocsAstroConfig}.
  */
-export function numbering(): AstroIntegration {
+export function numbering(options: NumberingOptions = {}): AstroIntegration {
+  const urlPrefix = (options.urlPrefix ?? '').replace(/\/+$/, '');
   let contentDir = '';
   return {
     name: 'notes-core-numbering',
     hooks: {
       'astro:config:setup': ({ config, updateConfig }) => {
-        contentDir = fileURLToPath(new URL('content/', config.root));
+        const dir = (options.contentDir ?? 'content').replace(/^\.?\/+/, '');
+        contentDir = fileURLToPath(new URL(`${dir}/`, config.root));
+        if (!fs.existsSync(contentDir)) {
+          throw new Error(
+            `[numbering] Content directory does not exist: ${contentDir}. ` +
+              'Set contentDir to the same base used by the content collection.',
+          );
+        }
         updateConfig({
           vite: {
             plugins: [
@@ -199,7 +251,7 @@ export function numbering(): AstroIntegration {
                 },
                 load(id: string) {
                   if (id === RESOLVED_ID) {
-                    return `export default ${JSON.stringify(buildNumberingMap(contentDir))};`;
+                    return `export default ${JSON.stringify(buildNumberingMap(contentDir, urlPrefix))};`;
                   }
                 },
                 handleHotUpdate({ file, server }: { file: string; server: any }) {

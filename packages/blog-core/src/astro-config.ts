@@ -33,6 +33,13 @@ export interface BlogAstroConfigOptions {
    * Defaults to `./src/components/registry.ts`.
    */
   components?: string;
+  /**
+   * Project-root-relative directory holding the posts. Must match the `base`
+   * passed to {@link postsCollection} in `src/content.config.ts`, since the
+   * build-time numbering pass reads the posts straight off disk to resolve
+   * `<Ref>` links. Defaults to `content`.
+   */
+  contentDir?: string;
 }
 
 /** Run a git command at build time, falling back gracefully (e.g. in CI/Docker). */
@@ -99,7 +106,8 @@ export function defineBlogAstroConfig(options: BlogAstroConfigOptions) {
       // Build-time auto-numbering for referenceable blocks (<Algorithm>,
       // <Listing>, numbered <Callout>) + <Ref>. Blog posts carry no
       // `part`/`chapter`, so numbers are heading-based (`section.subsection.n`).
-      numbering(),
+      // Posts are served under `/blog/<id>`, so cross-page refs need that prefix.
+      numbering({ contentDir: options.contentDir, urlPrefix: '/blog' }),
       // Client runtime for ```mermaid diagrams: the satteri processor rewrites
       // those fences into <pre class="mermaid"> (bypassing Expressive Code), and
       // this injects the lazy, theme-aware renderer. No-op on diagram-free pages.

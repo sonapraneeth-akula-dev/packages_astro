@@ -5,4 +5,8 @@ import { blogConfig } from './blog.config';
 // search, the MDX/Markdown pipeline and the Astro/Vite setup; this site only
 // supplies its config (./blog.config.ts), content collection and component
 // registry. PUBLIC_SITE_URL overrides the URL per environment.
-export default defineBlogAstroConfig({ port: 4322, blogConfig });
+export default defineBlogAstroConfig({
+	port: 4322,
+	blogConfig,
+	contentDir: './src/content/blog',
+});

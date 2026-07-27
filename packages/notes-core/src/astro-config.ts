@@ -36,6 +36,14 @@ export interface DocsAstroConfigOptions {
   components?: string;
   /** Optional curated sidebar that overrides the auto-generated tree. */
   sidebar?: SidebarConfig;
+  /**
+   * Project-root-relative directory holding the notes. Must match the `base`
+   * passed to {@link docsCollection} in `src/content.config.ts`, since the
+   * build-time numbering pass reads the notes straight off disk to resolve
+  * `<Ref>` links. Defaults to `./src/content/docs`, matching
+  * {@link docsCollection}.
+   */
+  contentDir?: string;
 }
 
 /** Run a git command at build time, falling back gracefully (e.g. in CI/Docker). */
@@ -102,7 +110,7 @@ export function defineDocsAstroConfig(options: DocsAstroConfigOptions) {
       // `virtual:numbering` map consumed by <Algorithm>/<Listing>/<Callout id>
       // and <Ref>. Numbers derive from `part`/`chapter` frontmatter + heading
       // structure, so authors never type them by hand.
-      numbering(),
+      numbering({ contentDir: options.contentDir ?? './src/content/docs' }),
       // Client runtime for ```mermaid diagrams: the satteri processor rewrites
       // those fences into <pre class="mermaid"> (bypassing Expressive Code), and
       // this injects the lazy, theme-aware renderer. No-op on diagram-free pages.
