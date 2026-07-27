@@ -99,6 +99,7 @@ const href = `/blog/${post.id}`;
     margin: 0.25rem 0 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -117,6 +118,6 @@ const href = `/blog/${post.id}`;
   @media (max-width: 40rem) {
     .post-row { grid-template-columns: auto minmax(0, 1fr); }
     .row-meta { display: none; }
-    .row-desc { -webkit-line-clamp: 2; }
+    .row-desc { -webkit-line-clamp: 2; line-clamp: 2; }
   }
 </style>
