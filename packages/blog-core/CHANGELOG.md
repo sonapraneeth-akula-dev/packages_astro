@@ -5,6 +5,22 @@ All notable changes to `@sonapraneeth/blog-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-07-27
+
+### Changed
+
+- The on-this-page rail is bound to the viewport so the shared "Back to top"
+  control pins to the bottom of the rail while the heading list scrolls.
+- Sticky offsets are named CSS tokens (`--header-height`, `--sticky-top`)
+  instead of a `5.5rem` literal repeated across the rail and anchor offsets.
+
+### Fixed
+
+- Anchor jumps land just below the header. `scroll-padding-top` on the
+  scrollport and `scroll-margin-top` on each heading both applied, so clicking
+  an on-this-page link cleared the header twice and left roughly two
+  header-heights of blank space above the target.
+
 ## [2.7.0] - 2026-07-27
 
 ### Changed

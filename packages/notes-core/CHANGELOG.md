@@ -5,6 +5,36 @@ All notable changes to `@sonapraneeth/notes-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.15.0] - 2026-07-27
+
+### Changed
+
+- Doc pages lay out as a single named-area grid, so the on-this-page rail
+  starts level with the title instead of below the whole header block. Named
+  areas rather than source order mean the rail reflows to a card *below* the
+  title, never above it, once the layout collapses to one column.
+- The breadcrumb trail is pinned flush under the site header, so the route back
+  up the tree stays reachable without scrolling to the top of the note. It is
+  kept to a single line that scrolls sideways rather than wrapping, so its
+  height stays fixed.
+- Sticky offsets are named CSS tokens (`--header-height`, `--sticky-top`,
+  `--crumbs-height`, `--rail-top`) instead of a `5.5rem` literal repeated
+  across the sidebar, the rail and anchor offsets.
+
+### Fixed
+
+- The sidebar's Browse links stay pinned to the bottom while only the tree
+  scrolls. The scroll region was missing `min-height: 0`, so a tall tree
+  overflowed the panel and pushed Browse off-screen instead of scrolling.
+- The sidebar panel stays pinned for the length of the article. It previously
+  sat at its content height, so a short tree stopped travelling partway down a
+  long page.
+- Scrolling to the end of the sidebar tree no longer chains to the page, and
+  the tree no longer shifts sideways when its scrollbar appears.
+- Anchor jumps land just below the pinned chrome. `scroll-padding-top` on the
+  scrollport and `scroll-margin-top` on the target both applied, so headings
+  landed roughly twice as far down as intended.
+
 ## [2.14.0] - 2026-07-27
 
 ### Changed

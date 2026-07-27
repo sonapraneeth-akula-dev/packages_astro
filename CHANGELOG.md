@@ -10,6 +10,36 @@ version. The headings below summarise changes across all workspaces.
 
 ## [Unreleased]
 
+### Added
+
+- A "Back to top" control pinned to the bottom of the on-this-page rail on both
+  engines, with the heading list scrolling above it.
+
+### Changed
+
+- Notes doc pages lay out as one named-area grid, so the on-this-page rail
+  starts level with the title rather than below the header block, and the
+  breadcrumb trail is pinned under the site header.
+- Sticky offsets are named CSS tokens in both engines instead of a `5.5rem`
+  literal repeated across sidebars, rails and anchor offsets.
+- The live theme switcher renders on the dev server only and is imported
+  dynamically, so neither its markup nor its stylesheet reaches a build.
+- Release `@sonapraneeth/components` 2.8.0,
+  `@sonapraneeth/notes-core` 2.15.0 and `@sonapraneeth/blog-core` 2.8.0.
+
+### Fixed
+
+- The notes sidebar keeps its Browse links pinned while only the tree scrolls,
+  and stays pinned for the length of the article.
+- Anchor jumps on both engines land just below the pinned chrome instead of
+  roughly twice as far down, since `scroll-padding-top` and `scroll-margin-top`
+  were both applied and added up.
+
+### Removed
+
+- The `theme.switcher` config option. It is now derived from the build mode, so
+  a site can no longer enable it — by intent or by copying a demo config.
+
 ## [2.6.0] - 2026-07-27
 
 ### Added

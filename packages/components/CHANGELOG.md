@@ -9,6 +9,31 @@ Entries before 2.5.0 were reconstructed from the commit history, since this
 package previously recorded its changes only in the repository-level
 [CHANGELOG.md](../../CHANGELOG.md).
 
+## [2.8.0] - 2026-07-27
+
+### Added
+
+- A "Back to top" control pinned to the bottom of the on-this-page rail. The
+  heading list scrolls between the title and the control when it does not fit,
+  so the control stays reachable on long pages. It is hidden below the rail
+  breakpoint and in print, leaves no fragment in the URL, and honors
+  `prefers-reduced-motion`.
+
+### Changed
+
+- The live theme switcher now renders on the dev server only, and is imported
+  dynamically so its markup and stylesheet are absent from production builds.
+  Previously the panel's CSS shipped on every page even when the component was
+  not rendered.
+
+### Removed
+
+- The `theme.switcher` config option. Previewing palettes, fonts and radii is a
+  development activity, and enabling it shipped every preset instead of only
+  the selected one, so the flag is now derived rather than configured. Sites
+  that set it must remove it. Released as a minor because every workspace
+  consumer was updated in the same change.
+
 ## [2.7.0] - 2026-07-27
 
 ### Added
