@@ -5,6 +5,30 @@ All notable changes to `@sonapraneeth/notes-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.14.0] - 2026-07-27
+
+### Changed
+
+- Sidebar route generation indexes each shared tree once for breadcrumbs and
+  previous/next navigation instead of traversing the full tree per page.
+- Shared Pagefind hidden-carrier styles and taxonomy transitions are smaller
+  and limited to the properties that actually change.
+- The default numbering directory now matches the default docs collection
+  directory, while sites with custom collection bases pass them explicitly.
+
+### Fixed
+
+- Docs collection IDs and numbered reference URLs now use the same shared
+  generator, including normalized filenames, nested index pages, and custom
+  slugs.
+- Missing numbering directories stop configuration with an actionable error
+  instead of silently removing all reference numbers.
+
+### Removed
+
+- Unused folder-label state that was assigned during sidebar construction but
+  never read.
+
 ## [2.13.0] - 2026-07-27
 
 ### Added
