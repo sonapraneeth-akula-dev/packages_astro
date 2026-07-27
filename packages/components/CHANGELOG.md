@@ -9,6 +9,32 @@ Entries before 2.5.0 were reconstructed from the commit history, since this
 package previously recorded its changes only in the repository-level
 [CHANGELOG.md](../../CHANGELOG.md).
 
+## [2.7.0] - 2026-07-27
+
+### Added
+
+- Shared `contentEntryId()` generation for Astro content loaders and numbered
+  cross-references, including GitHub-style filename normalization and custom
+  slug support.
+
+### Changed
+
+- Reading progress now updates with a compositor-friendly transform instead of
+  changing layout width on every scroll frame.
+- Mermaid diagrams batch all SVG measurements before updating view boxes,
+  avoiding repeated synchronous layout work on pages with multiple diagrams.
+- Shared controls transition only properties that visually change.
+- Theme font registration removes ineffective role-variable deduplication.
+
+### Fixed
+
+- Numbered references now fail fast when their configured content directory is
+  missing and generate URLs that match Astro collection IDs.
+- Pagefind chips use the correct common element type for both linked and
+  filter-only variants.
+- Font styles are restricted to the literal values accepted by Astro's Fonts
+  API.
+
 ## [2.6.0] - 2026-07-26
 
 ### Added
