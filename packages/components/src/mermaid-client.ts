@@ -79,14 +79,18 @@ async function renderAll(): Promise<void> {
 
     // Fit each diagram to the content column (no horizontal scroll) and make it
     // click-to-enlarge: the inline copy is a preview, the overlay is readable.
+    // Measure every diagram first, then write: interleaving `getBBox()` reads
+    // with attribute writes would force one synchronous reflow per diagram.
+    const measured: Array<{ svg: SVGSVGElement; bounds: DOMRect }> = [];
     for (const node of nodes) {
       const svg = node.querySelector<SVGSVGElement>('svg');
       if (!svg) {
         continue;
       }
-      // Shrink-wrap the canvas to the drawing, then let CSS scale it to the
-      // column width.
-      normalizeViewBox(svg);
+      const bounds = measure(svg);
+      if (bounds) {
+        measured.push({ svg, bounds });
+      }
       if (node.dataset.zoomBound !== 'true') {
         node.dataset.zoomBound = 'true';
         node.addEventListener('click', () => {
@@ -96,6 +100,11 @@ async function renderAll(): Promise<void> {
           }
         });
       }
+    }
+    // Shrink-wrap each canvas to its drawing, then let CSS scale it to the
+    // column width.
+    for (const { svg, bounds } of measured) {
+      normalizeViewBox(svg, bounds);
     }
   } catch (error) {
     console.error('[mermaid] failed to render diagrams', error);
@@ -108,6 +117,17 @@ async function renderAll(): Promise<void> {
   }
 }
 
+/** The drawn content box of a diagram, or `null` when it can't be measured. */
+function measure(svg: SVGSVGElement): DOMRect | null {
+  let bounds: DOMRect;
+  try {
+    bounds = svg.getBBox();
+  } catch {
+    return null; // not rendered/measurable (e.g. display:none)
+  }
+  return bounds.width && bounds.height ? bounds : null;
+}
+
 /**
  * Shrink-wrap a diagram's `viewBox` to its actual drawn content.
  *
@@ -118,16 +138,7 @@ async function renderAll(): Promise<void> {
  * and rewriting the `viewBox` makes the drawing fill the SVG — and therefore the
  * column — no matter what Mermaid computed.
  */
-function normalizeViewBox(svg: SVGSVGElement): void {
-  let bounds: DOMRect;
-  try {
-    bounds = svg.getBBox();
-  } catch {
-    return; // not rendered/measurable (e.g. display:none)
-  }
-  if (!bounds.width || !bounds.height) {
-    return;
-  }
+function normalizeViewBox(svg: SVGSVGElement, bounds: DOMRect): void {
   const padding = 8;
   svg.setAttribute(
     'viewBox',
