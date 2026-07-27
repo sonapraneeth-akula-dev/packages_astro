@@ -158,7 +158,6 @@ function visible(entry: DocEntry): boolean {
 interface BuildGroup {
   segment: string;
   label: string;
-  hasExplicitLabel: boolean;
   href?: string;
   badge?: string;
   order: number;
@@ -170,7 +169,6 @@ function emptyGroup(segment: string): BuildGroup {
   return {
     segment,
     label: humanize(segment),
-    hasExplicitLabel: false,
     order: Number.POSITIVE_INFINITY,
     children: new Map(),
     leaves: [],
@@ -188,10 +186,7 @@ function emptyGroup(segment: string): BuildGroup {
  */
 function applyFolderIndex(group: BuildGroup, entry: DocEntry): void {
   const explicit = entry.data.sidebar?.label;
-  if (explicit) {
-    group.label = explicit;
-    group.hasExplicitLabel = true;
-  }
+  if (explicit) group.label = explicit;
   group.badge = entry.data.sidebar?.badge;
   group.order = entryOrder(entry);
   group.leaves.push({
