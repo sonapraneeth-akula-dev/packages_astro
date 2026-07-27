@@ -238,7 +238,7 @@ export function numbering(options: NumberingOptions = {}): AstroIntegration {
         if (!fs.existsSync(contentDir)) {
           throw new Error(
             `[numbering] Content directory does not exist: ${contentDir}. ` +
-              'Set contentDir to the same base used by the content collection.',
+            'Set contentDir to the same base used by the content collection.',
           );
         }
         updateConfig({

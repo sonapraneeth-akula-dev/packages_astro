@@ -6,7 +6,7 @@ import { blogConfig } from './blog.config';
 // supplies its config (./blog.config.ts), content collection and component
 // registry. PUBLIC_SITE_URL overrides the URL per environment.
 export default defineBlogAstroConfig({
-	port: 4322,
-	blogConfig,
-	contentDir: './src/content/blog',
+  port: 4322,
+  blogConfig,
+  contentDir: './src/content/blog',
 });

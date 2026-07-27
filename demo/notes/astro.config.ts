@@ -5,7 +5,7 @@ import { docsConfig } from './notes.config';
 // auto-generated from the folder structure (no sidebar.json passed).
 // PUBLIC_SITE_URL overrides the URL per environment.
 export default defineDocsAstroConfig({
-	port: 4310,
-	docsConfig,
-	contentDir: './content',
+  port: 4310,
+  docsConfig,
+  contentDir: './content',
 });

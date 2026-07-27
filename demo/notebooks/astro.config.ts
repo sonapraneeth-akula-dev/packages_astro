@@ -5,7 +5,7 @@ import { docsConfig } from './notes.config';
 // routing/search; the home page is a hub of notebooks, each with a scoped
 // sidebar auto-generated from its folder. PUBLIC_SITE_URL overrides the URL.
 export default defineDocsAstroConfig({
-	port: 4311,
-	docsConfig,
-	contentDir: './content',
+  port: 4311,
+  docsConfig,
+  contentDir: './content',
 });
