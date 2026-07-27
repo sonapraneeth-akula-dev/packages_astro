@@ -33,3 +33,7 @@ registry = "https://registry.npmjs.org/"
 ```
 
 Then re-run `bun install` to refresh the lockfile against the chosen registry.
+
+## Engineering references
+
+- [Package performance and correctness improvements](docs/package-performance-and-correctness-improvements.md) records the 2026-07-27 package review, implemented optimizations, validation, known limitations, and troubleshooting guidance.

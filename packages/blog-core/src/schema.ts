@@ -34,10 +34,11 @@ export function postFrontmatterSchema({ image }: { image: ImageFunction }) {
      */
     archived: z.boolean().default(false),
     /**
-     * Force-load the KaTeX stylesheet for LaTeX math. Leave unset to rely on
-     * auto-detection (the layout ships the CSS only when the body contains an
-     * unescaped `$`); set `true` to load it regardless — useful when math is
-     * injected by an imported MDX component the body scan can't see.
+     * Reserved opt-in flag for LaTeX math. Currently a no-op: the post layout
+     * imports `katex.min.css` on every post (Approach 1 in
+     * `docs/math-rendering.md`), so math renders whether or not this is set.
+     * Kept so existing frontmatter stays valid and so a future conditional
+     * loader has a flag to read.
      */
     math: z.boolean().default(false),
     /** Optional accent emoji/glyph shown on cards when no hero image. */

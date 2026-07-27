@@ -81,10 +81,11 @@ export function docFrontmatterSchema(image?: ImageHelper) {
      */
     keywords: z.array(z.string()).default([]),
     /**
-     * Force-load the KaTeX stylesheet for LaTeX math. Leave unset to rely on
-     * auto-detection (the layout ships the CSS only when the body contains an
-     * unescaped `$`); set `true` to load it regardless — useful when math is
-     * injected by an imported MDX component the body scan can't see.
+     * Reserved opt-in flag for LaTeX math. Currently a no-op: the doc layout
+     * imports `katex.min.css` on every page (Approach 1 in
+     * `docs/math-rendering.md`), so math renders whether or not this is set.
+     * Kept so existing frontmatter stays valid and so a future conditional
+     * loader has a flag to read.
      */
     math: z.boolean().default(false),
     /** Optional published date shown in the page header. */
