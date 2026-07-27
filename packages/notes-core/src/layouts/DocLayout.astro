@@ -247,18 +247,10 @@ const showToc = tableOfContents && headings.length > 0;
      it (see below) since there is more room once the nav sidebar is gone. */
   .doc { min-width: 0; padding-block: 0; --measure: 48rem; }
 
-  /* Search-only keywords: indexed by Pagefind but visually removed. */
-  .doc-keywords {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  /* Off-screen carrier for Pagefind result metadata (#2). */
+  /* Off-screen carriers for Pagefind-only content: the search-only keywords and
+     the result metadata (#2). Clipped rather than `display:none` so they stay in
+     the DOM for the static index. */
+  .doc-keywords,
   .doc-meta-index {
     position: absolute;
     width: 1px;

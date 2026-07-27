@@ -183,30 +183,11 @@ const { title, description, pubDate, updatedDate, category, tags, keywords, cove
      code-heavy blog. Reading mode widens the measure (see below). */
   .post { padding-block: 2.5rem 4rem; --measure: 48rem; }
 
-  /* Off-screen carrier for the per-tag Pagefind filter facets. Clipped rather
-     than `display:none` so it stays in the DOM for the static index. */
-  .tag-facets {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  /* Search-only keywords: indexed by Pagefind but visually removed. */
-  .post-keywords {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  /* Off-screen carrier for Pagefind result metadata (#2). */
+  /* Off-screen carriers for Pagefind-only content: the per-tag filter facets,
+     the search-only keywords and the result metadata (#2). Clipped rather than
+     `display:none` so they stay in the DOM for the static index. */
+  .tag-facets,
+  .post-keywords,
   .post-meta-index {
     position: absolute;
     width: 1px;
