@@ -38,6 +38,14 @@
   --radius-lg: calc(var(--radius-base, 0.5rem) * 1.7);
   --container: 70rem;
 
+  /* Sticky geometry. The breadcrumb bar butts directly against the header (no
+     gap for content to show through); everything else clears both, with a
+     little breathing room. */
+  --header-height: 4.25rem;
+  --sticky-top: 5.5rem;
+  --crumbs-height: 2.9rem;
+  --rail-top: calc(var(--header-height) + var(--crumbs-height) + 1.25rem);
+
   /* Docs left-sidebar width (per breakpoint below). */
   --sidebar-width: 16rem;
 }
@@ -133,7 +141,7 @@ html[data-theme="dark"] {
 html {
   scroll-behavior: smooth;
   height: 100%;
-  scroll-padding-top: 5.5rem;
+  scroll-padding-top: var(--sticky-top);
 }
 
 body {

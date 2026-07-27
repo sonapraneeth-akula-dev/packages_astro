@@ -41,6 +41,11 @@
   --radius: var(--radius-base, 0.5rem);
   --radius-lg: calc(var(--radius-base, 0.5rem) * 1.7);
   --container: 70rem;
+
+  /* Sticky geometry: the header's height plus a little breathing room. The
+     on-this-page rail and anchor scroll offsets derive from it. */
+  --header-height: 4.25rem;
+  --sticky-top: 5.5rem;
 }
 
 /* ─── Screen size breakpoints (shared reference with the homepage) ───
@@ -146,7 +151,7 @@ html {
   scroll-behavior: smooth;
   height: 100%;
   /* Offset anchor jumps so headings clear the sticky header. */
-  scroll-padding-top: 5.5rem;
+  scroll-padding-top: var(--sticky-top);
 }
 
 body {
