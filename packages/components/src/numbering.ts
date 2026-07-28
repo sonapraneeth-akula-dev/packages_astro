@@ -232,7 +232,11 @@ export function numbering(options: NumberingOptions = {}): AstroIntegration {
   return {
     name: 'notes-core-numbering',
     hooks: {
-      'astro:config:setup': ({ config, updateConfig }) => {
+      'astro:config:setup': ({ command, config, updateConfig }) => {
+        // `astro preview` only serves an existing build — nothing imports
+        // `virtual:numbering`, and the content sources need not be present
+        // (runtime container images ship `dist/` alone). Skip the whole hook.
+        if (command === 'preview') return;
         const dir = (options.contentDir ?? 'content').replace(/^\.?\/+/, '');
         contentDir = fileURLToPath(new URL(`${dir}/`, config.root));
         if (!fs.existsSync(contentDir)) {
