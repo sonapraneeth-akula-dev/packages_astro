@@ -40,8 +40,8 @@ export const docsConfig = defineDocsConfig({
   notebooks: true,
   // Showcase the theme system: indigo accent, the Poppins "geometric" font
   // combo and fully-rounded (pill) corners. The live theme switcher is not
-  // configurable — it renders on the dev server only (`bun dev`), so use it
-  // there to preview palette/font/radius combinations.
+  // configurable here — this site opts in from `astro.config.ts`
+  // (`themeSwitcher: true`) to preview palette/font/radius combinations.
   //
   // `scriptFonts` self-hosts Noto Sans Devanagari for this site only and emits a
   // `.font-devanagari` class. Tag a span with it plus `lang`, e.g.

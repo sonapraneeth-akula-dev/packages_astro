@@ -48,16 +48,19 @@ const appEnv = __APP_ENV__;
 
 // Resolve the site's theme: accent palette + radius inline below, fonts loaded
 // per the selected combo (only those families are registered in the config).
-// `theme.switcher` is dev-server-only (see resolveTheme), so a production build
-// ships just the selected preset and never renders the ThemeSwitcher panel.
-const theme = resolveTheme(config.theme);
+// A real site's only runtime theme control is the header's light/dark/system
+// toggle — palette, fonts and radius are fixed by its config. The full
+// ThemeSwitcher panel is a demo-site design aid, opted into from astro.config
+// (`themeSwitcher: true`), which also registers every font family.
+const theme = resolveTheme(config.theme, { switcher: __THEME_SWITCHER__ });
 const themeStyle = renderThemeStyle(theme);
 const fontVars = themeFontVars(theme);
 
-// Imported dynamically behind the (statically replaced) DEV flag so the panel's
-// markup *and* its stylesheet are dead code in a production build. A plain
-// top-level import would bundle the CSS even though the component never renders.
-const ThemeSwitcher = import.meta.env.DEV
+// Imported dynamically behind the (statically replaced) opt-in flag so the
+// panel's markup *and* its stylesheet are dead code on a site that doesn't ask
+// for it. A plain top-level import would bundle the CSS even though the
+// component never renders.
+const ThemeSwitcher = __THEME_SWITCHER__
   ? (await import('@sonapraneeth/components/ThemeSwitcher.astro')).default
   : null;
 ---
@@ -131,8 +134,8 @@ const ThemeSwitcher = import.meta.env.DEV
       <slot />
     </main>
     <Footer config={config} />
-    {/* Reading mode takes the bottom-right corner slot; the switcher (dev
-        server only) stacks above it so both stay reachable. */}
+    {/* Reading mode takes the bottom-right corner slot; the switcher (demo
+        sites only) stacks above it so both stay reachable. */}
     {readingMode && <ReadingMode />}
     {ThemeSwitcher && <ThemeSwitcher theme={theme} raised={readingMode} />}
     <PwaInstall

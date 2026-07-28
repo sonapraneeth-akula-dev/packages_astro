@@ -8,4 +8,7 @@ export default defineDocsAstroConfig({
   port: 4310,
   docsConfig,
   contentDir: './content',
+  // Demo site: render the live ThemeSwitcher panel so visitors can preview
+  // every palette / font combo / radius. Real sites leave this off.
+  themeSwitcher: true,
 });

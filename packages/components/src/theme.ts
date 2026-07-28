@@ -14,11 +14,14 @@
  *   - Accent colours + radius are emitted as a tiny inline `<style>` per page
  *     (see {@link renderThemeStyle}), so no unused palette ever ships.
  *
- * The live ThemeSwitcher is a design aid, not a site feature: it renders on the
- * dev server only and is deliberately absent from {@link ThemeConfig}, so no
- * site config can turn it on. In that mode every palette, font combo and radius
- * ships as a `data-*` preset so the panel can flip them at runtime — which is
- * exactly why it must never reach a production build.
+ * The full ThemeSwitcher panel (palette / fonts / radius) is a design aid for
+ * the demo sites, not a consumer-site feature. A consumer site offers only
+ * light / dark / system, from the header toggle; its palette, fonts and radius
+ * are fixed by its config. The panel is therefore deliberately absent from
+ * {@link ThemeConfig} — a site opts in from its Astro config factory
+ * (`themeSwitcher: true`), which is how the demo sites enable it. In that mode
+ * every palette, font combo and radius ships as a `data-*` preset so the panel
+ * can flip them at runtime, which is exactly why real sites must not enable it.
  *
  * The engines keep their existing neutral surface tokens (`--bg`, `--surface`,
  * `--text`, …) in `global.css`; this module only overrides the per-config
@@ -55,8 +58,9 @@ export interface ResolvedTheme {
   fonts: FontComboName;
   radius: RadiusName;
   /**
-   * Live-preview mode. Derived, never configured — see {@link resolveTheme}.
-   * When on, every preset ships so the ThemeSwitcher can flip them at runtime.
+   * Live-preview mode. Opted into by the site's Astro config, never by its
+   * content config — see {@link resolveTheme}. When on, every preset ships so
+   * the ThemeSwitcher can flip them at runtime.
    */
   switcher: boolean;
   scriptFonts: ScriptFontConfig[];
@@ -363,15 +367,18 @@ export const RADIUS_OPTIONS: RadiusOption[] = [
 /**
  * Merge a partial theme selection onto the defaults.
  *
- * `switcher` is derived from the build mode rather than read from the config:
- * previewing palettes/fonts/radii is a development activity, and enabling it
+ * `switcher` is an argument rather than a {@link ThemeConfig} field: previewing
+ * palettes/fonts/radii is a design activity for the demo sites, and enabling it
  * ships every preset (all palettes, all radii, every font family) instead of
- * just the selected one. Keeping it off {@link ThemeConfig} means a site cannot
- * enable it by mistake, and a production build can never carry the extra
- * payload — the panel exists on the dev server and nowhere else.
+ * just the selected one. Keeping it off the config means a real site cannot
+ * enable it by mistake and never carries the extra payload — only a site whose
+ * Astro config passes `themeSwitcher: true` gets the panel.
  */
-export function resolveTheme(theme?: ThemeConfig): ResolvedTheme {
-  return { ...DEFAULT_THEME, ...theme, switcher: import.meta.env.DEV };
+export function resolveTheme(
+  theme?: ThemeConfig,
+  options?: { switcher?: boolean },
+): ResolvedTheme {
+  return { ...DEFAULT_THEME, ...theme, switcher: options?.switcher ?? false };
 }
 
 /** Every unique family across all combos, registered under `--ff-<slug>`. */

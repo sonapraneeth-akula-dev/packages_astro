@@ -36,8 +36,8 @@ export const docsConfig = defineDocsConfig({
   notebooks: false,
   // Showcase the theme system: emerald accent, the Playfair + Merriweather
   // "classical" font combo and small corner radius. The live theme switcher is
-  // not configurable — it renders on the dev server only (`bun dev`), so use it
-  // there to preview palette/font/radius combinations.
+  // not configurable here — this site opts in from `astro.config.ts`
+  // (`themeSwitcher: true`) to preview palette/font/radius combinations.
   theme: { palette: 'emerald', fonts: 'classical', radius: 'small' },
   pwa: { enabled: true, precache: 'all' },
 });

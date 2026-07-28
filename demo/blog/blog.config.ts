@@ -24,8 +24,8 @@ export const blogConfig = defineBlogConfig({
   search: true,
   pwa: { enabled: true, precache: 'all' },
   // Showcase the theme system: violet accent, the Inter "modern" font combo
-  // and large corner radius. The live theme switcher is not configurable — it
-  // renders on the dev server only (`bun dev`), so use it there to preview
+  // and large corner radius. The live theme switcher is not configurable here —
+  // this site opts in from `astro.config.ts` (`themeSwitcher: true`) to preview
   // palette/font/radius combinations.
   //
   // `scriptFonts` self-hosts Noto Serif Devanagari for this site only and emits

@@ -40,6 +40,13 @@ export interface BlogAstroConfigOptions {
    * `<Ref>` links. Defaults to `content`.
    */
   contentDir?: string;
+  /**
+   * Render the live ThemeSwitcher panel (palette / fonts / radius previews).
+   * For the demo sites only: it ships every palette, radius and font family
+   * instead of just the selected one. A real site leaves this off and offers
+   * light/dark/system from the header toggle alone. Default `false`.
+   */
+  themeSwitcher?: boolean;
 }
 
 /** Run a git command at build time, falling back gracefully (e.g. in CI/Docker). */
@@ -72,7 +79,10 @@ export function defineBlogAstroConfig(options: BlogAstroConfigOptions) {
     process.env.GIT_BRANCH ?? git('git rev-parse --abbrev-ref HEAD', 'unknown');
 
   // Self-host only the fonts the selected combo needs (see the theme system).
-  const theme = resolveTheme(options.blogConfig.theme);
+  // In switcher mode every family across every combo is registered instead, so
+  // the panel can flip fonts at runtime.
+  const themeSwitcher = options.themeSwitcher ?? false;
+  const theme = resolveTheme(options.blogConfig.theme, { switcher: themeSwitcher });
   const fonts = themeFontEntries(theme).map((entry) => ({
     provider: fontProviders.google(),
     ...entry,
@@ -175,6 +185,7 @@ export function defineBlogAstroConfig(options: BlogAstroConfigOptions) {
       preview: { allowedHosts: true },
       define: {
         __APP_ENV__: JSON.stringify(process.env.PUBLIC_APP_ENV ?? 'dev'),
+        __THEME_SWITCHER__: JSON.stringify(themeSwitcher),
         __GIT_COMMIT__: JSON.stringify(gitCommit),
         __GIT_BRANCH__: JSON.stringify(gitBranch),
       },

@@ -1,10 +1,14 @@
 ---
 /**
  * Live theme switcher — a floating panel to preview accent palette, font combo
- * and corner radius (plus light/dark) at runtime. Rendered only when a site
- * sets `theme.switcher = true`; in that mode the layout ships every preset as a
- * `data-*` rule (see @sonapraneeth/components/theme) so these controls just flip
- * attributes on <html> and persist the choice to localStorage.
+ * and corner radius (plus light/dark) at runtime. Intended for the demo sites:
+ * a real site offers only light/dark/system via the header toggle and takes the
+ * other axes from its config, so its layout does not render this panel.
+ *
+ * Rendered only when the site's Astro config passes `themeSwitcher: true`, in
+ * which case the layout ships every preset as a `data-*` rule (see
+ * @sonapraneeth/components/theme) so these controls just flip attributes on
+ * <html> and persist the choice to localStorage.
  *
  * Framework-free: a small inline island, matching the engines' other islands.
  */

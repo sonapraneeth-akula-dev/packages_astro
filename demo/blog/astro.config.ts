@@ -8,4 +8,7 @@ export default defineBlogAstroConfig({
   port: 4312,
   blogConfig,
   contentDir: './content',
+  // Demo site: render the live ThemeSwitcher panel so visitors can preview
+  // every palette / font combo / radius. Real sites leave this off.
+  themeSwitcher: true,
 });
