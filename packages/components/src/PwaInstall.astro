@@ -20,10 +20,10 @@ const { enabled, install } = resolvePwa(Astro.props);
 // Install only works on a built site — gate to production builds, matching
 // PwaHead (which emits the manifest link + service-worker registration there).
 const show = enabled && install && import.meta.env.PROD;
-// The dev-only ScreenSizeIndicator occupies the same bottom-left corner whenever
-// PUBLIC_APP_ENV is not 'prod' (independent of build mode), so raise the button
-// above it in those environments to avoid overlapping.
-const hasDevIndicator = __APP_ENV__ !== 'prod';
+// The ScreenSizeIndicator occupies the same bottom-left corner in the 'dev' and
+// 'test' environments (independent of build mode), so raise the button above it
+// there to avoid overlapping. Keep this gate in sync with ScreenSizeIndicator.
+const hasDevIndicator = __APP_ENV__ === 'dev' || __APP_ENV__ === 'test';
 ---
 
 {

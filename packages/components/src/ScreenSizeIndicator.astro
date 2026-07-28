@@ -1,9 +1,10 @@
 ---
-// Dev-only screen-size indicator. Renders a small fixed badge showing the live
-// viewport size, the active named breakpoint and the resolved --container width.
-// Never shown in production.
+// Development-only screen-size indicator. Renders a small fixed badge showing
+// the live viewport size, the active named breakpoint and the resolved
+// --container width. Limited to the 'dev' and 'test' environments — 'ppe' is a
+// production-like environment and must look like 'prod'.
 const appEnv = __APP_ENV__;
-const show = appEnv !== 'prod';
+const show = appEnv === 'dev' || appEnv === 'test';
 ---
 
 {
