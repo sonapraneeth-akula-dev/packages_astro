@@ -9,6 +9,20 @@ Entries before 2.5.0 were reconstructed from the commit history, since this
 package previously recorded its changes only in the repository-level
 [CHANGELOG.md](../../CHANGELOG.md).
 
+## [2.9.0] - 2026-07-28
+
+### Changed
+
+- Theme-switcher preview mode is now an explicit site opt-in from each site's
+  Astro config (`themeSwitcher: true`) instead of being inferred from the
+  generic build mode.
+
+### Fixed
+
+- The screen-size indicator now renders only in `dev` and `test`
+  app environments, and the PWA install button offset follows the same gate so
+  the two controls do not overlap.
+
 ## [2.8.0] - 2026-07-27
 
 ### Added

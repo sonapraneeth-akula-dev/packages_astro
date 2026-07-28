@@ -22,10 +22,11 @@ version. The headings below summarise changes across all workspaces.
   breadcrumb trail is pinned under the site header.
 - Sticky offsets are named CSS tokens in both engines instead of a `5.5rem`
   literal repeated across sidebars, rails and anchor offsets.
-- The live theme switcher renders on the dev server only and is imported
-  dynamically, so neither its markup nor its stylesheet reaches a build.
-- Release `@sonapraneeth/components` 2.8.0,
-  `@sonapraneeth/notes-core` 2.15.0 and `@sonapraneeth/blog-core` 2.8.0.
+- The live theme switcher is a demo-site opt-in (`themeSwitcher: true` in
+  `astro.config.ts`) and is imported dynamically, so sites that do not opt in
+  ship neither its markup nor its stylesheet.
+- Release `@sonapraneeth/components` 2.9.0,
+  `@sonapraneeth/notes-core` 2.16.0 and `@sonapraneeth/blog-core` 2.9.0.
 
 ### Fixed
 
@@ -34,6 +35,8 @@ version. The headings below summarise changes across all workspaces.
 - Anchor jumps on both engines land just below the pinned chrome instead of
   roughly twice as far down, since `scroll-padding-top` and `scroll-margin-top`
   were both applied and added up.
+- The screen-size indicator now renders only in `dev` and `test` app
+  environments, and the PWA install button offset matches that same gate.
 
 ### Removed
 
