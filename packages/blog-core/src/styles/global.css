@@ -474,13 +474,25 @@ pre.mermaid {
   cursor: zoom-in;
 }
 
-/* Prevent global paragraph/div margins from blowing up Mermaid foreignObject labels */
-pre.mermaid p,
-pre.mermaid div,
-.mermaid-lightbox p,
-.mermaid-lightbox div {
+/* Mermaid wraps every label in an HTML `<p>`, so the global paragraph margin
+   (`p { margin: 0 0 1.15rem }`) applies to it. That matters twice, and the
+   selectors below MUST stay unscoped because of it:
+
+   1. Render — the `<p>` sits in a `<foreignObject>` inside the SVG.
+   2. Measure — before laying out, Mermaid appends a probe to `<body>` to size
+      each label. That probe is NOT inside `pre.mermaid`.
+
+   Scoping this reset to `pre.mermaid` fixes only (1), so Mermaid sizes every
+   compartment ~18px per line taller than the text it later draws — giant boxes
+   with the text crammed at the top. Reset both contexts via the label classes
+   Mermaid always applies. */
+.nodeLabel p,
+.edgeLabel p,
+.nodeLabel div,
+.edgeLabel div,
+foreignObject p,
+foreignObject div {
   margin: 0 !important;
-  line-height: 1.3 !important;
 }
 
 pre.mermaid:not([data-processed]) {
