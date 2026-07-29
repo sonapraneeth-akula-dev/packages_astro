@@ -59,38 +59,16 @@ async function renderAll(): Promise<void> {
     if ('fonts' in document) {
       await document.fonts.ready;
     }
-    const isDark = activeTheme() === 'dark';
     const mermaid = await ensureMermaid();
     mermaid.initialize({
       startOnLoad: false,
-      theme: isDark ? 'dark' : 'default',
+      theme: activeTheme() === 'dark' ? 'dark' : 'default',
       securityLevel: 'strict',
       fontFamily: 'inherit',
-      fontSize: 15,
-      class: {
-        hideEmptyMembersBox: true,
-      },
-      themeVariables: isDark
-        ? {
-            primaryColor: '#27272a',
-            primaryTextColor: '#f4f4f5',
-            primaryBorderColor: '#52525b',
-            lineColor: '#a1a1aa',
-            secondaryColor: '#18181b',
-            tertiaryColor: '#27272a',
-            classText: '#f4f4f5',
-            nodeBorder: '#52525b',
-          }
-        : {
-            primaryColor: '#f8fafc',
-            primaryTextColor: '#0f172a',
-            primaryBorderColor: '#cbd5e1',
-            lineColor: '#64748b',
-            secondaryColor: '#f1f5f9',
-            tertiaryColor: '#f8fafc',
-            classText: '#0f172a',
-            nodeBorder: '#cbd5e1',
-          },
+      // A class node with no attributes still renders an empty middle
+      // compartment, which reads as a rendering glitch in a diagram that only
+      // lists methods.
+      class: { hideEmptyMembersBox: true },
     });
 
     for (const node of nodes) {

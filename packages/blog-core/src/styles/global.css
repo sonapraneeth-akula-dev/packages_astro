@@ -463,6 +463,13 @@ pre.mermaid {
   background: none;
   text-align: center;
   line-height: normal;
+  /* CRITICAL: `<pre>` defaults to a monospace font, but Mermaid measures every
+     label in a temporary container attached to <body> — which uses the sans
+     stack. Rendering the SVG in a wider monospace font than the one it measured
+     makes each label overflow the box Mermaid sized for it, so text wraps and
+     overlaps. Forcing the sans stack here keeps measurement and render in the
+     same font. */
+  font-family: var(--font-sans);
   /* Click a diagram to open a large, readable copy (see components/mermaid). */
   cursor: zoom-in;
 }
