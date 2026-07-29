@@ -56,12 +56,16 @@ async function renderAll(): Promise<void> {
 
   rendering = true;
   try {
+    if ('fonts' in document) {
+      await document.fonts.ready;
+    }
     const mermaid = await ensureMermaid();
     mermaid.initialize({
       startOnLoad: false,
       theme: activeTheme() === 'dark' ? 'dark' : 'default',
       securityLevel: 'strict',
       fontFamily: 'inherit',
+      fontSize: 16,
     });
 
     for (const node of nodes) {
@@ -165,13 +169,16 @@ function openLightbox(svg: SVGSVGElement): void {
   const clone = svg.cloneNode(true) as SVGSVGElement;
   const box = svg.viewBox.baseVal;
   if (box && box.width && box.height) {
-    const scale = Math.min(
+    // Scale diagram to fit viewport, but enforce a minimum 0.85x scale so
+    // text never shrinks into unreadable micro-text. Large diagrams scroll.
+    const fitScale = Math.min(
       (window.innerWidth * 0.92 - 48) / box.width,
       (window.innerHeight * 0.86 - 48) / box.height,
     );
+    const scale = Math.max(fitScale, 0.85);
     clone.style.maxWidth = 'none';
-    clone.style.width = `${Math.round(box.width * Math.max(scale, 0.1))}px`;
-    clone.style.height = `${Math.round(box.height * Math.max(scale, 0.1))}px`;
+    clone.style.width = `${Math.round(box.width * scale)}px`;
+    clone.style.height = `${Math.round(box.height * scale)}px`;
   }
   content.appendChild(clone);
   overlay.appendChild(content);

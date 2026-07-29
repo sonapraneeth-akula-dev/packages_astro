@@ -467,6 +467,15 @@ pre.mermaid {
   cursor: zoom-in;
 }
 
+/* Prevent global paragraph/div margins from blowing up Mermaid foreignObject labels */
+pre.mermaid p,
+pre.mermaid div,
+.mermaid-lightbox p,
+.mermaid-lightbox div {
+  margin: 0 !important;
+  line-height: 1.3 !important;
+}
+
 pre.mermaid:not([data-processed]) {
   visibility: hidden;
 }
