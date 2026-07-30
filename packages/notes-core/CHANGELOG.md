@@ -5,6 +5,26 @@ All notable changes to `@sonapraneeth/notes-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.17.0] - 2026-07-30
+
+### Changed
+
+- `pre.mermaid > svg` no longer forces `max-width: none`, so a diagram renders
+  at its natural size, centred, and is scaled down only when it is wider than
+  the content column.
+
+### Fixed
+
+- Mermaid class diagrams are no longer laid out roughly ten times too large for
+  readers who prefer reduced motion. The `prefers-reduced-motion` reset applied
+  `transition-duration: 0.01ms` to every element — non-zero on purpose so that
+  `transitionend` still fires — and Chromium transitions SVG geometry
+  presentation attributes. Mermaid sizes a `<foreignObject>` and calls
+  `getBBox()` immediately afterwards, so it measured the pre-transition value
+  and produced a 2326x2326 box in place of a 242x172 one, scaling the whole
+  diagram down to an unreadable 0.14. Transitions are now a true zero inside
+  SVG, where there is nothing to animate.
+
 ## [2.16.0] - 2026-07-28
 
 ### Changed

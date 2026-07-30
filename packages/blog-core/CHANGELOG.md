@@ -5,6 +5,20 @@ All notable changes to `@sonapraneeth/blog-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.0] - 2026-07-30
+
+### Fixed
+
+- Mermaid class diagrams are no longer laid out roughly ten times too large for
+  readers who prefer reduced motion. The `prefers-reduced-motion` reset applied
+  `transition-duration: 0.01ms` to every element — non-zero on purpose so that
+  `transitionend` still fires — and Chromium transitions SVG geometry
+  presentation attributes. Mermaid sizes a `<foreignObject>` and calls
+  `getBBox()` immediately afterwards, so it measured the pre-transition value
+  and produced a box roughly ten times too big, scaling the whole diagram down
+  to an unreadable fraction of its size. Transitions are now a true zero inside
+  SVG, where there is nothing to animate.
+
 ## [2.9.0] - 2026-07-28
 
 ### Changed

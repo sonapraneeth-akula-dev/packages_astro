@@ -25,11 +25,25 @@ version. The headings below summarise changes across all workspaces.
 - The live theme switcher is a demo-site opt-in (`themeSwitcher: true` in
   `astro.config.ts`) and is imported dynamically, so sites that do not opt in
   ship neither its markup nor its stylesheet.
-- Release `@sonapraneeth/components` 2.9.0,
-  `@sonapraneeth/notes-core` 2.16.0 and `@sonapraneeth/blog-core` 2.9.0.
+- Mermaid diagrams render at their natural size on both engines instead of
+  being stretched to the content column, so their labels match the surrounding
+  prose. Class boxes are also tighter (`class.padding: 8` rather than Mermaid's
+  default 12, which doubles as the compartment gap).
+- Release `@sonapraneeth/components` 2.10.0,
+  `@sonapraneeth/notes-core` 2.17.0 and `@sonapraneeth/blog-core` 2.10.0.
 
 ### Fixed
 
+- Mermaid class diagrams are no longer laid out roughly ten times too large for
+  readers who prefer reduced motion. The `prefers-reduced-motion` reset applied
+  `transition-duration: 0.01ms` to every element — non-zero on purpose so that
+  `transitionend` still fires — and Chromium transitions SVG geometry
+  presentation attributes, so Mermaid's `getBBox()` call right after it sizes a
+  `<foreignObject>` measured the pre-transition value. Transitions are now a
+  true zero inside SVG, where there is nothing to animate.
+- A class that declares only methods no longer renders an empty attributes
+  strip; `class.hideEmptyMembersBox` covers only classes with neither members
+  nor methods (mermaid-js/mermaid#6657, #6192).
 - The notes sidebar keeps its Browse links pinned while only the tree scrolls,
   and stays pinned for the length of the article.
 - Anchor jumps on both engines land just below the pinned chrome instead of

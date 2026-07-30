@@ -9,6 +9,31 @@ Entries before 2.5.0 were reconstructed from the commit history, since this
 package previously recorded its changes only in the repository-level
 [CHANGELOG.md](../../CHANGELOG.md).
 
+## [2.10.0] - 2026-07-30
+
+### Changed
+
+- Mermaid diagrams render at their natural size instead of being stretched to
+  the content column. The client pins an inline `max-width` to the diagram's own
+  content width, so labels match the surrounding prose rather than being
+  magnified with it; only a diagram wider than the column is scaled down.
+- Class diagrams use `class.padding: 8` instead of Mermaid's default 12. That
+  value doubles as the compartment gap, and a class with no attributes still
+  reserves `GAP/2 + GAP*4` above its first method, so the default left every box
+  noticeably taller than its contents.
+
+### Fixed
+
+- A class that declares only methods no longer renders an empty attributes
+  strip. Mermaid's `class.hideEmptyMembersBox` applies only when a class has
+  neither members nor methods (mermaid-js/mermaid#6657, #6192), so the strip
+  appeared in every methods-only diagram. The runtime now drops the
+  members/methods divider and re-centres the method rows. Node height is
+  deliberately left alone: Dagre positions the box and edges terminate on it, so
+  resizing it would misalign every arrow.
+- Diagram registration during `astro preview` no longer scans content that the
+  runtime image does not ship.
+
 ## [2.9.0] - 2026-07-28
 
 ### Changed
