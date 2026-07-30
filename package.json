@@ -48,7 +48,8 @@
     "preview:app:blog": "bun astro preview --root app/blog",
     "check": "bun astro check --root demo/notes && bun astro check --root demo/notebooks && bun astro check --root demo/blog && bun astro check --root app/notes/go && bun astro check --root app/blog",
     "test": "bun test tests",
-    "test:watch": "bun test --watch tests"
+    "test:watch": "bun test --watch tests",
+    "zip:workspace": "pwsh -NoProfile -File scripts/zip-workspace.ps1"
   },
   "devDependencies": {
     "@types/bun": "^1.3.14"
