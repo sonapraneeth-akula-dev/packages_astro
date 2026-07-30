@@ -65,10 +65,10 @@ async function renderAll(): Promise<void> {
       theme: activeTheme() === 'dark' ? 'dark' : 'default',
       securityLevel: 'strict',
       fontFamily: 'inherit',
-      // A class node with no attributes still renders an empty middle
-      // compartment, which reads as a rendering glitch in a diagram that only
-      // lists methods.
-      class: { hideEmptyMembersBox: true },
+      // Drops the body of a class that declares neither members nor methods.
+      // Classes that declare only methods are handled after rendering, by
+      // `collapseEmptyMembersBoxes` — this option does not cover them.
+      class: { hideEmptyMembersBox: true, padding: 8 },
     });
 
     for (const node of nodes) {
@@ -94,6 +94,7 @@ async function renderAll(): Promise<void> {
       if (!svg) {
         continue;
       }
+      collapseEmptyMembersBoxes(svg);
       const bounds = measure(svg);
       if (bounds) {
         measured.push({ svg, bounds });
@@ -135,6 +136,54 @@ function measure(svg: SVGSVGElement): DOMRect | null {
   return bounds.width && bounds.height ? bounds : null;
 }
 
+/** The `y` of a divider line, read off its `M<x> <y> …` path command. */
+function dividerY(path: SVGPathElement): number | null {
+  const match = /^M\s*-?[\d.]+\s+(-?[\d.]+)/.exec(path.getAttribute('d') ?? '');
+  return match ? Number.parseFloat(match[1]) : null;
+}
+
+/**
+ * Merge away the empty attributes compartment of a class node.
+ *
+ * Mermaid's `class.hideEmptyMembersBox` only applies when a class declares
+ * *neither* members *nor* methods (mermaid-js/mermaid#6657, #6192 — both open),
+ * so a class listing methods only still gets an empty strip between two divider
+ * lines. Every class diagram in this project is methods-only, so the strip shows
+ * up in all of them as dead space.
+ *
+ * The node's outer box is positioned by dagre and its edges terminate on that
+ * box, so the height is left untouched: we drop the members/methods divider and
+ * re-centre the method rows in the taller compartment that results. The diagram
+ * reads as a normal two-compartment UML class, and no edge moves.
+ */
+function collapseEmptyMembersBoxes(svg: SVGSVGElement): void {
+  for (const node of svg.querySelectorAll<SVGGElement>('g.node')) {
+    const members = node.querySelector<SVGGElement>('g.members-group');
+    const methods = node.querySelector<SVGGElement>('g.methods-group');
+    if (!members || !methods || members.childElementCount > 0 || methods.childElementCount === 0) {
+      continue;
+    }
+
+    const dividers = node.querySelectorAll<SVGPathElement>('g.divider path');
+    if (dividers.length !== 2) {
+      continue;
+    }
+    const top = dividerY(dividers[0]);
+    const bottom = dividerY(dividers[1]);
+    if (top === null || bottom === null) {
+      continue;
+    }
+
+    dividers[1].parentElement?.remove();
+    const offset = (bottom - top) / 2;
+    const current = methods.transform.baseVal.consolidate()?.matrix;
+    methods.setAttribute(
+      'transform',
+      `translate(${current?.e ?? 0}, ${(current?.f ?? 0) - offset})`,
+    );
+  }
+}
+
 /**
  * Shrink-wrap a diagram's `viewBox` to its actual drawn content.
  *
@@ -147,10 +196,16 @@ function measure(svg: SVGSVGElement): DOMRect | null {
  */
 function normalizeViewBox(svg: SVGSVGElement, bounds: DOMRect): void {
   const padding = 8;
+  const width = bounds.width + padding * 2;
   svg.setAttribute(
     'viewBox',
-    `${bounds.x - padding} ${bounds.y - padding} ${bounds.width + padding * 2} ${bounds.height + padding * 2}`,
+    `${bounds.x - padding} ${bounds.y - padding} ${width} ${bounds.height + padding * 2}`,
   );
+  // Cap the diagram at its own content width. Mermaid's inline `max-width` was
+  // computed from the canvas it measured against, which the correction above
+  // just invalidated; without this the stylesheet's `width: 100%` would blow the
+  // diagram up to the column width and render its labels larger than the prose.
+  svg.style.maxWidth = `${Math.round(width)}px`;
   // Drop any fixed height so the browser derives it from the corrected aspect
   // ratio (CSS sets width: 100%; height: auto).
   svg.removeAttribute('height');

@@ -450,6 +450,18 @@ a.chip:hover {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  /* …but never inside an SVG. The 0.01ms above is deliberately non-zero so that
+     `transitionend` still fires, and Chrome transitions SVG *geometry*
+     presentation attributes (width/height/x/y). Mermaid sizes a
+     `<foreignObject>` and reads `getBBox()` on the very next line, so with a
+     live transition it measures the pre-transition value and lays out a class
+     box ~10x too large — the whole diagram then scales down and is unreadable.
+     Diagrams have nothing to animate, so make the duration a true zero here. */
+  svg,
+  svg * {
+    transition-duration: 0s !important;
+  }
 }
 
 /* Mermaid diagrams. The remark-mermaid transform emits `<pre class="mermaid">`

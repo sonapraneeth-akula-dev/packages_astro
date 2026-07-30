@@ -426,6 +426,19 @@ a.chip:hover {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  /* …but never inside an SVG. The 0.01ms above is deliberately non-zero so that
+     `transitionend` still fires, and Chrome transitions SVG *geometry*
+     presentation attributes (width/height/x/y). Mermaid sizes a
+     `<foreignObject>` and reads `getBBox()` on the very next line, so with a
+     live transition it measures the pre-transition value and lays out a class
+     box ~10x too large (2326x2326 instead of 242x172) — the whole diagram then
+     scales to 0.14 and is unreadable. Diagrams have nothing to animate, so make
+     the duration a true zero here. */
+  svg,
+  svg * {
+    transition-duration: 0s !important;
+  }
 }
 
 /* Mermaid diagrams. The remark-mermaid transform emits `<pre class="mermaid">`
@@ -476,15 +489,14 @@ pre.mermaid:not([data-processed]) {
 }
 
 pre.mermaid>svg {
-  /* Scale the diagram to the column. `max-width` must beat Mermaid's inline
-     `style="max-width: …px"`, which would otherwise cap a diagram below the
-     column width and leave dead space beside it. Height follows the
-     (client-normalized) aspect ratio; capping it would letterbox a tall diagram
-     and reintroduce that whitespace. Click opens the enlarged overlay. */
+  /* Fit the diagram to the column without ever enlarging it. The client pins an
+     inline `max-width` to the diagram's own content width, so a small diagram
+     renders at its natural size (labels match the prose font) and only a diagram
+     wider than the column is scaled down. Height follows the (client-normalized)
+     aspect ratio. Click opens the enlarged overlay. */
   display: block;
   width: 100%;
   height: auto;
-  max-width: none !important;
   margin-inline: auto;
 }
 
