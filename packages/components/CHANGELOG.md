@@ -9,6 +9,20 @@ Entries before 2.5.0 were reconstructed from the commit history, since this
 package previously recorded its changes only in the repository-level
 [CHANGELOG.md](../../CHANGELOG.md).
 
+## [2.11.0] - 2026-08-01
+
+### Added
+
+- The shared footer can load Git commit and branch metadata from the runtime
+  `/build-info.json` artifact. It remains hidden when either value is absent or
+  `unknown`, allowing deployment metadata to change without rebuilding pages.
+
+### Fixed
+
+- Both PWA service-worker strategies bypass `/build-info.json`, preventing a
+  previous deployment's commit and branch from remaining visible after an
+  image update.
+
 ## [2.10.0] - 2026-07-30
 
 ### Changed

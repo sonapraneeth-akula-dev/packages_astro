@@ -10,6 +10,7 @@ const { config } = Astro.props;
 
 const socials = activeSocials(config);
 const year = new Date().getFullYear();
+const showBuildInfo = __APP_ENV__ !== 'dev';
 ---
 
 <footer class="site-footer">
@@ -39,12 +40,48 @@ const year = new Date().getFullYear();
   </div>
   <div class="container footer-base">
     <span>© {year} {config.author}. All rights reserved.</span>
+    {showBuildInfo && (
+      <span class="footer-build" data-build-info hidden>
+        Commit <code data-build-commit></code> · Branch <code data-build-branch></code>
+      </span>
+    )}
     <span>Built with Astro · MDX</span>
   </div>
 </footer>
 
 {/* Dev-only live viewport / breakpoint badge (hidden in production). */}
 <ScreenSizeIndicator />
+
+<script>
+  interface BuildInfo {
+    commit?: unknown;
+    branch?: unknown;
+  }
+
+  const container = document.querySelector<HTMLElement>('[data-build-info]');
+
+  if (container) {
+    fetch('/build-info.json', { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() as Promise<BuildInfo> : null)
+      .then((info) => {
+        const commit = info?.commit;
+        const branch = info?.branch;
+        const isKnown = (value: unknown): value is string =>
+          typeof value === 'string' && value.trim() !== '' && value.toLowerCase() !== 'unknown';
+
+        if (!isKnown(commit) || !isKnown(branch)) return;
+
+        const commitElement = container.querySelector('[data-build-commit]');
+        const branchElement = container.querySelector('[data-build-branch]');
+        if (!commitElement || !branchElement) return;
+
+        commitElement.textContent = commit;
+        branchElement.textContent = branch;
+        container.hidden = false;
+      })
+      .catch(() => undefined);
+  }
+</script>
 
 <style>
   .site-footer {
@@ -110,6 +147,10 @@ const year = new Date().getFullYear();
     border-top: 1px solid var(--border);
     color: var(--text-muted);
     font-size: 0.82rem;
+  }
+  .footer-build code {
+    color: var(--text);
+    font-size: inherit;
   }
 
   @media (max-width: 48rem) {
