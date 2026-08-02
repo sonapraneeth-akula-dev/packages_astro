@@ -1,6 +1,6 @@
 {
   "name": "@sonapraneeth/notes-core",
-  "version": "2.18.0",
+  "version": "2.19.0",
   "type": "module",
   "description": "Shared docs/notes engine for Astro + MDX: components, layouts, sidebar generation, config schema and an Astro config factory.",
   "exports": {
@@ -17,6 +17,7 @@
     "./utils/*": "./src/utils/*"
   },
   "dependencies": {
+    "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "catalog:",
     "@expressive-code/plugin-line-numbers": "catalog:",
     "@sonapraneeth/components": "workspace:*",

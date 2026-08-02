@@ -12,6 +12,10 @@ declare module 'virtual:notes-core/components' {
   export const components: Record<string, unknown>;
 }
 
+declare module 'virtual:notes-core/robots' {
+  export const robots: string;
+}
+
 declare module 'virtual:notes-core/sidebar' {
   import type { SidebarConfig } from '../schema';
   export const sidebar: SidebarConfig | null;

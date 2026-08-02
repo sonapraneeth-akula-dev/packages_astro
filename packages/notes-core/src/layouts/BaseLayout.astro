@@ -74,6 +74,9 @@ const ThemeSwitcher = __THEME_SWITCHER__
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {config.discovery.rss.enabled && (
+      <link rel="alternate" type="application/rss+xml" title={config.title} href="/rss.xml" />
+    )}
 
     <meta property="og:type" content={article ? 'article' : 'website'} />
     <meta property="og:title" content={fullTitle} />

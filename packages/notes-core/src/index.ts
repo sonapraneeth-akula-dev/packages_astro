@@ -18,7 +18,14 @@ export {
   defaultDocsConfig,
   activeSocials,
 } from './config';
-export type { DocsConfig, NavLink, SocialProfile } from './config';
+export type {
+  DocsConfig,
+  DocsConfigInput,
+  DiscoveryConfig,
+  DiscoveryConfigInput,
+  NavLink,
+  SocialProfile,
+} from './config';
 
 // Frontmatter + sidebar schemas
 export {

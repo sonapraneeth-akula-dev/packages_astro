@@ -11,6 +11,8 @@ import { execSync } from 'node:child_process';
 import { resolveTheme, themeFontEntries } from '@sonapraneeth/components/theme';
 import { pwa } from '@sonapraneeth/components/pwa';
 import { mermaid } from '@sonapraneeth/components/mermaid';
+import { routeIncluded } from '@sonapraneeth/components';
+import { sitemapAlias } from '@sonapraneeth/components/discovery-node';
 import { notesRoutes } from './routes-integration';
 import { numbering } from '@sonapraneeth/components/numbering';
 import type { DocsConfig } from './config';
@@ -115,7 +117,14 @@ export function defineDocsAstroConfig(options: DocsAstroConfigOptions) {
         },
       }),
       satteriMdx(),
-      sitemap(),
+      ...(options.docsConfig.discovery.sitemap.enabled
+        ? [
+          sitemap({
+            filter: (page) => routeIncluded(page, options.docsConfig.discovery.sitemap),
+          }),
+          sitemapAlias(),
+        ]
+        : []),
       // Build-time auto-numbering for referenceable blocks: exposes the
       // `virtual:numbering` map consumed by <Algorithm>/<Listing>/<Callout id>
       // and <Ref>. Numbers derive from `part`/`chapter` frontmatter + heading

@@ -5,6 +5,17 @@ All notable changes to `@sonapraneeth/notes-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.0] - 2026-08-02
+
+### Added
+
+- Generate `robots.txt`, `rss.xml`, `sitemap.xml`, `sitemap-index.xml` and
+  sitemap shards by default for every notes-core consumer. The RSS feed lists
+  visible, non-draft notes and page metadata advertises the feed.
+- Add `discovery` config to disable any endpoint and independently include or
+  exclude route prefixes from RSS and sitemap output. Robots may index always,
+  never or production builds only; the default is production only.
+
 ## [2.18.0] - 2026-08-02
 
 ### Fixed

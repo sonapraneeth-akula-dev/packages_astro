@@ -7,9 +7,15 @@
 import type { SiteChrome } from '@sonapraneeth/components/chrome';
 import type { ThemeConfig } from '@sonapraneeth/components/theme';
 import type { PwaConfig } from '@sonapraneeth/components/pwa';
+import {
+  resolveDiscoveryConfig,
+  type DiscoveryConfig,
+  type DiscoveryConfigInput,
+} from '@sonapraneeth/components/discovery';
 
 export type { NavLink, SocialProfile } from '@sonapraneeth/components/chrome';
 export type { PwaConfig } from '@sonapraneeth/components/pwa';
+export type { DiscoveryConfig, DiscoveryConfigInput } from '@sonapraneeth/components/discovery';
 export { activeSocials } from '@sonapraneeth/components/chrome';
 
 import type { CaptionAlignConfig } from '@sonapraneeth/components/captions';
@@ -37,6 +43,17 @@ export interface DocsConfig extends SiteChrome {
   editUrlBase?: string;
   /** Enable the Pagefind-powered offline search page. */
   search: boolean;
+  /**
+   * Robots, RSS and sitemap generation. Every endpoint is enabled by default.
+   *
+   * @example
+   * discovery: {
+   *   robots: { indexing: 'production-only', disallow: ['/private'] },
+   *   rss: { include: ['/guides'], exclude: ['/guides/archive'] },
+   *   sitemap: false,
+   * }
+   */
+  discovery: DiscoveryConfig;
   /**
    * Treat each top-level content folder as a self-contained "notebook"
    * (sub-note). The home page becomes a hub of notebook cards, and each notebook
@@ -109,6 +126,7 @@ export const defaultDocsConfig: DocsConfig = {
     },
   ],
   search: true,
+  discovery: resolveDiscoveryConfig(),
   notebooks: false,
   theme: {},
   captionAlign: { default: 'center' },
@@ -117,6 +135,14 @@ export const defaultDocsConfig: DocsConfig = {
 export { ICON_BOOK };
 
 /** Merge a partial site config onto the defaults. */
-export function defineDocsConfig(config: Partial<DocsConfig>): DocsConfig {
-  return { ...defaultDocsConfig, ...config };
+export type DocsConfigInput = Omit<Partial<DocsConfig>, 'discovery'> & {
+  discovery?: DiscoveryConfigInput;
+};
+
+export function defineDocsConfig(config: DocsConfigInput): DocsConfig {
+  return {
+    ...defaultDocsConfig,
+    ...config,
+    discovery: resolveDiscoveryConfig(config.discovery),
+  };
 }
