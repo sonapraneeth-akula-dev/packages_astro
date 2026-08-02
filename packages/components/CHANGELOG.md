@@ -9,6 +9,15 @@ Entries before 2.5.0 were reconstructed from the commit history, since this
 package previously recorded its changes only in the repository-level
 [CHANGELOG.md](../../CHANGELOG.md).
 
+## [2.13.0] - 2026-08-02
+
+### Added
+
+- Add shared discovery configuration for robots, RSS and sitemap generation,
+  including endpoint toggles, include/exclude route-prefix matching, production
+  indexing policy and a conventional `sitemap.xml` alias for Astro's generated
+  sitemap index.
+
 ## [2.12.0] - 2026-08-02
 
 ### Fixed

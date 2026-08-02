@@ -1,6 +1,6 @@
 {
   "name": "@sonapraneeth/components",
-  "version": "2.12.0",
+  "version": "2.13.0",
   "type": "module",
   "description": "Shared prop/config-driven Astro UI components used by the notes and blog engines.",
   "exports": {
@@ -11,6 +11,8 @@
     "./mdx": "./src/mdx.ts",
     "./captions": "./src/captions.ts",
     "./numbering": "./src/numbering.ts",
+    "./discovery": "./src/discovery.ts",
+    "./discovery-node": "./src/discovery-node.ts",
     "./pwa": "./src/pwa.ts",
     "./mermaid": "./src/mermaid.ts",
     "./mermaid-client": "./src/mermaid-client.ts",
