@@ -574,6 +574,10 @@ html[data-reading] .container {
     print-color-adjust: exact;
   }
 
+  .katex .msupsub .size3 {
+    font-size: 0.64em !important;
+  }
+
   .skip-link,
   .env-banner,
   .site-header,

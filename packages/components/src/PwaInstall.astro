@@ -210,6 +210,12 @@ const hasDevIndicator = __APP_ENV__ === 'dev' || __APP_ENV__ === 'test';
     }
   }
 
+  @media print {
+    .pwa-install {
+      display: none !important;
+    }
+  }
+
   .pwa-install__btn {
     display: inline-flex;
     align-items: center;

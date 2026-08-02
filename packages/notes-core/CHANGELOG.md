@@ -5,6 +5,13 @@ All notable changes to `@sonapraneeth/notes-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.18.0] - 2026-08-02
+
+### Fixed
+
+- KaTeX superscripts and subscripts retain the adjusted script size in print,
+  preventing the PDF renderer from overriding the on-screen typography.
+
 ## [2.17.0] - 2026-07-30
 
 ### Changed

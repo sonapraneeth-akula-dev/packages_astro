@@ -94,4 +94,10 @@ const show = appEnv === 'dev' || appEnv === 'test';
   .ssi-tier {
     color: var(--text-muted);
   }
+
+  @media print {
+    #screen-size-indicator {
+      display: none !important;
+    }
+  }
 </style>

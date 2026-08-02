@@ -9,6 +9,14 @@ Entries before 2.5.0 were reconstructed from the commit history, since this
 package previously recorded its changes only in the repository-level
 [CHANGELOG.md](../../CHANGELOG.md).
 
+## [2.12.0] - 2026-08-02
+
+### Fixed
+
+- The PWA install prompt and development viewport indicator are explicitly
+  hidden in print, so neither control appears in printed pages or saved PDFs
+  even when a consuming site does not provide its own print reset.
+
 ## [2.11.0] - 2026-08-01
 
 ### Added
