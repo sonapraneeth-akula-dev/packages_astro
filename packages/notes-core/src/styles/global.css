@@ -245,6 +245,10 @@ p {
   font-weight: 450;
 }
 
+.katex .msupsub .size3 {
+  font-size: 0.64em;
+}
+
 /* Cap tall fenced code blocks so they scroll vertically instead of stretching
    the page. */
 .expressive-code .frame pre {
