@@ -18,7 +18,14 @@ export {
   defaultBlogConfig,
   activeSocials,
 } from './config';
-export type { BlogConfig, NavLink, SocialProfile } from './config';
+export type {
+  BlogConfig,
+  BlogConfigInput,
+  DiscoveryConfig,
+  DiscoveryConfigInput,
+  NavLink,
+  SocialProfile,
+} from './config';
 
 // Frontmatter schema
 export { postFrontmatterSchema } from './schema';

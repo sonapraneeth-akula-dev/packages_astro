@@ -11,6 +11,8 @@ import { execSync } from 'node:child_process';
 import { resolveTheme, themeFontEntries } from '@sonapraneeth/components/theme';
 import { pwa } from '@sonapraneeth/components/pwa';
 import { mermaid } from '@sonapraneeth/components/mermaid';
+import { routeIncluded } from '@sonapraneeth/components';
+import { sitemapAlias } from '@sonapraneeth/components/discovery-node';
 import { blogRoutes } from './routes-integration';
 import { numbering } from '@sonapraneeth/components/numbering';
 import type { BlogConfig } from './config';
@@ -112,7 +114,14 @@ export function defineBlogAstroConfig(options: BlogAstroConfigOptions) {
         },
       }),
       satteriMdx(),
-      sitemap(),
+      ...(options.blogConfig.discovery.sitemap.enabled
+        ? [
+          sitemap({
+            filter: (page) => routeIncluded(page, options.blogConfig.discovery.sitemap),
+          }),
+          sitemapAlias(),
+        ]
+        : []),
       // Build-time auto-numbering for referenceable blocks (<Algorithm>,
       // <Listing>, numbered <Callout>) + <Ref>. Blog posts carry no
       // `part`/`chapter`, so numbers are heading-based (`section.subsection.n`).

@@ -1,6 +1,7 @@
 import type { AstroIntegration } from 'astro';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { renderRobots } from '@sonapraneeth/components/discovery.ts';
 import type { BlogConfig } from './config';
 
 /**
@@ -24,6 +25,7 @@ export interface BlogRoutesOptions {
 const ID = {
   config: 'virtual:blog-core/config',
   components: 'virtual:blog-core/components',
+  robots: 'virtual:blog-core/robots',
 } as const;
 
 /** The package-relative entrypoints of the injected route components. */
@@ -34,6 +36,7 @@ const ROUTES = {
   category: '@sonapraneeth/blog-core/routes/categories/[category].astro',
   tags: '@sonapraneeth/blog-core/routes/tags/index.astro',
   tag: '@sonapraneeth/blog-core/routes/tags/[tag].astro',
+  robots: '@sonapraneeth/blog-core/routes/robots.txt.ts',
   rss: '@sonapraneeth/blog-core/routes/rss.xml.ts',
   search: '@sonapraneeth/blog-core/routes/search.astro',
   notFound: '@sonapraneeth/blog-core/routes/404.astro',
@@ -48,13 +51,20 @@ export function blogRoutes(options: BlogRoutesOptions): AstroIntegration {
   return {
     name: '@sonapraneeth/blog-core/routes',
     hooks: {
-      'astro:config:setup': ({ config, injectRoute, updateConfig }) => {
+      'astro:config:setup': ({ command, config, injectRoute, updateConfig }) => {
         const root = fileURLToPath(config.root);
         const componentsPath = path
           .resolve(root, options.components ?? './src/components/registry.ts')
           .replace(/\\/g, '/');
 
         const configCode = `export const blogConfig = ${JSON.stringify(options.blogConfig)};`;
+        const appEnv = process.env.PUBLIC_APP_ENV;
+        const robots = renderRobots(
+          options.blogConfig.discovery,
+          config.site ?? new URL('http://localhost:4312'),
+          appEnv ? appEnv === 'prod' : command === 'build',
+        );
+        const robotsCode = `export const robots = ${JSON.stringify(robots)};`;
         const componentsCode = `export { components } from ${JSON.stringify(componentsPath)};`;
 
         updateConfig({
@@ -63,13 +73,14 @@ export function blogRoutes(options: BlogRoutesOptions): AstroIntegration {
               {
                 name: 'blog-core:virtual-modules',
                 resolveId(id) {
-                  if (id === ID.config || id === ID.components) {
+                  if (id === ID.config || id === ID.components || id === ID.robots) {
                     return `\0${id}`;
                   }
                   return null;
                 },
                 load(id) {
                   if (id === `\0${ID.config}`) return configCode;
+                  if (id === `\0${ID.robots}`) return robotsCode;
                   if (id === `\0${ID.components}`) return componentsCode;
                   return null;
                 },
@@ -84,7 +95,12 @@ export function blogRoutes(options: BlogRoutesOptions): AstroIntegration {
         injectRoute({ pattern: '/categories/[category]', entrypoint: ROUTES.category, prerender: true });
         injectRoute({ pattern: '/tags', entrypoint: ROUTES.tags, prerender: true });
         injectRoute({ pattern: '/tags/[tag]', entrypoint: ROUTES.tag, prerender: true });
-        injectRoute({ pattern: '/rss.xml', entrypoint: ROUTES.rss, prerender: true });
+        if (options.blogConfig.discovery.robots.enabled) {
+          injectRoute({ pattern: '/robots.txt', entrypoint: ROUTES.robots, prerender: true });
+        }
+        if (options.blogConfig.discovery.rss.enabled) {
+          injectRoute({ pattern: '/rss.xml', entrypoint: ROUTES.rss, prerender: true });
+        }
         if (options.blogConfig.search) {
           injectRoute({ pattern: '/search', entrypoint: ROUTES.search, prerender: true });
         }

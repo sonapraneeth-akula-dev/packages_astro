@@ -12,3 +12,7 @@ declare module 'virtual:blog-core/config' {
 declare module 'virtual:blog-core/components' {
   export const components: Record<string, unknown>;
 }
+
+declare module 'virtual:blog-core/robots' {
+  export const robots: string;
+}

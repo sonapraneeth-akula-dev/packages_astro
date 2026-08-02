@@ -5,6 +5,16 @@ All notable changes to `@sonapraneeth/blog-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.0] - 2026-08-02
+
+### Added
+
+- Generate `robots.txt` and the conventional `sitemap.xml` alias by default,
+  alongside the existing RSS feed and Astro sitemap index.
+- Add `discovery` config to disable robots, RSS or sitemap and independently
+  include or exclude route prefixes from feed and sitemap output. Disabling RSS
+  also removes its default social link and page metadata.
+
 ## [2.10.0] - 2026-07-30
 
 ### Fixed

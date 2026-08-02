@@ -6,9 +6,15 @@
 import type { SiteChrome } from '@sonapraneeth/components/chrome';
 import type { ThemeConfig } from '@sonapraneeth/components/theme';
 import type { PwaConfig } from '@sonapraneeth/components/pwa';
+import {
+  resolveDiscoveryConfig,
+  type DiscoveryConfig,
+  type DiscoveryConfigInput,
+} from '@sonapraneeth/components/discovery';
 
 export type { NavLink, SocialProfile } from '@sonapraneeth/components/chrome';
 export type { PwaConfig } from '@sonapraneeth/components/pwa';
+export type { DiscoveryConfig, DiscoveryConfigInput } from '@sonapraneeth/components/discovery';
 export { activeSocials } from '@sonapraneeth/components/chrome';
 
 import type { CaptionAlignConfig } from '@sonapraneeth/components/captions';
@@ -30,6 +36,17 @@ export interface BlogConfig extends SiteChrome {
   timeZoneLabel: string;
   /** Enable the Pagefind-powered offline search page. */
   search: boolean;
+  /**
+   * Robots, RSS and sitemap generation. Every endpoint is enabled by default.
+   *
+   * @example
+   * discovery: {
+   *   robots: { indexing: 'production-only', disallow: ['/private'] },
+   *   rss: { include: ['/blog'], exclude: ['/blog/archive'] },
+   *   sitemap: false,
+   * }
+   */
+  discovery: DiscoveryConfig;
   /**
    * Visual theme — accent palette, font combination and corner roundedness.
    * Only the selected options ship (fonts register per combo; accents + radius
@@ -70,6 +87,7 @@ export const defaultBlogConfig: BlogConfig = {
   timeZone: 'Asia/Kolkata',
   timeZoneLabel: 'IST',
   search: true,
+  discovery: resolveDiscoveryConfig(),
   theme: {},
   captionAlign: { default: 'center' },
   nav: [
@@ -95,6 +113,13 @@ export const defaultBlogConfig: BlogConfig = {
 };
 
 /** Merge a partial site config onto the defaults. */
-export function defineBlogConfig(config: Partial<BlogConfig>): BlogConfig {
-  return { ...defaultBlogConfig, ...config };
+export type BlogConfigInput = Omit<Partial<BlogConfig>, 'discovery'> & {
+  discovery?: DiscoveryConfigInput;
+};
+
+export function defineBlogConfig(config: BlogConfigInput): BlogConfig {
+  const discovery = resolveDiscoveryConfig(config.discovery);
+  const socials = (config.socials ?? defaultBlogConfig.socials)
+    .filter((social) => discovery.rss.enabled || social.id !== 'rss');
+  return { ...defaultBlogConfig, ...config, discovery, socials };
 }

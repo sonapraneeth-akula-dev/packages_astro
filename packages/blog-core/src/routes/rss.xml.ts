@@ -1,10 +1,12 @@
 import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
+import { routeIncluded } from '@sonapraneeth/components/discovery.ts';
 import { blogConfig } from 'virtual:blog-core/config';
 import { getFeedPosts } from '../utils/posts';
 
 export async function GET(context: APIContext) {
-  const posts = await getFeedPosts();
+  const posts = (await getFeedPosts())
+    .filter((post) => routeIncluded(`/blog/${post.id}`, blogConfig.discovery.rss));
   return rss({
     title: blogConfig.title,
     description: blogConfig.description,
