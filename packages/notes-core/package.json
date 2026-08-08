@@ -1,6 +1,6 @@
 {
   "name": "@sonapraneeth/notes-core",
-  "version": "2.20.0",
+  "version": "2.21.0",
   "type": "module",
   "description": "Shared docs/notes engine for Astro + MDX: components, layouts, sidebar generation, config schema and an Astro config factory.",
   "exports": {

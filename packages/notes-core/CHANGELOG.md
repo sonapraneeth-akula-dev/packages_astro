@@ -5,6 +5,13 @@ All notable changes to `@sonapraneeth/notes-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.21.0] - 2026-08-08
+
+### Added
+
+- Mark external links in note content, configured navigation, sidebar entries
+  and page actions with an external-link icon and secure new-tab behavior.
+
 ## [2.20.0] - 2026-08-02
 
 ### Added
