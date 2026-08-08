@@ -9,6 +9,15 @@ Entries before 2.5.0 were reconstructed from the commit history, since this
 package previously recorded its changes only in the repository-level
 [CHANGELOG.md](../../CHANGELOG.md).
 
+## [2.14.0] - 2026-08-08
+
+### Added
+
+- Show the curated external-link icon on external header and footer navigation,
+  social links, link cards and link buttons. These links open in a new tab with
+  `noopener noreferrer`; explicit component icons, targets and relationships
+  remain supported.
+
 ## [2.13.0] - 2026-08-02
 
 ### Added
