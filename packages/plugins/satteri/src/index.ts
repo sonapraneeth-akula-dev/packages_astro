@@ -26,6 +26,61 @@ export interface SatteriAutolinkHeadingsOptions {
   content?: ElementContent | ElementContent[];
 }
 
+const EXTERNAL_WEB_LINK = /^(?:https?:)?\/\//i;
+type RehypeTransformer = (tree: unknown) => void;
+
+/** Mark external web links as secure new-tab links and append a visual cue. */
+export function rehypeSatteriExternalLinks(): RehypeTransformer {
+  return (tree: unknown): void => {
+    visit(tree as Root, 'element', (node: Element) => {
+      if (node.tagName !== 'a') return;
+
+      const href = node.properties?.['href'];
+      if (typeof href !== 'string' || !EXTERNAL_WEB_LINK.test(href)) return;
+
+      node.properties['target'] = '_blank';
+      node.properties['rel'] = ['noopener', 'noreferrer'];
+      node.children.push({
+        type: 'element',
+        tagName: 'svg',
+        properties: {
+          className: ['external-link-icon'],
+          width: 14,
+          height: 14,
+          viewBox: '0 0 24 24',
+          fill: 'none',
+          stroke: 'currentColor',
+          strokeWidth: '2',
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+          ariaHidden: 'true',
+          style: 'display:inline-block;width:.8em;height:.8em;margin-inline-start:.2em;vertical-align:-.05em',
+        },
+        children: [
+          {
+            type: 'element',
+            tagName: 'path',
+            properties: { d: 'M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6' },
+            children: [],
+          },
+          {
+            type: 'element',
+            tagName: 'polyline',
+            properties: { points: '15 3 21 3 21 9' },
+            children: [],
+          },
+          {
+            type: 'element',
+            tagName: 'line',
+            properties: { x1: '10', y1: '14', x2: '21', y2: '3' },
+            children: [],
+          },
+        ],
+      });
+    });
+  };
+}
+
 const DEFAULT_PROPERTIES: Record<string, unknown> = {
   className: ['heading-anchor'],
   ariaHidden: 'true',
@@ -43,7 +98,7 @@ function defaultContent(): Element {
       viewBox: '0 0 24 24',
       fill: 'none',
       stroke: 'currentColor',
-      strokeWidth: 2,
+      strokeWidth: '2',
       strokeLinecap: 'round',
       strokeLinejoin: 'round',
     },
@@ -80,12 +135,12 @@ function defaultContent(): Element {
  */
 export default function rehypeSatteriAutolinkHeadings(
   options: SatteriAutolinkHeadingsOptions = {},
-) {
+): RehypeTransformer {
   const behavior = options.behavior ?? 'append';
   const properties = options.properties ?? DEFAULT_PROPERTIES;
 
-  return (tree: Root): void => {
-    visit(tree, 'element', (node: Element) => {
+  return (tree: unknown): void => {
+    visit(tree as Root, 'element', (node: Element) => {
       if (!HEADINGS.has(node.tagName)) return;
 
       const id = node.properties?.['id'];

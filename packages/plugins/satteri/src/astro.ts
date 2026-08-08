@@ -10,7 +10,7 @@ import { unified } from '@astrojs/markdown-remark';
 import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import remarkMath from 'remark-math';
-import rehypeSatteriAutolinkHeadings from './index';
+import rehypeSatteriAutolinkHeadings, { rehypeSatteriExternalLinks } from './index';
 import { remarkCodeSource, type CodeSourceOptions } from './remark-code-source';
 import { remarkMermaid } from './remark-mermaid';
 
@@ -48,16 +48,22 @@ export function satteriMdx() {
  *     `katex/dist/katex.min.css` in your layout so the math is styled.
  *   - `rehype-slug` assigns heading ids and the satteri autolink plugin
  *     appends a clickable anchor beside each heading.
+ *   - External HTTP(S) links open in a new tab with `noopener noreferrer` and
+ *     receive a decorative external-link icon.
  *
- * The plugin defaults (append behavior, `.heading-anchor` class, chain SVG) are
- * what the engine's styles expect, so no options are needed here. Because MDX
- * inherits this pipeline, LaTeX works in both `.md` and `.mdx`.
+ * The plugin defaults (append behavior, `.heading-anchor` class and SVG icons)
+ * are what the engine's styles expect, so no options are needed here. Because
+ * MDX inherits this pipeline, these transforms and LaTeX work in both `.md`
+ * and `.mdx`.
  *
  *   markdown: { processor: satteriMarkdownProcessor() }
  */
 export function satteriMarkdownProcessor(options: SatteriPresetOptions = {}) {
+  const autolinkHeadings = rehypeSatteriAutolinkHeadings as unknown as typeof rehypeSlug;
+  const externalLinks = rehypeSatteriExternalLinks as unknown as typeof rehypeSlug;
+
   return unified({
     remarkPlugins: [remarkMath, [remarkCodeSource, options.codeSource ?? {}], remarkMermaid],
-    rehypePlugins: [rehypeSlug, rehypeSatteriAutolinkHeadings, rehypeKatex],
+    rehypePlugins: [rehypeSlug, autolinkHeadings, externalLinks, rehypeKatex],
   });
 }
