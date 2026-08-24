@@ -13,6 +13,8 @@ import type { SidebarConfig } from './schema';
 export interface NotesRoutesOptions {
   /** The site's resolved config (from {@link defineDocsConfig}). */
   docsConfig: DocsConfig;
+  /** Project-root-relative directory watched for structural content changes. */
+  contentDir?: string;
   /**
    * Project-root-relative path to the site's MDX component registry module
    * (which default-merges the engine's components). Defaults to
@@ -56,11 +58,14 @@ const ROUTES = {
  * injected route components through `virtual:notes-core/*` modules.
  */
 export function notesRoutes(options: NotesRoutesOptions): AstroIntegration {
+  let contentRoot = '';
+
   return {
     name: '@sonapraneeth/notes-core/routes',
     hooks: {
       'astro:config:setup': ({ command, config, injectRoute, updateConfig }) => {
         const root = fileURLToPath(config.root);
+        contentRoot = path.resolve(root, options.contentDir ?? './src/content/docs');
         const componentsPath = path
           .resolve(root, options.components ?? './src/components/registry.ts')
           .replace(/\\/g, '/');
@@ -143,6 +148,35 @@ export function notesRoutes(options: NotesRoutesOptions): AstroIntegration {
           injectRoute({ pattern: '/rss.xml', entrypoint: ROUTES.rss, prerender: true });
         }
         injectRoute({ pattern: '/404', entrypoint: ROUTES.notFound, prerender: true });
+      },
+      'astro:server:setup': ({ logger, refreshContent, server }) => {
+        let restartTimer: ReturnType<typeof setTimeout> | undefined;
+        const restartForContentStructure = (file: string): void => {
+          const relative = path.relative(contentRoot, path.resolve(file));
+          if (
+            !relative ||
+            relative.startsWith('..') ||
+            path.isAbsolute(relative) ||
+            !/\.mdx?$/i.test(relative)
+          ) {
+            return;
+          }
+
+          clearTimeout(restartTimer);
+          restartTimer = setTimeout(async () => {
+            try {
+              await refreshContent?.();
+              await server.restart();
+            } catch (error) {
+              logger.error(
+                `Failed to refresh routes after a content change: ${error instanceof Error ? error.message : String(error)}`,
+              );
+            }
+          }, 600);
+        };
+
+        server.watcher.on('add', restartForContentStructure);
+        server.watcher.on('unlink', restartForContentStructure);
       },
     },
   };

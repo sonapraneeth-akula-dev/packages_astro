@@ -138,6 +138,7 @@ export function defineDocsAstroConfig(options: DocsAstroConfigOptions) {
       // `/search` and `/404` so sites need no `src/pages/` of their own.
       notesRoutes({
         docsConfig: options.docsConfig,
+        contentDir: options.contentDir,
         components: options.components,
         sidebar: options.sidebar,
       }),
