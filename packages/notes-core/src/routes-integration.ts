@@ -75,7 +75,7 @@ export function notesRoutes(options: NotesRoutesOptions): AstroIntegration {
         const appEnv = process.env.PUBLIC_APP_ENV;
         const robots = renderRobots(
           options.docsConfig.discovery,
-          config.site ?? new URL('http://localhost:4310'),
+          new URL(config.site ?? 'http://localhost:4310'),
           appEnv ? appEnv === 'prod' : command === 'build',
         );
         const robotsCode = `export const robots = ${JSON.stringify(robots)};`;
