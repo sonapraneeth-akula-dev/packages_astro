@@ -1,4 +1,5 @@
 import type { AstroIntegration } from 'astro';
+import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { renderRobots } from '@sonapraneeth/components/discovery.ts';
@@ -151,6 +152,8 @@ export function notesRoutes(options: NotesRoutesOptions): AstroIntegration {
       },
       'astro:server:setup': ({ logger, refreshContent, server }) => {
         let restartTimer: ReturnType<typeof setTimeout> | undefined;
+        const pendingAdds = new Set<string>();
+        const frontmatterByFile = new Map<string, string>();
         const restartForContentStructure = (file: string): void => {
           const relative = path.relative(contentRoot, path.resolve(file));
           if (
@@ -165,7 +168,8 @@ export function notesRoutes(options: NotesRoutesOptions): AstroIntegration {
           clearTimeout(restartTimer);
           restartTimer = setTimeout(async () => {
             try {
-              await refreshContent?.();
+              await refreshContent?.({});
+              pendingAdds.clear();
               await server.restart();
             } catch (error) {
               logger.error(
@@ -175,8 +179,34 @@ export function notesRoutes(options: NotesRoutesOptions): AstroIntegration {
           }, 600);
         };
 
-        server.watcher.on('add', restartForContentStructure);
-        server.watcher.on('unlink', restartForContentStructure);
+        server.watcher.on('add', (file) => {
+          const resolved = path.resolve(file);
+          pendingAdds.add(resolved);
+          restartForContentStructure(file);
+        });
+        server.watcher.on('change', async (file) => {
+          const resolved = path.resolve(file);
+          if (pendingAdds.has(resolved)) {
+            restartForContentStructure(file);
+            return;
+          }
+
+          if (!/\.mdx?$/i.test(resolved)) return;
+          const source = await readFile(resolved, 'utf8').catch(() => null);
+          if (source === null) return;
+          const frontmatter = source.match(/^(?:\uFEFF)?---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)?.[1] ?? '';
+          const previous = frontmatterByFile.get(resolved);
+          frontmatterByFile.set(resolved, frontmatter);
+          if (previous === undefined || previous !== frontmatter) {
+            restartForContentStructure(file);
+          }
+        });
+        server.watcher.on('unlink', (file) => {
+          const resolved = path.resolve(file);
+          pendingAdds.delete(resolved);
+          frontmatterByFile.delete(resolved);
+          restartForContentStructure(file);
+        });
       },
     },
   };
