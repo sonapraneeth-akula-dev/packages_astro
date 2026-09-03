@@ -5,6 +5,14 @@ All notable changes to `@sonapraneeth/notes-core` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.21.4] - 2026-09-03
+
+### Fixed
+
+- Keep wide content tables within the article column and make them
+  horizontally scrollable instead of allowing them to overlap the
+  on-this-page navigation.
+
 ## [2.21.3] - 2026-08-27
 
 ### Fixed
