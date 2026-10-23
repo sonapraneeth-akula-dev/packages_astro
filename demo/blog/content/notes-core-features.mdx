@@ -1,0 +1,284 @@
+---
+title: 'Every Feature in notes-core'
+description: A complete reference for the @sonapraneeth/notes-core engine — sidebar generation, notebooks mode, the print view, taxonomy routes, frontmatter fields and config options.
+pubDate: 2026-07-30
+category: Reference
+tags: [notes-core, reference, astro, architecture]
+keywords: [feature index, api reference, docsconfig, sidebar, notebooks]
+cover: '📓'
+---
+
+import { Callout, DocImage, Steps } from '@sonapraneeth/blog-core/components/mdx';
+import notesHome from './images/notes-home.png';
+import notesDoc from './images/notes-doc.png';
+import notesNesting from './images/notes-sidebar-nesting.png';
+import notesSearch from './images/notes-search.png';
+import notesTags from './images/notes-tags.png';
+import notesCategories from './images/notes-categories.png';
+import notebooksHub from './images/notebooks-hub.png';
+import notebooksLanding from './images/notebooks-landing.png';
+import notebooksDoc from './images/notebooks-doc.png';
+import notebooksPrint from './images/notebooks-print.png';
+import notebooksTags from './images/notebooks-tags.png';
+
+`@sonapraneeth/notes-core` is the sibling of the blog engine: same route
+injection, same MDX pipeline, same theme system — but built around a sidebar, a
+folder tree and long-form handbooks instead of a dated feed. This post indexes
+every feature, with screenshots from both demo sites.
+
+<Callout type="tip">
+  The flat-handbook screenshots come from `demo/notes`; the notebooks-mode ones
+  from `demo/notebooks`. Regenerate them with `node
+  scripts/capture-screenshots.ts notes` and `… notebooks`.
+</Callout>
+
+## The two entry points
+
+```ts title="astro.config.ts"
+import { defineDocsAstroConfig } from '@sonapraneeth/notes-core/astro';
+import { docsConfig } from './notes.config';
+
+export default defineDocsAstroConfig({
+  port: 4310,
+  docsConfig,
+  contentDir: './content',
+});
+```
+
+```ts title="notes.config.ts"
+import { defineDocsConfig } from '@sonapraneeth/notes-core/config';
+
+export const docsConfig = defineDocsConfig({
+  brand: 'Notebooks',
+  title: 'Notebooks — Demo',
+  subject: 'Notebooks',
+  notebooks: true,
+  search: true,
+});
+```
+
+### `defineDocsConfig` options
+
+| Option | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `brand` | `string` | `Grihasetu` | Short brand in the header |
+| `title` | `string` | — | Full site name in `<title>` and metadata |
+| `description` | `string` | — | Tagline / default meta description |
+| `author` | `string` | — | Author shown in the footer and on notebook cards |
+| `subject` | `string` | `Documentation` | Subject shown on the landing page |
+| `timeZone` / `timeZoneLabel` | `string` | `Asia/Kolkata` / `IST` | Timestamp rendering |
+| `editUrlBase` | `string` | — | Base URL for "Edit this page"; the doc id is appended |
+| `search` | `boolean` | `true` | Build the Pagefind search page and index |
+| `notebooks` | `boolean` | `false` | Treat each top-level folder as a self-contained notebook |
+| `theme` | `ThemeConfig` | `{}` | Palette, font combo, radius, script fonts |
+| `pwa` | `PwaConfig` | off | Manifest + service worker; disabled unless `pwa.enabled` |
+| `captionAlign` | `CaptionAlignConfig` | `{ default: 'center' }` | Figure and numbered-block caption alignment |
+| `printSectionNumbers` | `boolean` | `true` | Auto-number headings inside the notebook print view |
+| `nav` / `socials` | arrays | home/categories/tags/search, GitHub | Header links and footer socials |
+
+`defineDocsAstroConfig` takes the same shape as the blog factory: `port`,
+`site`, `docsConfig`, `contentDir`, `components`, `integrations`,
+`themeSwitcher` — plus an optional curated `sidebar`.
+
+## Injected routes
+
+| Pattern | Page |
+| --- | --- |
+| `/` | Landing page, or the notebook hub in notebooks mode |
+| `/[...slug]` | A single note |
+| `/categories`, `/categories/[category]` | Site-wide category index and pages |
+| `/tags`, `/tags/[tag]` | Site-wide tag index and pages |
+| `/[notebook]/categories`, `/[notebook]/categories/[category]` | Notebook-scoped categories (notebooks mode) |
+| `/[notebook]/tags`, `/[notebook]/tags/[tag]` | Notebook-scoped tags (notebooks mode) |
+| `/print/[notebook]` | Whole-notebook print view (notebooks mode) |
+| `/search` | Pagefind search (only when `search: true`) |
+| `/404` | Not-found page |
+
+## The sidebar
+
+The sidebar is generated from the folder tree — no manifest required. Folder
+`index.mdx` files become group landing pages, and frontmatter tunes the result.
+
+<DocImage
+  id="fig-notes-home"
+  src={notesHome}
+  alt="The demo notes landing page with the sidebar on the left"
+  caption="The flat-handbook landing page, sidebar auto-generated from the content folder."
+/>
+
+<DocImage
+  id="fig-notes-doc"
+  src={notesDoc}
+  alt="A documentation page with a left sidebar, body content and a right-hand table of contents"
+  caption="A note page: sidebar, breadcrumbs, reading progress and a right-hand table of contents."
+/>
+
+Nesting is not capped at two or three levels — the demo goes six deep and the
+sidebar stays navigable, with breadcrumbs and prev/next derived from the same
+tree.
+
+<DocImage
+  id="fig-notes-nesting"
+  src={notesNesting}
+  alt="A deeply nested page showing six levels of sidebar hierarchy expanded"
+  caption="Six levels of nesting, with breadcrumbs generated from the same tree."
+/>
+
+### Sidebar frontmatter
+
+```yaml
+sidebar:
+  label: Configuration   # override the sidebar text
+  order: 2               # sort within the folder (default: Infinity)
+  hidden: false          # keep routable, drop from the sidebar
+  badge: New             # small badge beside the entry
+```
+
+### Curated `sidebar.json`
+
+Pass a `sidebar` to the Astro config to replace the generated tree entirely.
+Four item shapes are supported:
+
+<Steps>
+
+1. `{ "doc": "getting-started/installation" }` — link a note by id, with an optional `label` and `badge`.
+2. `{ "link": "https://…", "label": "Spec" }` — an external link.
+3. `{ "group": "Guides", "items": [ … ] }` — a collapsible group.
+4. `{ "divider": true }` — a visual separator.
+
+</Steps>
+
+<Callout type="caution">
+  A curated sidebar takes over completely, so `notebooks` mode is ignored when
+  one is supplied.
+</Callout>
+
+## Notebooks mode
+
+Set `notebooks: true` and every top-level content folder becomes a
+self-contained handbook: its own scoped sidebar, landing page, prev/next chain
+and taxonomy routes. One site, several independent books.
+
+<DocImage
+  id="fig-notebooks-hub"
+  src={notebooksHub}
+  alt="The notebooks home page showing a grid of notebook cards for C++, Go and C#"
+  caption="The hub: one card per top-level folder. Cards cluster under the optional `group` field."
+/>
+
+<DocImage
+  id="fig-notebooks-landing"
+  src={notebooksLanding}
+  alt="The C++ notebook landing page with its own scoped sidebar and chapter list"
+  caption="A notebook landing page, with a sidebar scoped to that notebook alone."
+/>
+
+<DocImage
+  id="fig-notebooks-doc"
+  src={notebooksDoc}
+  alt="A chapter inside the Go notebook, nested one level deeper"
+  caption="A chapter inside a notebook. Nesting works the same as in flat mode."
+/>
+
+Cards come in two styles. `card: 'standard'` puts the title and description
+below the cover; `card: 'book'` renders a cover that opens like a book on hover.
+
+## The print view
+
+`/print/[notebook]` stitches an entire notebook into one document with page
+breaks between chapters, then opens the print dialog — so "Save as PDF"
+produces the whole handbook.
+
+<DocImage
+  id="fig-notebooks-print"
+  src={notebooksPrint}
+  alt="The print view for the C++ notebook, showing the cover block followed by the first chapter"
+  caption="The print view at /print/cpp. Set `printInNotebook: false` on any screen-only page to exclude it."
+/>
+
+`printSectionNumbers` (site config, default `true`) numbers `##`/`###`/`####`
+headings within each chapter. Turn it off for notebooks whose headings already
+carry their own numbering.
+
+## Taxonomy and search
+
+Categories and tags work site-wide, and are additionally scoped per notebook
+when notebooks mode is on.
+
+<DocImage
+  id="fig-notes-tags"
+  src={notesTags}
+  alt="The tag index for the notes demo"
+  caption="Site-wide tag index at /tags."
+/>
+
+<DocImage
+  id="fig-notes-categories"
+  src={notesCategories}
+  alt="The category index for the notes demo"
+  caption="Site-wide category index at /categories."
+/>
+
+<DocImage
+  id="fig-notebooks-tags"
+  src={notebooksTags}
+  alt="The tag index scoped to the C++ notebook"
+  caption="Notebook-scoped tags at /[notebook]/tags — here, /cpp/tags."
+/>
+
+<DocImage
+  id="fig-notes-search"
+  src={notesSearch}
+  alt="The notes search page with an input and result list"
+  caption="The same Pagefind search page the blog engine uses."
+/>
+
+## Note frontmatter
+
+Validated by `docFrontmatterSchema` in `src/schema.ts`.
+
+| Field | Type | Required | What it does |
+| --- | --- | --- | --- |
+| `title` | `string` | ✓ | Page title and default sidebar label |
+| `description` | `string` | | Summary for metadata and hub cards |
+| `author` | `string` | | Shown on the notebook hub card |
+| `group` | `string` | | On a notebook's `index.mdx`: clusters notebooks on the hub |
+| `slug` | `string` | | Custom route, overriding the file path |
+| `sidebar` | `object` | | `label`, `order`, `hidden`, `badge` |
+| `part` / `chapter` | `string` | | Feed the numbering system (e.g. `II`, `3`) |
+| `category` | `string` | | Routable at `/categories/[category]` |
+| `tags` | `string[]` | | Routable at `/tags/[tag]` |
+| `keywords` | `string[]` | | Search-only aliases |
+| `draft` | `boolean` | | Hide from the sidebar and listings |
+| `publishedDate` / `lastUpdated` | `date` | | Dates shown in the page header |
+| `cover` | `string` | | Emoji or glyph for the header or hub card |
+| `coverImage` | `image` | | Local cover image, optimized by Astro |
+| `card` | `'standard' \| 'book'` | | Hub card style |
+| `tableOfContents` | `boolean` | | Show or hide the right-hand TOC (default `true`) |
+| `printInNotebook` | `boolean` | | Include in the print view (default `true`) |
+| `math` | `boolean` | | Reserved opt-in flag for LaTeX |
+| `captionAlign` | `object` | | Per-page caption alignment override |
+
+## Helpers a site can import
+
+From `@sonapraneeth/notes-core`:
+
+- **Routing and sidebar** — `buildDocRoutes`, `buildSidebar`, `flattenSidebar`, `buildHomeData`, `getNotebooks`, `groupNotebooks`, `notebookSegment`, `normalizePath`, `entrySlug`, `entryParam`, `entryLabel`, `isRootIndex`, `editUrl`.
+- **Taxonomy** — `getLiveDocs`, `getCategories`, `getTags`, `docsInCategory`, `docsWithTag`.
+- **Formatting** — `slugify`, `humanize`, `readingTime`, `truncateWords`, `coverInitials`, `coverHue`, `formatDateTime`.
+
+The exported types (`SidebarNode`, `SidebarGroup`, `SidebarLeaf`, `DocLink`,
+`Breadcrumb`, `Notebook`, `NotebookGroup`, `DocRoute`, `HomeData`) let a site
+build custom pages on top of the same tree the engine uses.
+
+## Shared with blog-core
+
+Both engines are assembled from the same parts, so everything below behaves
+identically on a notes site: Expressive Code, the Satteri MDX pipeline with
+KaTeX and Mermaid, build-time numbering with `<Ref>` cross-links, the sitemap,
+self-hosted theme fonts, the opt-in PWA, and the full MDX component map.
+
+<Callout type="note">
+  The component catalogue is documented separately in *Every Component in the
+  Shared UI Package*, and the blog engine in *Every Feature in blog-core*.
+</Callout>

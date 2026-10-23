@@ -9,6 +9,12 @@ Entries before 2.5.0 were reconstructed from the commit history, since this
 package previously recorded its changes only in the repository-level
 [CHANGELOG.md](../../CHANGELOG.md).
 
+## [Unreleased]
+
+### Changed
+
+- Upgrade the shared Astro catalog to 7.4.0 and Mermaid to 12.2.0.
+
 ## [2.10.0] - 2026-07-30
 
 ### Changed

@@ -1,0 +1,15 @@
+**/node_modules/
+**/dist/
+**/build/
+**/.astro/
+**/coverage/
+**/test-results/
+**/playwright-report/
+**/dependencies/
+**/content/
+**/public/
+**/diagrams/
+**/sources/
+**/*.md
+**/*.mdx
+**/*.svg

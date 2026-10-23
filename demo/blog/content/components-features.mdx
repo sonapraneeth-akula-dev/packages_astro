@@ -1,0 +1,220 @@
+---
+title: 'Every Component in the Shared UI Package'
+description: The full catalogue of @sonapraneeth/components — every Astro component, the theme system, the numbering integration, PWA and search runtimes, with a screenshot of each family.
+pubDate: 2026-07-30
+category: Reference
+tags: [components, reference, design, mdx]
+keywords: [component library, ui catalogue, callout, annotation, theme system]
+cover: '🧩'
+---
+
+import { Callout, DocImage, Steps } from '@sonapraneeth/blog-core/components/mdx';
+import callouts from './images/components-callouts.png';
+import annotations from './images/components-annotations.png';
+import codeBlocks from './images/components-code-blocks.png';
+import cardsAndTabs from './images/components-cards-and-tabs.png';
+import numbering from './images/components-numbering.png';
+import images from './images/components-images.png';
+import themeSwitcher from './images/components-theme-switcher.png';
+
+`@sonapraneeth/components` is the layer both engines sit on: the MDX component
+map, the chrome (header, footer, search, pagination), and four Astro
+integrations — theme, numbering, PWA and Mermaid. Nothing here knows whether it
+is rendering a blog post or a handbook chapter.
+
+<Callout type="tip">
+  Everything in the catalogue is usable inside any `.mdx` file with no import —
+  the map is passed to `<Content />`. Import explicitly only when you need a
+  component in an `.astro` file.
+</Callout>
+
+## The MDX catalogue
+
+| Component | What it renders |
+| --- | --- |
+| `Callout` | Admonition box — `note`, `tip`, `important`, `caution`, `warning`, `danger`. Numbered and referenceable when given an `id` |
+| `Annotation` | Inline highlight (yellow, blue, pink, green, orange) that opens a sticky note on click |
+| `Card` / `CardGrid` | A responsive card grid that collapses to one column on mobile |
+| `LinkCard` | A whole card that is a link — title, description, optional icon |
+| `LinkButton` | A link styled as a button |
+| `Badge` | Small inline label, e.g. `New` or `Beta` |
+| `Steps` | An ordered list rendered as numbered steps |
+| `Tabs` / `TabItem` | Client-side tab switcher |
+| `FileTree` | A file and folder tree from a nested list |
+| `Icon` | Inline SVG from the shared registry |
+| `DocImage` | Optimized, captioned, zoomable figure; auto-numbered with an `id` |
+| `MdImage` | Mapped onto `img`, so plain Markdown images get the same optimization |
+| `Code` | Expressive Code block (added by each engine, not the shared map) |
+| `Algorithm` / `Listing` | Numbered, referenceable algorithm and listing blocks |
+| `Ref` | Cross-page link to any numbered block, with the label generated for you |
+
+### Callouts
+
+<DocImage
+  id="fig-callouts"
+  src={callouts}
+  alt="All six callout variants stacked: note, tip, important, caution, warning and danger"
+  caption="The six Callout types, each with its own icon and semantic colour."
+/>
+
+### Annotations
+
+Highlight a phrase inline and attach a note to it. The note opens on click, so
+the prose stays uninterrupted for readers who do not want the detour.
+
+<DocImage
+  id="fig-annotations"
+  src={annotations}
+  alt="A paragraph with several coloured inline highlights, one of them expanded into a sticky note"
+  caption="Annotation in its five colours."
+/>
+
+### Code blocks
+
+<DocImage
+  id="fig-code-blocks"
+  src={codeBlocks}
+  alt="Code blocks with a titled frame, a line-number gutter and highlighted lines"
+  caption="Expressive Code: titled frames, copy button, line numbers, line markers and dual themes."
+/>
+
+Blocks can also import their contents rather than inlining them — from a file
+with `file="./snippets/x.ts#L20-L25"`, or from an allow-listed URL with
+`url="…"` — so prose and real source never drift apart.
+
+### Cards, grids and tabs
+
+<DocImage
+  id="fig-cards-tabs"
+  src={cardsAndTabs}
+  alt="A card grid above a tab switcher with three tabs"
+  caption="CardGrid, Card, LinkCard, Tabs and TabItem."
+/>
+
+### Numbered, referenceable blocks
+
+Give a block an `id` — as its **first** attribute — and the build-time numbering
+integration assigns it a number. `<Ref id="…" />` then links to it from anywhere
+on the site, generating the label ("Algorithm 2.1.3") for you.
+
+<DocImage
+  id="fig-numbering"
+  src={numbering}
+  alt="A numbered algorithm block and a numbered listing, with an inline cross-reference link"
+  caption="Numbering resolves at build time — zero runtime cost, no manual counters."
+/>
+
+Numbers derive from the `part` and `chapter` frontmatter (notes only) plus the
+heading structure, and each type keeps its own counter. The resolved map is
+exposed as the `virtual:numbering` module.
+
+### Images
+
+<DocImage
+  id="fig-images"
+  src={images}
+  alt="A captioned figure with a numbered caption, and a plain Markdown image below it"
+  caption="DocImage emits modern formats, a srcset and intrinsic dimensions — so there is no layout shift."
+/>
+
+Click any figure to open the full-width overlay; Escape or a click dismisses it.
+Pass `zoom={false}` to disable that, and `priority` for the single LCP image.
+
+## Site chrome
+
+These are rendered by the engines' layouts rather than written in MDX.
+
+| Component | What it does |
+| --- | --- |
+| `Header` | Brand, nav, search link, appearance toggle, mobile tab bar |
+| `Footer` | Brand, description, author, social links |
+| `TableOfContents` | Right-hand heading list with scroll-aware highlighting |
+| `ProgressBar` | Reading progress bar tied to scroll position |
+| `Pagination` | Previous/next paging for feeds and taxonomy pages |
+| `PagefindSearch` | The search input, result list and keyboard handling |
+| `ReadingMode` | Floating toggle that strips the page down to the article |
+| `PwaInstall` | "Install app" button, shown only when the site is installable |
+| `PwaHead` | Manifest link, theme colour and service-worker registration |
+| `ThemeSwitcher` | Live palette / font / radius preview panel (demo sites only) |
+| `EnvBanner` | "Not production" banner in dev and staging |
+| `ScreenSizeIndicator` | Current breakpoint readout, dev only |
+
+`ReadingMode` stores its state under the `reading-mode` key and only flips a
+`data-reading` attribute on `<html>` — every layout change after that is pure
+CSS, re-applied before paint so a stored preference never flashes the full
+chrome.
+
+## The theme system
+
+Three independent axes, each optional. Only the selected option ships.
+
+<Steps>
+
+1. **Palette** — `indigo` (default), `emerald`, `violet`.
+2. **Fonts** — `jakarta` (default), `modern`, `classical`, `geometric`, `system`.
+3. **Radius** — `none`, `small`, `default`, `large`, `full`.
+
+</Steps>
+
+```ts title="blog.config.ts"
+theme: {
+  palette: 'violet',
+  fonts: 'modern',
+  radius: 'large',
+  scriptFonts: [
+    {
+      id: 'devanagari',
+      name: 'Noto Serif Devanagari',
+      weights: ['400 700'],
+      subsets: ['devanagari'],
+      fallback: "'Nirmala UI', 'Noto Serif Devanagari', serif",
+      scale: 1.4,
+    },
+  ],
+}
+```
+
+`scriptFonts` self-hosts extra non-Latin families for one site only and emits a
+`.font-<id>` utility class. Tag a span with that class plus a `lang` attribute
+and only the tagged text switches family:
+
+> <span lang="sa" class="font-devanagari">अथ योगानुशासनम् ॥१॥</span>
+
+Set `themeSwitcher: true` in a site's Astro config to render the live preview
+panel. It ships every preset so they can be flipped at runtime, which is why it
+belongs on demo sites only — a real site fixes its theme and offers just
+light/dark/system from the header.
+
+<DocImage
+  id="fig-theme-switcher"
+  src={themeSwitcher}
+  alt="The theme panel open over the blog home page, showing appearance, colour, font and radius options"
+  caption="The ThemeSwitcher panel: appearance, palette, font combo and radius."
+/>
+
+## Integrations and runtimes
+
+| Module | What it provides |
+| --- | --- |
+| `theme.ts` | `resolveTheme`, `themeFontEntries`, `renderThemeStyle`, `renderThemeInitScript`, plus the palette/font/radius option lists |
+| `numbering.ts` | The build-time numbering integration and the `virtual:numbering` map |
+| `pwa.ts` | Manifest, icon generation, service worker and precache strategy (`false`, `'core'`, `'all'`) |
+| `mermaid.ts` / `mermaid-client.ts` | The lazy, theme-aware renderer for mermaid diagram fences |
+| `pagefind-search.ts` | The client-side Pagefind wrapper and search state |
+| `precache-cli.ts` | Bundle analysis for tuning what the service worker precaches |
+| `captions.ts` | `resolveCaptionAlign` and the caption alignment types |
+| `chrome.ts` | `SiteChrome`, `NavLink`, `SocialProfile`, `activeSocials` |
+| `icons.ts` | The icon registry, `IconName` and `isIconName` |
+
+<Callout type="note">
+  Caption alignment resolves in three layers: the component's own prop, then the
+  page's `captionAlign` frontmatter, then the site's `captionAlign` config —
+  each falling back to `default`, which itself defaults to `center`.
+</Callout>
+
+## Related reading
+
+- *Every Feature in blog-core* — the blog engine that consumes this package.
+- *Every Feature in notes-core* — the docs engine.
+- *Typography for Long-Form Reading* — the type scale behind these components.
+- *Dark Mode Without the Flash* — how the appearance toggle avoids a flash.

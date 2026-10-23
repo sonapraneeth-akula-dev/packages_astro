@@ -1,0 +1,259 @@
+---
+title: 'Every Feature in blog-core'
+description: A complete reference for the @sonapraneeth/blog-core engine — config options, injected routes, frontmatter fields, built-in integrations and the helpers a site can call.
+pubDate: 2026-07-30
+category: Reference
+tags: [blog-core, reference, astro, architecture]
+keywords: [feature index, api reference, blogconfig, frontmatter]
+cover: '📰'
+---
+
+import { Callout, DocImage, Steps } from '@sonapraneeth/blog-core/components/mdx';
+import blogHome from './images/blog-home.png';
+import blogHomeDark from './images/blog-home-dark.png';
+import blogPost from './images/blog-post.png';
+import blogCategories from './images/blog-categories.png';
+import blogTags from './images/blog-tags.png';
+import blogSearch from './images/blog-search.png';
+import blog404 from './images/blog-404.png';
+
+`@sonapraneeth/blog-core` is the whole blog: routing, layouts, taxonomy, feed,
+search and the MDX pipeline. A site that consumes it ships three things — a
+config, a content folder and (optionally) a component registry. This post is the
+index of everything the engine gives you, with a screenshot of each surface.
+
+<Callout type="tip">
+  Every screenshot on this page was captured from the demo blog you are reading
+  right now, at `demo/blog`. Run `node scripts/capture-screenshots.ts blog` to
+  regenerate them.
+</Callout>
+
+## The two entry points
+
+A site never calls `defineConfig` from Astro. It calls the engine's two
+factories instead.
+
+```ts title="astro.config.ts"
+import { defineBlogAstroConfig } from '@sonapraneeth/blog-core/astro';
+import { blogConfig } from './blog.config';
+
+export default defineBlogAstroConfig({
+  port: 4312,
+  blogConfig,
+  contentDir: './content',
+  themeSwitcher: true,
+});
+```
+
+```ts title="blog.config.ts"
+import { defineBlogConfig } from '@sonapraneeth/blog-core/config';
+
+export const blogConfig = defineBlogConfig({
+  brand: 'Blog',
+  title: 'Blog Engine — Demo',
+  description: 'A showcase journal.',
+  author: 'Sona Praneeth Akula',
+  pageSize: 5,
+  search: true,
+});
+```
+
+### `defineBlogAstroConfig` options
+
+| Option | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `blogConfig` | `BlogConfig` | — | The resolved site config; reaches injected routes through a virtual module |
+| `port` | `number` | `4312` | Dev/preview port |
+| `site` | `string` | `PUBLIC_SITE_URL` or localhost | Canonical site URL for sitemap, RSS and metadata |
+| `contentDir` | `string` | `content` | Where posts live; also read by the build-time numbering pass |
+| `components` | `string` | `./src/components/registry.ts` | Per-site MDX component registry |
+| `integrations` | `AstroIntegration[]` | `[]` | Extra integrations appended after the engine defaults |
+| `themeSwitcher` | `boolean` | `false` | Ship the live palette/font/radius preview panel (demo sites only) |
+
+### `defineBlogConfig` options
+
+| Option | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `brand` | `string` | `Grihasetu` | Short brand in the header |
+| `title` | `string` | — | Full site name in `<title>` and metadata |
+| `description` | `string` | — | Tagline / default meta description |
+| `author` | `string` | — | Author shown in the footer |
+| `pageSize` | `number` | `7` | Posts per page on the feed and taxonomy pages |
+| `timeZone` | `string` | `Asia/Kolkata` | IANA zone used to render timestamps |
+| `timeZoneLabel` | `string` | `IST` | Abbreviation printed after timestamps |
+| `search` | `boolean` | `true` | Build the Pagefind search page and index |
+| `theme` | `ThemeConfig` | `{}` | Palette, font combo, radius, script fonts |
+| `pwa` | `PwaConfig` | off | Manifest + service worker; disabled unless `pwa.enabled` |
+| `captionAlign` | `CaptionAlignConfig` | `{ default: 'center' }` | Alignment of figure and numbered-block captions |
+| `nav` | `NavLink[]` | home/categories/tags/search | Header and mobile tab-bar links |
+| `socials` | `SocialProfile[]` | GitHub, RSS | Footer links; empty `href` hides the entry |
+
+## Injected routes
+
+The engine registers every page through `injectRoute`, so a consuming site has
+no `src/pages/` at all.
+
+| Pattern | Page |
+| --- | --- |
+| `/[...page]` | Paginated home feed |
+| `/blog/[...id]` | A single post |
+| `/categories` | Category index |
+| `/categories/[category]` | Posts in one category |
+| `/tags` | Tag index |
+| `/tags/[tag]` | Posts with one tag |
+| `/search` | Pagefind search (only when `search: true`) |
+| `/rss.xml` | RSS feed |
+| `/404` | Not-found page |
+
+### The home feed
+
+A hero card for the newest post, then a paginated grid. `pageSize` controls how
+many appear before the pager.
+
+<DocImage
+  id="fig-blog-home"
+  src={blogHome}
+  alt="The demo blog home page: a hero card for the newest post above a grid of post cards"
+  caption="The paginated home feed injected at /[...page]."
+/>
+
+### A post page
+
+Cover, category and tag chips, publish date, reading time, a table of contents
+and prev/next navigation — all supplied by the `BlogPost` layout.
+
+<DocImage
+  id="fig-blog-post"
+  src={blogPost}
+  alt="A blog post page showing the title, metadata row, table of contents and body copy"
+  caption="A post rendered by the injected /blog/[...id] route."
+/>
+
+### Categories and tags
+
+`category` is a single required field; `tags` is a list. Both become routable
+index pages plus one page per term.
+
+<DocImage
+  id="fig-blog-categories"
+  src={blogCategories}
+  alt="The category index listing each category with a post count"
+  caption="The category index at /categories."
+/>
+
+<DocImage
+  id="fig-blog-tags"
+  src={blogTags}
+  alt="The tag index showing every tag as a chip with a post count"
+  caption="The tag index at /tags."
+/>
+
+### Offline search
+
+Pagefind indexes the built HTML after `astro build`, so search is entirely
+static — no API, no server.
+
+<DocImage
+  id="fig-blog-search"
+  src={blogSearch}
+  alt="The search page with an input field and result list"
+  caption="The Pagefind-powered search page at /search."
+/>
+
+### 404
+
+<DocImage
+  id="fig-blog-404"
+  src={blog404}
+  alt="The not-found page with a short message and a link back to the home feed"
+  caption="The injected /404 route."
+/>
+
+## Dark mode
+
+Appearance is stored in `localStorage` and applied by an inline script before
+first paint, so there is no flash of the wrong theme.
+
+<DocImage
+  id="fig-blog-dark"
+  src={blogHomeDark}
+  alt="The demo blog home feed rendered in dark mode"
+  caption="The same feed with the dark appearance selected."
+/>
+
+## Post frontmatter
+
+Validated by `postFrontmatterSchema` in `src/schema.ts`.
+
+| Field | Type | Required | What it does |
+| --- | --- | --- | --- |
+| `title` | `string` | ✓ | Post title |
+| `description` | `string` | ✓ | Summary used on cards, metadata and RSS |
+| `pubDate` | `date` | ✓ | Publish date; also the feed sort key |
+| `category` | `string` | ✓ | Single category, routable at `/categories/[category]` |
+| `updatedDate` | `date` | | Last-updated stamp shown in the post header |
+| `tags` | `string[]` | | Routable at `/tags/[tag]` |
+| `keywords` | `string[]` | | Search-only aliases (e.g. `csharp` on a "C#" post) |
+| `draft` | `boolean` | | Hide while authoring |
+| `archived` | `boolean` | | Keep the URL and taxonomy, drop from the feed and RSS |
+| `cover` | `string` | | Emoji or glyph used when there is no cover image |
+| `coverImage` | `image` | | Local hero image, optimized by Astro |
+| `coverAlt` | `string` | | Alt text for `coverImage` (defaults to the title) |
+| `math` | `boolean` | | Reserved opt-in flag for LaTeX |
+| `captionAlign` | `object` | | Per-post caption alignment override |
+
+## Built-in integrations
+
+Everything below is wired up by `defineBlogAstroConfig` — a site opts out of
+nothing and configures none of it.
+
+| Integration | What you get |
+| --- | --- |
+| Expressive Code | Copy buttons, titled frames, line numbers, line markers and dual light/dark themes. Registered *before* MDX so it also processes fenced code inside `.mdx` |
+| Satteri MDX | The Markdown/MDX pipeline: heading ids, a clickable anchor beside each heading, KaTeX math, and the mermaid fence rewrite |
+| Numbering | Build-time numbers for `<Algorithm>`, `<Listing>`, `<DocImage>` and numbered `<Callout>`, plus `<Ref>` cross-links |
+| Mermaid | The lazy, theme-aware client renderer for diagram fences |
+| Sitemap | `/sitemap-index.xml` |
+| `blogRoutes` | The nine injected routes above |
+| PWA | Manifest, icons and a runtime-caching service worker — only when `pwa.enabled` |
+| Fonts | Google Fonts self-hosted at build time, limited to the selected theme combo |
+
+Two build settings are worth knowing about: `compressHTML` is on, and
+`inlineStylesheets: 'always'` puts the page's CSS in the document head so
+nothing render-blocking is fetched over the network.
+
+## Helpers a site can import
+
+From `@sonapraneeth/blog-core`:
+
+<Steps>
+
+1. `getPublishedPosts()` / `getFeedPosts()` — drafts and archived posts filtered out for you.
+2. `getCategories()` / `getTags()` — taxonomies with counts.
+3. `postsInCategory()` / `postsWithTag()` — filtered lists.
+4. `readingTime()`, `formatDate()`, `formatDateTime()`, `slugify()` — the formatting used by the layouts.
+
+</Steps>
+
+## MDX components
+
+Import from `@sonapraneeth/blog-core/components/mdx`, or just use them — the map
+is passed to `<Content />`, so every component is available in a post without an
+import.
+
+`Callout`, `Annotation`, `Tabs`, `TabItem`, `Card`, `CardGrid`, `LinkCard`,
+`Badge`, `LinkButton`, `Steps`, `FileTree`, `Icon`, `DocImage`, `Code`,
+`Algorithm`, `Listing`, `Ref`. Plain Markdown images are auto-upgraded to
+optimized, lazy output through the `img` mapping.
+
+<Callout type="note">
+  The component catalogue — with a screenshot of each one — lives in its own
+  post: *Every Component in the Shared UI Package*.
+</Callout>
+
+## Related reading
+
+- *Designing a Route-Injection Engine in Astro* — how the injection works.
+- *Offline Search With Pagefind* — the index build and client runtime.
+- *An Installable PWA From a Single Config Flag* — the `pwa` block in detail.
+- *LaTeX Math That Renders at Build Time* — the KaTeX half of the pipeline.
