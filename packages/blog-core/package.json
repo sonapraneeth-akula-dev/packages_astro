@@ -17,7 +17,7 @@
     "./utils/*": "./src/utils/*"
   },
   "dependencies": {
-    "@astrojs/rss": "^4.0.18",
+    "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "catalog:",
     "@expressive-code/plugin-line-numbers": "catalog:",
     "@sonapraneeth/components": "workspace:*",
