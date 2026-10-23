@@ -454,7 +454,11 @@ const showToc = tableOfContents && headings.length > 0;
   }
   .doc-body :global(blockquote p:last-child) { margin-bottom: 0; }
   .doc-body :global(table) {
+    display: block;
     width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
     border-collapse: collapse;
     margin: 1.5rem 0;
     font-size: 0.95rem;

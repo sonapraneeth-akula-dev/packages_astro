@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade the shared Astro catalog to 7.4.0, Expressive Code to 0.44.2, and
   KaTeX to 0.19.0; retain TypeScript 6.0.3 for Astro Check.
 
+## [2.21.4] - 2026-09-03
+
+### Fixed
+
+- Keep wide content tables within the article column and make them
+  horizontally scrollable instead of allowing them to overlap the
+  on-this-page navigation.
+
 ## [2.21.3] - 2026-08-27
 
 ### Fixed
