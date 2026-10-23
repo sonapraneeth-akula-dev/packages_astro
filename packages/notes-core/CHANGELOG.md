@@ -12,6 +12,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade the shared Astro catalog to 7.4.0, Expressive Code to 0.44.2, and
   KaTeX to 0.19.0; retain TypeScript 6.0.3 for Astro Check.
 
+## [2.21.3] - 2026-08-27
+
+### Fixed
+
+- Normalize Astro's configured site value to a `URL` before generating
+  `robots.txt`, satisfying the discovery renderer's type contract for both
+  string and `URL` configurations.
+
+## [2.21.2] - 2026-08-27
+
+### Fixed
+
+- Refresh generated sidebars and previous/next navigation when an existing
+  Markdown or MDX file's frontmatter changes in development. Body-only edits
+  continue to use normal HMR without rebuilding the route graph.
+- Delay route regeneration for newly added files until their final write event
+  settles, preventing partial frontmatter from producing stale navigation.
+
+## [2.21.1] - 2026-08-24
+
+### Fixed
+
+- Refresh the Astro content store and generated route graph when Markdown or
+  MDX files are added or removed in development, so automatic sidebars and
+  page routes update without manually restarting the dev server.
+
+## [2.21.0] - 2026-08-08
+
+### Added
+
+- Mark external links in note content, configured navigation, sidebar entries
+  and page actions with an external-link icon and secure new-tab behavior.
+
+## [2.20.0] - 2026-08-02
+
+### Added
+
+- Show the RSS feed in desktop navigation, mobile navigation and footer links
+  whenever RSS discovery is enabled. Custom RSS nav entries are preserved and
+  disabling RSS removes the link automatically.
+
+## [2.19.0] - 2026-08-02
+
+### Added
+
+- Generate `robots.txt`, `rss.xml`, `sitemap.xml`, `sitemap-index.xml` and
+  sitemap shards by default for every notes-core consumer. The RSS feed lists
+  visible, non-draft notes and page metadata advertises the feed.
+- Add `discovery` config to disable any endpoint and independently include or
+  exclude route prefixes from RSS and sitemap output. Robots may index always,
+  never or production builds only; the default is production only.
+
+## [2.18.0] - 2026-08-02
+
+### Fixed
+
+- KaTeX superscripts and subscripts retain the adjusted script size in print,
+  preventing the PDF renderer from overriding the on-screen typography.
+
 ## [2.17.0] - 2026-07-30
 
 ### Changed

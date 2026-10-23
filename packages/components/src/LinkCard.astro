@@ -7,6 +7,7 @@
  *     description="How the design tokens fit together." />
  */
 import type { HTMLAttributes } from 'astro/types';
+import Icon from './Icon.astro';
 
 interface Props extends Omit<HTMLAttributes<'a'>, 'title'> {
   title: string;
@@ -14,17 +15,27 @@ interface Props extends Omit<HTMLAttributes<'a'>, 'title'> {
   description?: string;
 }
 
-const { title, href, description, ...attrs } = Astro.props;
+const { title, href, description, target, rel, ...attrs } = Astro.props;
+const isExternal = /^(?:https?:)?\/\//i.test(href);
 ---
 
 <div class="link-card">
-  <a href={href} {...attrs}>
+  <a
+    href={href}
+    {...attrs}
+    target={target ?? (isExternal ? '_blank' : undefined)}
+    rel={rel ?? (isExternal ? 'noopener noreferrer' : undefined)}
+  >
     <span class="link-card-title">
       <span>{title}</span>
-      <svg class="link-card-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-        <polyline points="12 5 19 12 12 19"></polyline>
-      </svg>
+      {isExternal
+        ? <span class="link-card-arrow"><Icon name="external" size="1.1rem" /></span>
+        : (
+          <svg class="link-card-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        )}
     </span>
     {description && <span class="link-card-desc">{description}</span>}
   </a>

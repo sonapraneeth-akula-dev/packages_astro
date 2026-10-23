@@ -1,8 +1,8 @@
 {
   "name": "@sonapraneeth/rehype-satteri-autolink-headings",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "type": "module",
-  "description": "Rehype plugin that appends a clickable SVG anchor link beside each heading — a small, from-scratch replacement for rehype-autolink-headings.",
+  "description": "Rehype plugins for heading anchors and secure, icon-marked external links, with a shared Astro Markdown and MDX preset.",
   "keywords": [
     "rehype",
     "rehype-plugin",
@@ -11,6 +11,7 @@
     "headings",
     "anchor",
     "autolink",
+    "external-links",
     "astro",
     "mdx"
   ],

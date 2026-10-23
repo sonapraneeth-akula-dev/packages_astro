@@ -1,5 +1,6 @@
 ---
 import type { SiteChrome } from './chrome';
+import Icon from './Icon.astro';
 
 interface Props {
   config: SiteChrome;
@@ -10,6 +11,9 @@ const path = Astro.url.pathname;
 function isActive(href: string) {
   if (href === '/') return path === '/';
   return path === href || path.startsWith(`${href}/`);
+}
+function isExternal(href: string) {
+  return /^(?:https?:)?\/\//i.test(href);
 }
 ---
 
@@ -28,11 +32,14 @@ function isActive(href: string) {
                 href={link.href}
                 aria-current={isActive(link.href) ? 'page' : undefined}
                 class:list={['nav-link', { active: isActive(link.href) }]}
+                target={isExternal(link.href) ? '_blank' : undefined}
+                rel={isExternal(link.href) ? 'noopener noreferrer' : undefined}
               >
                 <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <Fragment set:html={link.icon} />
                 </svg>
                 <span>{link.label}</span>
+                {isExternal(link.href) && <Icon name="external" size="0.8em" />}
               </a>
             </li>
           ))}
@@ -68,11 +75,14 @@ function isActive(href: string) {
           href={link.href}
           aria-current={isActive(link.href) ? 'page' : undefined}
           class:list={['bottom-link', { active: isActive(link.href) }]}
+          target={isExternal(link.href) ? '_blank' : undefined}
+          rel={isExternal(link.href) ? 'noopener noreferrer' : undefined}
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <Fragment set:html={link.icon} />
           </svg>
           <span>{link.label}</span>
+          {isExternal(link.href) && <Icon name="external" size="0.75em" />}
         </a>
       </li>
     ))}

@@ -11,3 +11,14 @@ export { activeSocials } from './chrome';
 export type { NavLink, SocialProfile, SiteChrome } from './chrome';
 export { icons, isIconName } from './icons';
 export type { IconName } from './icons';
+export {
+  renderRobots,
+  resolveDiscoveryConfig,
+  routeIncluded,
+} from './discovery';
+export type {
+  DiscoveryConfig,
+  DiscoveryConfigInput,
+  PathSelectionConfig,
+  RobotsConfig,
+} from './discovery';

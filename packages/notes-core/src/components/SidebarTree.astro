@@ -6,6 +6,7 @@
  * engine guarantees up to six levels).
  */
 import type { SidebarNode } from '../utils/docs';
+import Icon from '@sonapraneeth/components/Icon.astro';
 import SidebarTree from './SidebarTree.astro';
 
 interface Props {
@@ -65,6 +66,7 @@ function containsActive(node: SidebarNode): boolean {
           rel={node.isExternal ? 'noopener noreferrer' : undefined}
         >
           <span>{node.label}</span>
+          {node.isExternal && <Icon name="external" size="0.8em" />}
           {node.badge && <span class="st-badge">{node.badge}</span>}
         </a>
       </li>

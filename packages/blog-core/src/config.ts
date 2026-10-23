@@ -6,9 +6,15 @@
 import type { SiteChrome } from '@sonapraneeth/components/chrome';
 import type { ThemeConfig } from '@sonapraneeth/components/theme';
 import type { PwaConfig } from '@sonapraneeth/components/pwa';
+import {
+  resolveDiscoveryConfig,
+  type DiscoveryConfig,
+  type DiscoveryConfigInput,
+} from '@sonapraneeth/components/discovery';
 
 export type { NavLink, SocialProfile } from '@sonapraneeth/components/chrome';
 export type { PwaConfig } from '@sonapraneeth/components/pwa';
+export type { DiscoveryConfig, DiscoveryConfigInput } from '@sonapraneeth/components/discovery';
 export { activeSocials } from '@sonapraneeth/components/chrome';
 
 import type { CaptionAlignConfig } from '@sonapraneeth/components/captions';
@@ -30,6 +36,17 @@ export interface BlogConfig extends SiteChrome {
   timeZoneLabel: string;
   /** Enable the Pagefind-powered offline search page. */
   search: boolean;
+  /**
+   * Robots, RSS and sitemap generation. Every endpoint is enabled by default.
+   *
+   * @example
+   * discovery: {
+   *   robots: { indexing: 'production-only', disallow: ['/private'] },
+   *   rss: { include: ['/blog'], exclude: ['/blog/archive'] },
+   *   sitemap: false,
+   * }
+   */
+  discovery: DiscoveryConfig;
   /**
    * Visual theme — accent palette, font combination and corner roundedness.
    * Only the selected options ship (fonts register per combo; accents + radius
@@ -59,6 +76,8 @@ const ICON_TAGS =
   '<path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3H4a1 1 0 0 0-1 1v5.59A2 2 0 0 0 3.83 11l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83z"></path><circle cx="7" cy="7" r="1.2"></circle>';
 const ICON_SEARCH =
   '<circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>';
+const ICON_RSS =
+  '<path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1.4"></circle>';
 
 export const defaultBlogConfig: BlogConfig = {
   brand: 'Grihasetu',
@@ -70,6 +89,7 @@ export const defaultBlogConfig: BlogConfig = {
   timeZone: 'Asia/Kolkata',
   timeZoneLabel: 'IST',
   search: true,
+  discovery: resolveDiscoveryConfig(),
   theme: {},
   captionAlign: { default: 'center' },
   nav: [
@@ -77,6 +97,7 @@ export const defaultBlogConfig: BlogConfig = {
     { href: '/categories', label: 'Categories', icon: ICON_CATEGORIES },
     { href: '/tags', label: 'Tags', icon: ICON_TAGS },
     { href: '/search', label: 'Search', icon: ICON_SEARCH },
+    { href: '/rss.xml', label: 'RSS', icon: ICON_RSS },
   ],
   socials: [
     {
@@ -89,12 +110,24 @@ export const defaultBlogConfig: BlogConfig = {
       id: 'rss',
       href: '/rss.xml',
       label: 'RSS',
-      icon: '<path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1.4"></circle>',
+      icon: ICON_RSS,
     },
   ],
 };
 
 /** Merge a partial site config onto the defaults. */
-export function defineBlogConfig(config: Partial<BlogConfig>): BlogConfig {
-  return { ...defaultBlogConfig, ...config };
+export type BlogConfigInput = Omit<Partial<BlogConfig>, 'discovery'> & {
+  discovery?: DiscoveryConfigInput;
+};
+
+export function defineBlogConfig(config: BlogConfigInput): BlogConfig {
+  const discovery = resolveDiscoveryConfig(config.discovery);
+  const nav = config.nav ?? defaultBlogConfig.nav;
+  const hasRssLink = nav.some((link) => link.href === '/rss.xml');
+  const resolvedNav = discovery.rss.enabled
+    ? (hasRssLink ? nav : [...nav, { href: '/rss.xml', label: 'RSS', icon: ICON_RSS }])
+    : nav.filter((link) => link.href !== '/rss.xml');
+  const socials = (config.socials ?? defaultBlogConfig.socials)
+    .filter((social) => discovery.rss.enabled || social.id !== 'rss');
+  return { ...defaultBlogConfig, ...config, discovery, nav: resolvedNav, socials };
 }

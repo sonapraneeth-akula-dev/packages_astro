@@ -30,24 +30,24 @@ const {
   ...attrs
 } = Astro.props;
 
-const iconName = icon && isIconName(icon) ? icon : undefined;
-
 const isExternal = /^[a-z]+:/i.test(href);
+const resolvedIcon = icon ?? (isExternal ? 'external' : undefined);
+const iconName = resolvedIcon && isIconName(resolvedIcon) ? resolvedIcon : undefined;
 const target = attrs.target ?? (isExternal ? '_blank' : undefined);
 const rel = attrs.rel ?? (isExternal ? 'noopener noreferrer' : undefined);
 ---
 
 <a href={href} class:list={['link-button', `link-button--${variant}`, className]} {...attrs} target={target} rel={rel}>
-  {icon && iconPlacement === 'start' && (
+  {resolvedIcon && iconPlacement === 'start' && (
     iconName
       ? <span class="link-button-icon"><Icon name={iconName} /></span>
-      : <span class="link-button-icon" aria-hidden="true" set:html={icon} />
+      : <span class="link-button-icon" aria-hidden="true" set:html={resolvedIcon} />
   )}
   <span><slot /></span>
-  {icon && iconPlacement === 'end' && (
+  {resolvedIcon && iconPlacement === 'end' && (
     iconName
       ? <span class="link-button-icon"><Icon name={iconName} /></span>
-      : <span class="link-button-icon" aria-hidden="true" set:html={icon} />
+      : <span class="link-button-icon" aria-hidden="true" set:html={resolvedIcon} />
   )}
 </a>
 

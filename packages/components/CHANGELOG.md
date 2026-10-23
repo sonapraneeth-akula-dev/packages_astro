@@ -15,6 +15,46 @@ package previously recorded its changes only in the repository-level
 
 - Upgrade the shared Astro catalog to 7.4.0 and Mermaid to 12.2.0.
 
+## [2.14.0] - 2026-08-08
+
+### Added
+
+- Show the curated external-link icon on external header and footer navigation,
+  social links, link cards and link buttons. These links open in a new tab with
+  `noopener noreferrer`; explicit component icons, targets and relationships
+  remain supported.
+
+## [2.13.0] - 2026-08-02
+
+### Added
+
+- Add shared discovery configuration for robots, RSS and sitemap generation,
+  including endpoint toggles, include/exclude route-prefix matching, production
+  indexing policy and a conventional `sitemap.xml` alias for Astro's generated
+  sitemap index.
+
+## [2.12.0] - 2026-08-02
+
+### Fixed
+
+- The PWA install prompt and development viewport indicator are explicitly
+  hidden in print, so neither control appears in printed pages or saved PDFs
+  even when a consuming site does not provide its own print reset.
+
+## [2.11.0] - 2026-08-01
+
+### Added
+
+- The shared footer can load Git commit and branch metadata from the runtime
+  `/build-info.json` artifact. It remains hidden when either value is absent or
+  `unknown`, allowing deployment metadata to change without rebuilding pages.
+
+### Fixed
+
+- Both PWA service-worker strategies bypass `/build-info.json`, preventing a
+  previous deployment's commit and branch from remaining visible after an
+  image update.
+
 ## [2.10.0] - 2026-07-30
 
 ### Changed

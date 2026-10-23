@@ -12,6 +12,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade the shared Astro catalog to 7.4.0, Expressive Code to 0.44.2, and
   KaTeX to 0.19.0; retain TypeScript 6.0.3 for Astro Check.
 
+## [2.13.0] - 2026-08-08
+
+### Added
+
+- Mark external links in post content and shared navigation with an
+  external-link icon and secure new-tab behavior.
+
+## [2.12.0] - 2026-08-02
+
+### Added
+
+- Show the RSS feed in desktop navigation, mobile navigation and footer links
+  whenever RSS discovery is enabled. Custom RSS nav entries are preserved and
+  disabling RSS removes both nav and social links automatically.
+
+## [2.11.0] - 2026-08-02
+
+### Added
+
+- Generate `robots.txt` and the conventional `sitemap.xml` alias by default,
+  alongside the existing RSS feed and Astro sitemap index.
+- Add `discovery` config to disable robots, RSS or sitemap and independently
+  include or exclude route prefixes from feed and sitemap output. Disabling RSS
+  also removes its default social link and page metadata.
+
 ## [2.10.0] - 2026-07-30
 
 ### Fixed

@@ -7,9 +7,15 @@
 import type { SiteChrome } from '@sonapraneeth/components/chrome';
 import type { ThemeConfig } from '@sonapraneeth/components/theme';
 import type { PwaConfig } from '@sonapraneeth/components/pwa';
+import {
+  resolveDiscoveryConfig,
+  type DiscoveryConfig,
+  type DiscoveryConfigInput,
+} from '@sonapraneeth/components/discovery';
 
 export type { NavLink, SocialProfile } from '@sonapraneeth/components/chrome';
 export type { PwaConfig } from '@sonapraneeth/components/pwa';
+export type { DiscoveryConfig, DiscoveryConfigInput } from '@sonapraneeth/components/discovery';
 export { activeSocials } from '@sonapraneeth/components/chrome';
 
 import type { CaptionAlignConfig } from '@sonapraneeth/components/captions';
@@ -37,6 +43,17 @@ export interface DocsConfig extends SiteChrome {
   editUrlBase?: string;
   /** Enable the Pagefind-powered offline search page. */
   search: boolean;
+  /**
+   * Robots, RSS and sitemap generation. Every endpoint is enabled by default.
+   *
+   * @example
+   * discovery: {
+   *   robots: { indexing: 'production-only', disallow: ['/private'] },
+   *   rss: { include: ['/guides'], exclude: ['/guides/archive'] },
+   *   sitemap: false,
+   * }
+   */
+  discovery: DiscoveryConfig;
   /**
    * Treat each top-level content folder as a self-contained "notebook"
    * (sub-note). The home page becomes a hub of notebook cards, and each notebook
@@ -82,6 +99,8 @@ const ICON_CATEGORIES =
   '<rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect>';
 const ICON_TAGS =
   '<path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3H4a1 1 0 0 0-1 1v5.59A2 2 0 0 0 3.83 11l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83z"></path><circle cx="7" cy="7" r="1.2"></circle>';
+const ICON_RSS =
+  '<path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1.4"></circle>';
 const ICON_BOOK =
   '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>';
 
@@ -99,6 +118,7 @@ export const defaultDocsConfig: DocsConfig = {
     { href: '/categories', label: 'Categories', icon: ICON_CATEGORIES },
     { href: '/tags', label: 'Tags', icon: ICON_TAGS },
     { href: '/search', label: 'Search', icon: ICON_SEARCH },
+    { href: '/rss.xml', label: 'RSS', icon: ICON_RSS },
   ],
   socials: [
     {
@@ -109,6 +129,7 @@ export const defaultDocsConfig: DocsConfig = {
     },
   ],
   search: true,
+  discovery: resolveDiscoveryConfig(),
   notebooks: false,
   theme: {},
   captionAlign: { default: 'center' },
@@ -117,6 +138,22 @@ export const defaultDocsConfig: DocsConfig = {
 export { ICON_BOOK };
 
 /** Merge a partial site config onto the defaults. */
-export function defineDocsConfig(config: Partial<DocsConfig>): DocsConfig {
-  return { ...defaultDocsConfig, ...config };
+export type DocsConfigInput = Omit<Partial<DocsConfig>, 'discovery'> & {
+  discovery?: DiscoveryConfigInput;
+};
+
+export function defineDocsConfig(config: DocsConfigInput): DocsConfig {
+  const discovery = resolveDiscoveryConfig(config.discovery);
+  const nav = config.nav ?? defaultDocsConfig.nav;
+  const hasRssLink = nav.some((link) => link.href === '/rss.xml');
+  const resolvedNav = discovery.rss.enabled
+    ? (hasRssLink ? nav : [...nav, { href: '/rss.xml', label: 'RSS', icon: ICON_RSS }])
+    : nav.filter((link) => link.href !== '/rss.xml');
+
+  return {
+    ...defaultDocsConfig,
+    ...config,
+    discovery,
+    nav: resolvedNav,
+  };
 }
