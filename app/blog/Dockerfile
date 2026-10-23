@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.28.0
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Multi-stage build for the @sonapraneeth/blog-app (Grihasetu blog) site.
@@ -15,9 +15,11 @@
 
 # ─── Base ────────────────────────────────────────────────────────────────────
 # Pinned Bun image matching package.json "packageManager".
-FROM oven/bun:1.3.14-alpine AS base
+FROM oven/bun:1.4.4-alpine AS base
 WORKDIR /app
 ENV NODE_ENV=production
+ARG NPM_REGISTRY=https://registry.npmjs.org/
+ENV BUN_CONFIG_REGISTRY=${NPM_REGISTRY}
 
 # ─── Dependencies ────────────────────────────────────────────────────────────
 # Install the whole workspace once. Only the manifests are copied so this layer
@@ -26,15 +28,18 @@ ENV NODE_ENV=production
 # lockfile.
 FROM base AS deps
 COPY package.json bun.lock* bunfig.toml tsconfig.base.json ./
+ENV BUN_INSTALL_CACHE_DIR=/bun-cache
+RUN --mount=type=cache,target=/bun-cache bun pm fetch
 COPY packages/components/package.json ./packages/components/package.json
 COPY packages/notes-core/package.json ./packages/notes-core/package.json
 COPY packages/blog-core/package.json ./packages/blog-core/package.json
 COPY packages/plugins/satteri/package.json ./packages/plugins/satteri/package.json
 COPY demo/notes/package.json ./demo/notes/package.json
+COPY demo/notebooks/package.json ./demo/notebooks/package.json
 COPY demo/blog/package.json ./demo/blog/package.json
 COPY app/blog/package.json ./app/blog/package.json
 COPY app/notes/go/package.json ./app/notes/go/package.json
-RUN bun install --frozen-lockfile
+RUN --mount=type=cache,target=/bun-cache bun install --offline --frozen-lockfile
 
 # ─── Development ─────────────────────────────────────────────────────────────
 # Live watching + hot module reloading. Source is bind-mounted via compose.

@@ -36,4 +36,5 @@ Then re-run `bun install` to refresh the lockfile against the chosen registry.
 
 ## Engineering references
 
+- [Astro production hosting on a public server](docs/astro-production-hosting.md) explains why `astro preview` is only a build verification server, how to serve static output with Caddy, when SSR needs an adapter, and the current preview-based runtime caveat.
 - [Package performance and correctness improvements](docs/package-performance-and-correctness-improvements.md) records the 2026-07-27 package review, implemented optimizations, validation, known limitations, and troubleshooting guidance.

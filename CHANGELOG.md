@@ -17,6 +17,12 @@ version. The headings below summarise changes across all workspaces.
 
 ### Changed
 
+- Upgrade the workspace catalogs and packages to Astro 7.4.0, MDX 8.1.0,
+  Mermaid 12.2.0, KaTeX 0.19.0, and the latest available dependencies.
+  Keep TypeScript on 6.0.3 for Astro Check compatibility.
+- Pin Bun 1.4.4, Caddy 2.11.7 Alpine, and Dockerfile frontend 1.28.0.
+  Fetch locked packages into a BuildKit cache before offline workspace installs,
+  and include the notebooks workspace manifest in both Docker builds.
 - Notes doc pages lay out as one named-area grid, so the on-this-page rail
   starts level with the title rather than below the header block, and the
   breadcrumb trail is pinned under the site header.
