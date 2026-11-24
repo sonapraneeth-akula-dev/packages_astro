@@ -246,13 +246,22 @@ const showToc = tableOfContents && headings.length > 0;
     }
   }
 
+  const seenRegions = new Map<string, number>();
   let codeIdx = 0;
-  for (const pre of document.querySelectorAll<HTMLElement>(
-    '.doc-body pre[role="region"]:not([aria-label]):not([aria-labelledby])',
-  )) {
-    codeIdx += 1;
-    const lang = pre.dataset.language?.toUpperCase() || 'Code';
-    pre.setAttribute('aria-label', `${lang} code snippet ${codeIdx}`);
+  for (const pre of document.querySelectorAll<HTMLElement>('.doc-body pre[role="region"]')) {
+    if (pre.hasAttribute('aria-labelledby')) continue;
+    const existing = pre.getAttribute('aria-label');
+    if (!existing) {
+      codeIdx += 1;
+      const lang = pre.dataset.language?.toUpperCase() || 'Code';
+      pre.setAttribute('aria-label', `${lang} code snippet ${codeIdx}`);
+    } else {
+      const count = (seenRegions.get(existing) ?? 0) + 1;
+      seenRegions.set(existing, count);
+      if (count > 1) {
+        pre.setAttribute('aria-label', `${existing} (${count})`);
+      }
+    }
   }
 </script>
 
