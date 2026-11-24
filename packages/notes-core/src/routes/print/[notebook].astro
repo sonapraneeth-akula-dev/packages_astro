@@ -8,7 +8,7 @@
  */
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { buildNotebookPrintRoutes } from '../../utils/docs';
+import { buildNotebookPrintRoutes, entrySlug } from '../../utils/docs';
 import { resolveCaptionAlign } from '../../config';
 import { docsConfig } from 'virtual:notes-core/config';
 import { components } from 'virtual:notes-core/components';
@@ -43,6 +43,7 @@ const rendered = new Map(
   config={docsConfig}
   title={`Print · ${notebook.label}`}
   description={notebook.description}
+  noindex
 >
   <div class:list={['print-view container', { 'number-sections': docsConfig.printSectionNumbers !== false }]}>
     <header class="print-cover">
@@ -96,7 +97,7 @@ const rendered = new Map(
             figure: resolveCaptionAlign('figure', docsConfig.captionAlign, entry.data.captionAlign),
           };
           return (
-            <section class:list={['print-doc', { 'is-numbered': number }]}>
+            <section class:list={['print-doc', { 'is-numbered': number }]} data-doc-slug={entrySlug(entry)}>
               <article class="doc">
                 <header class="doc-head">
                   <h1>
@@ -119,12 +120,38 @@ const rendered = new Map(
 </BaseLayout>
 
 <script>
-  // Open the print dialog once the page (fonts, math, images) has loaded — or,
-  // when every page opted out of the book, explain that instead of printing.
-  addEventListener('load', () => {
+  // Rewrite chapter-relative links against each chapter's canonical route so
+  // "./foo" or "../bar" inside /print/<notebook> navigates to the real chapter.
+  for (const section of document.querySelectorAll<HTMLElement>('.print-doc[data-doc-slug]')) {
+    const slug = section.dataset.docSlug;
+    if (!slug) continue;
+    const base = new URL(slug.endsWith('/') ? slug : `${slug}/`, location.origin);
+    for (const a of section.querySelectorAll<HTMLAnchorElement>('a[href]')) {
+      const raw = a.getAttribute('href');
+      if (!raw || raw.startsWith('/') || raw.startsWith('#') || /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(raw)) {
+        continue;
+      }
+      const resolved = new URL(raw, base);
+      a.setAttribute('href', `${resolved.pathname}${resolved.search}${resolved.hash}`);
+    }
+  }
+
+  // Open the print dialog once fonts, math, images, and any Mermaid diagrams
+  // have rendered — or, when every page opted out, explain that instead.
+  addEventListener('load', async () => {
     const empty = document.querySelector<HTMLDialogElement>('[data-print-empty]');
-    if (empty) empty.showModal();
-    else window.print();
+    if (empty) {
+      empty.showModal();
+      return;
+    }
+    const ensureMermaid = (window as Window & { __renderAllMermaid?: () => Promise<void> }).__renderAllMermaid;
+    if (ensureMermaid) {
+      await Promise.race([
+        ensureMermaid(),
+        new Promise<void>((resolve) => setTimeout(resolve, 5000)),
+      ]);
+    }
+    window.print();
   });
 </script>
 

@@ -259,6 +259,7 @@ function openLightbox(svg: SVGSVGElement): void {
 }
 
 function boot(): void {
+  (window as Window & { __renderAllMermaid?: () => Promise<void> }).__renderAllMermaid = renderAll;
   void renderAll();
 }
 
