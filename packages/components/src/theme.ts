@@ -266,8 +266,8 @@ const FONT_COMBOS: Record<FontComboName, FontCombo> = {
     heading: { name: 'Playfair Display', weights: ['400 700'] },
   },
   geometric: {
-    sans: { name: 'Poppins', weights: ['400 700'] },
-    heading: { name: 'Poppins', weights: ['400 700'] },
+    sans: { name: 'Poppins', weights: ['400', '500', '600', '700'] },
+    heading: { name: 'Poppins', weights: ['400', '500', '600', '700'] },
   },
   system: {},
 };
