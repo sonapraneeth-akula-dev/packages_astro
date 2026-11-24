@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.28.0
+# syntax=docker/dockerfile:1.29.0
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Multi-stage build for the @sonapraneeth/blog-app (Grihasetu blog) site.
@@ -15,7 +15,7 @@
 
 # ─── Base ────────────────────────────────────────────────────────────────────
 # Pinned Bun image matching package.json "packageManager".
-FROM oven/bun:1.4.4-alpine AS base
+FROM oven/bun:1.4.5-alpine AS base
 WORKDIR /app
 ENV NODE_ENV=production
 ARG NPM_REGISTRY=https://registry.npmjs.org/
