@@ -226,6 +226,25 @@ const showToc = tableOfContents && headings.length > 0;
   document
     .querySelector('[data-print-doc]')
     ?.addEventListener('click', () => window.print());
+
+  let tableIdx = 0;
+  for (const table of document.querySelectorAll<HTMLTableElement>('.doc-body table')) {
+    if (table.scrollWidth > table.clientWidth && !table.hasAttribute('tabindex')) {
+      tableIdx += 1;
+      table.tabIndex = 0;
+      table.setAttribute('role', 'region');
+      table.setAttribute('aria-label', `Scrollable table ${tableIdx}`);
+    }
+  }
+
+  let codeIdx = 0;
+  for (const pre of document.querySelectorAll<HTMLElement>(
+    '.doc-body pre[role="region"]:not([aria-label]):not([aria-labelledby])',
+  )) {
+    codeIdx += 1;
+    const lang = pre.dataset.language?.toUpperCase() || 'Code';
+    pre.setAttribute('aria-label', `${lang} code snippet ${codeIdx}`);
+  }
 </script>
 
 {/* (#4) When arriving from search with `?highlight=`, mark the matched term in

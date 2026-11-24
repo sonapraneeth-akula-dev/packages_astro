@@ -135,8 +135,9 @@ const capAlign = Astro.locals.captionAlign?.figure ?? 'center';
   // Click-to-enlarge. One delegated listener per page (Astro bundles this module
   // once no matter how many <DocImage> instances a page renders).
   function openLightbox(image: HTMLImageElement): void {
-    const overlay = document.createElement('div');
+    const overlay = document.createElement('dialog');
     overlay.className = 'lightbox';
+    overlay.setAttribute('aria-label', image.alt ? `Enlarged image: ${image.alt}` : 'Enlarged image');
 
     const content = document.createElement('div');
     content.className = 'lightbox__content';
@@ -153,18 +154,10 @@ const capAlign = Astro.locals.captionAlign?.figure ?? 'center';
     content.appendChild(clone);
     overlay.appendChild(content);
 
-    const close = () => {
-      overlay.remove();
-      document.removeEventListener('keydown', onKey);
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        close();
-      }
-    };
-    overlay.addEventListener('click', close);
-    document.addEventListener('keydown', onKey);
+    overlay.addEventListener('click', () => overlay.close());
+    overlay.addEventListener('close', () => overlay.remove());
     document.body.appendChild(overlay);
+    overlay.showModal();
   }
 
   document.addEventListener('click', (event) => {

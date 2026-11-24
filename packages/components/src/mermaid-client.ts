@@ -101,10 +101,20 @@ async function renderAll(): Promise<void> {
       }
       if (node.dataset.zoomBound !== 'true') {
         node.dataset.zoomBound = 'true';
-        node.addEventListener('click', () => {
+        node.tabIndex = 0;
+        node.setAttribute('role', 'button');
+        node.setAttribute('aria-label', 'Enlarge diagram');
+        const openCurrent = () => {
           const current = node.querySelector<SVGSVGElement>('svg');
           if (current) {
             openLightbox(current);
+          }
+        };
+        node.addEventListener('click', openCurrent);
+        node.addEventListener('keydown', (event: KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openCurrent();
           }
         });
       }
@@ -218,8 +228,9 @@ function normalizeViewBox(svg: SVGSVGElement, bounds: DOMRect): void {
  * even a small inline preview becomes comfortably legible.
  */
 function openLightbox(svg: SVGSVGElement): void {
-  const overlay = document.createElement('div');
+  const overlay = document.createElement('dialog');
   overlay.className = 'mermaid-lightbox';
+  overlay.setAttribute('aria-label', 'Enlarged diagram');
 
   const content = document.createElement('div');
   content.className = 'mermaid-lightbox__content';
@@ -241,18 +252,10 @@ function openLightbox(svg: SVGSVGElement): void {
   content.appendChild(clone);
   overlay.appendChild(content);
 
-  const close = () => {
-    overlay.remove();
-    document.removeEventListener('keydown', onKey);
-  };
-  const onKey = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      close();
-    }
-  };
-  overlay.addEventListener('click', close);
-  document.addEventListener('keydown', onKey);
+  overlay.addEventListener('click', () => overlay.close());
+  overlay.addEventListener('close', () => overlay.remove());
   document.body.appendChild(overlay);
+  overlay.showModal();
 }
 
 function boot(): void {

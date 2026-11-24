@@ -22,6 +22,8 @@ interface Props {
   ogImage?: string;
   /** Set to true on article pages for og:type=article. */
   article?: boolean;
+  /** Prevent search engines from indexing utility/404 pages. */
+  noindex?: boolean;
   /**
    * Offer the reading-mode toggle on this page. Article layouts opt in; index
    * and listing pages must not, since stripping their chrome would leave the
@@ -35,6 +37,7 @@ const {
   description = blogConfig.description,
   ogImage,
   article = false,
+  noindex = false,
   readingMode = false,
 } = Astro.props;
 
@@ -72,6 +75,7 @@ const ThemeSwitcher = __THEME_SWITCHER__
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={canonical} />
     {blogConfig.discovery.rss.enabled && (
       <link rel="alternate" type="application/rss+xml" title={blogConfig.title} href="/rss.xml" />
