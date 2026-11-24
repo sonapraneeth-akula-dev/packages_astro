@@ -18,8 +18,10 @@ const SOURCE_ATTR = 'data-mermaid-source';
 
 let mermaidApi: MermaidApi | null = null;
 let loader: Promise<MermaidApi> | null = null;
-let rendering = false;
-let pending = false;
+let renderChain: Promise<void> = Promise.resolve();
+let observer: IntersectionObserver | null = null;
+const pendingQueue = new Set<HTMLElement>();
+let flushScheduled = false;
 
 /** Resolve the active appearance: an explicit `data-theme` wins, else OS pref. */
 function activeTheme(): 'dark' | 'light' {
@@ -41,98 +43,101 @@ async function ensureMermaid(): Promise<MermaidApi> {
   return loader;
 }
 
-/** Render (or re-render) every diagram on the page with the current theme. */
-async function renderAll(): Promise<void> {
-  if (rendering) {
-    // A theme change mid-render: coalesce into a single follow-up pass.
-    pending = true;
-    return;
-  }
+/** Enqueue a batch of diagram elements to render sequentially in the active theme. */
+function renderNodes(targets: HTMLElement[]): Promise<void> {
+  const unique = Array.from(new Set(targets)).filter((n) => n.isConnected);
+  if (unique.length === 0) return renderChain;
 
+  renderChain = renderChain.then(async () => {
+    const theme = activeTheme();
+    const nodes = unique.filter(
+      (node) => node.dataset.mermaidTheme !== theme || !node.querySelector('svg'),
+    );
+    if (nodes.length === 0) return;
+
+    try {
+      if ('fonts' in document) {
+        await document.fonts.ready;
+      }
+      const mermaid = await ensureMermaid();
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: theme === 'dark' ? 'dark' : 'default',
+        securityLevel: 'strict',
+        fontFamily: 'inherit',
+        // Drops the body of a class that declares neither members nor methods.
+        // Classes that declare only methods are handled after rendering, by
+        // `collapseEmptyMembersBoxes` — this option does not cover them.
+        class: { hideEmptyMembersBox: true, padding: 8 },
+      });
+
+      for (const node of nodes) {
+        // Restore the original definition so an already-rendered diagram can be
+        // re-rendered after a theme switch (Mermaid replaces the text with an SVG
+        // and marks the node with `data-processed`).
+        const source = node.getAttribute(SOURCE_ATTR);
+        if (source !== null) {
+          node.textContent = source;
+        }
+        node.removeAttribute('data-processed');
+      }
+
+      await mermaid.run({ nodes });
+
+      // Fit each diagram to the content column (no horizontal scroll) and make it
+      // click-to-enlarge: the inline copy is a preview, the overlay is readable.
+      // Measure every diagram first, then write: interleaving `getBBox()` reads
+      // with attribute writes would force one synchronous reflow per diagram.
+      const measured: Array<{ svg: SVGSVGElement; bounds: DOMRect }> = [];
+      for (const node of nodes) {
+        node.dataset.mermaidTheme = theme;
+        const svg = node.querySelector<SVGSVGElement>('svg');
+        if (!svg) {
+          continue;
+        }
+        collapseEmptyMembersBoxes(svg);
+        const bounds = measure(svg);
+        if (bounds) {
+          measured.push({ svg, bounds });
+        }
+        if (node.dataset.zoomBound !== 'true') {
+          node.dataset.zoomBound = 'true';
+          node.tabIndex = 0;
+          node.setAttribute('role', 'button');
+          node.setAttribute('aria-label', 'Enlarge diagram');
+          const openCurrent = () => {
+            const current = node.querySelector<SVGSVGElement>('svg');
+            if (current) {
+              openLightbox(current);
+            }
+          };
+          node.addEventListener('click', openCurrent);
+          node.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              openCurrent();
+            }
+          });
+        }
+      }
+      // Shrink-wrap each canvas to its drawing, then let CSS scale it to the
+      // column width.
+      for (const { svg, bounds } of measured) {
+        normalizeViewBox(svg, bounds);
+      }
+    } catch (error) {
+      console.error('[mermaid] failed to render diagrams', error);
+    }
+  });
+
+  return renderChain;
+}
+
+/** Render every diagram on the page (used for printing or browsers without IO). */
+function renderAll(): Promise<void> {
   const nodes = Array.from(document.querySelectorAll<HTMLElement>(SELECTOR));
-  if (nodes.length === 0) {
-    return;
-  }
-
-  rendering = true;
-  try {
-    if ('fonts' in document) {
-      await document.fonts.ready;
-    }
-    const mermaid = await ensureMermaid();
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: activeTheme() === 'dark' ? 'dark' : 'default',
-      securityLevel: 'strict',
-      fontFamily: 'inherit',
-      // Drops the body of a class that declares neither members nor methods.
-      // Classes that declare only methods are handled after rendering, by
-      // `collapseEmptyMembersBoxes` — this option does not cover them.
-      class: { hideEmptyMembersBox: true, padding: 8 },
-    });
-
-    for (const node of nodes) {
-      // Restore the original definition so an already-rendered diagram can be
-      // re-rendered after a theme switch (Mermaid replaces the text with an SVG
-      // and marks the node with `data-processed`).
-      const source = node.getAttribute(SOURCE_ATTR);
-      if (source !== null) {
-        node.textContent = source;
-      }
-      node.removeAttribute('data-processed');
-    }
-
-    await mermaid.run({ nodes });
-
-    // Fit each diagram to the content column (no horizontal scroll) and make it
-    // click-to-enlarge: the inline copy is a preview, the overlay is readable.
-    // Measure every diagram first, then write: interleaving `getBBox()` reads
-    // with attribute writes would force one synchronous reflow per diagram.
-    const measured: Array<{ svg: SVGSVGElement; bounds: DOMRect }> = [];
-    for (const node of nodes) {
-      const svg = node.querySelector<SVGSVGElement>('svg');
-      if (!svg) {
-        continue;
-      }
-      collapseEmptyMembersBoxes(svg);
-      const bounds = measure(svg);
-      if (bounds) {
-        measured.push({ svg, bounds });
-      }
-      if (node.dataset.zoomBound !== 'true') {
-        node.dataset.zoomBound = 'true';
-        node.tabIndex = 0;
-        node.setAttribute('role', 'button');
-        node.setAttribute('aria-label', 'Enlarge diagram');
-        const openCurrent = () => {
-          const current = node.querySelector<SVGSVGElement>('svg');
-          if (current) {
-            openLightbox(current);
-          }
-        };
-        node.addEventListener('click', openCurrent);
-        node.addEventListener('keydown', (event: KeyboardEvent) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            openCurrent();
-          }
-        });
-      }
-    }
-    // Shrink-wrap each canvas to its drawing, then let CSS scale it to the
-    // column width.
-    for (const { svg, bounds } of measured) {
-      normalizeViewBox(svg, bounds);
-    }
-  } catch (error) {
-    console.error('[mermaid] failed to render diagrams', error);
-  } finally {
-    rendering = false;
-    if (pending) {
-      pending = false;
-      void renderAll();
-    }
-  }
+  for (const node of nodes) observer?.unobserve(node);
+  return renderNodes(nodes);
 }
 
 /** The drawn content box of a diagram, or `null` when it can't be measured. */
@@ -258,9 +263,60 @@ function openLightbox(svg: SVGSVGElement): void {
   overlay.showModal();
 }
 
+function scheduleFlush(): void {
+  if (flushScheduled) return;
+  flushScheduled = true;
+  window.requestAnimationFrame(() => {
+    flushScheduled = false;
+    const batch = Array.from(pendingQueue);
+    pendingQueue.clear();
+    if (batch.length > 0) {
+      void renderNodes(batch);
+    }
+  });
+}
+
+function rerenderActiveDiagrams(): void {
+  const rendered = Array.from(document.querySelectorAll<HTMLElement>(SELECTOR)).filter((n) =>
+    Boolean(n.querySelector('svg')),
+  );
+  if (rendered.length > 0) {
+    void renderNodes(rendered);
+  }
+}
+
 function boot(): void {
   (window as Window & { __renderAllMermaid?: () => Promise<void> }).__renderAllMermaid = renderAll;
-  void renderAll();
+  const nodes = Array.from(document.querySelectorAll<HTMLElement>(SELECTOR));
+  if (nodes.length === 0) return;
+
+  if (location.pathname.startsWith('/print/') || !('IntersectionObserver' in window)) {
+    void renderAll();
+    return;
+  }
+
+  observer?.disconnect();
+  observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const el = entry.target as HTMLElement;
+        observer?.unobserve(el);
+        pendingQueue.add(el);
+      }
+      if (pendingQueue.size > 0) {
+        scheduleFlush();
+      }
+    },
+    { rootMargin: '300px 0px' },
+  );
+
+  for (const node of nodes) {
+    if (node.dataset.mermaidTheme === activeTheme() && node.querySelector('svg')) {
+      continue;
+    }
+    observer.observe(node);
+  }
 }
 
 if (document.readyState === 'loading') {
@@ -272,10 +328,15 @@ if (document.readyState === 'loading') {
 // Re-render after client-side navigations (Astro ClientRouter, when enabled).
 document.addEventListener('astro:after-swap', boot);
 
-// Re-render when the appearance toggles (explicit override on <html>) …
+// Ensure all off-screen diagrams render if the user triggers Ctrl+P directly.
+window.addEventListener('beforeprint', () => {
+  void renderAll();
+});
+
+// Re-render already-visible diagrams when the appearance toggles …
 new MutationObserver((records) => {
   if (records.some((record) => record.attributeName === 'data-theme')) {
-    void renderAll();
+    rerenderActiveDiagrams();
   }
 }).observe(document.documentElement, {
   attributes: true,
@@ -285,4 +346,4 @@ new MutationObserver((records) => {
 // … or when the OS-level colour scheme changes while on "system".
 window
   .matchMedia?.('(prefers-color-scheme: dark)')
-  .addEventListener?.('change', () => void renderAll());
+  .addEventListener?.('change', rerenderActiveDiagrams);

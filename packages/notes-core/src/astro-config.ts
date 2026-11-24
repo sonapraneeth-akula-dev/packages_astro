@@ -53,6 +53,13 @@ export interface DocsAstroConfigOptions {
   * {@link docsCollection}.
    */
   contentDir?: string;
+  /**
+   * Optional experimental parallel prerender setting (e.g. `{ workers: 4 }`)
+   * for large multi-hundred-page handbooks.
+   */
+  parallelPrerender?: boolean | { workers?: number };
+  /** Optional static-build page generation concurrency (e.g. `8`). */
+  buildConcurrency?: number;
 }
 
 /** Run a git command at build time, falling back gracefully (e.g. in CI/Docker). */
@@ -157,10 +164,20 @@ export function defineDocsAstroConfig(options: DocsAstroConfigOptions) {
       ...(options.integrations ?? []),
     ],
     compressHTML: true,
+    ...(options.parallelPrerender !== undefined
+      ? {
+          experimental: {
+            parallelPrerender: options.parallelPrerender,
+          },
+        }
+      : {}),
     build: {
-      // Inline page CSS into the document <head> so the first paint never waits
-      // on a separate render-blocking stylesheet request, improving FCP/LCP.
-      inlineStylesheets: 'always',
+      // Inline small page-scoped stylesheets (<4 KB) while emitting shared
+      // global + KaTeX styles once as a content-hashed, browser-cached asset.
+      inlineStylesheets: 'auto',
+      ...(options.buildConcurrency !== undefined
+        ? { concurrency: options.buildConcurrency }
+        : {}),
     },
     markdown: {
       // The whole Markdown/MDX rehype pipeline lives in the satteri plugin

@@ -154,11 +154,9 @@ export function defineBlogAstroConfig(options: BlogAstroConfigOptions) {
     ],
     compressHTML: true,
     build: {
-      // Inline every stylesheet into the document head so the critical CSS
-      // ships with the HTML and no external <link> blocks first paint. The
-      // engine's per-page CSS is small, so this removes render-blocking
-      // requests and improves FCP/LCP without bloating the payload.
-      inlineStylesheets: 'always',
+      // Inline small page-scoped stylesheets (<4 KB) while emitting shared
+      // global + KaTeX styles once as a content-hashed, browser-cached asset.
+      inlineStylesheets: 'auto',
     },
     markdown: {
       // The whole Markdown/MDX rehype pipeline lives in the satteri plugin
